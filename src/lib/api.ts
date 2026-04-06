@@ -1,7 +1,12 @@
 import type { ContourParams, ContourPreviewResponse } from '../types/contour.ts';
 import type { ExportCopy } from '../types/printPlanning.ts';
 
-const BASE = (import.meta.env.VITE_API_URL ?? '') + '/api';
+function buildBase(): string {
+  let url = import.meta.env.VITE_API_URL ?? '';
+  if (url && !url.startsWith('http')) url = 'https://' + url;
+  return url.replace(/\/$/, '') + '/api';
+}
+const BASE = buildBase();
 
 function buildFormData(file: File, params: ContourParams): FormData {
   const fd = new FormData();
