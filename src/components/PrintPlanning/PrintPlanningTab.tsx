@@ -53,22 +53,21 @@ export function PrintPlanningTab() {
   const canLayout = files.length > 0;
   const canExport = copies.length > 0;
 
-  // Utilization color
-  const utilColor = utilizationPct >= 75 ? 'text-green-600' : utilizationPct >= 50 ? 'text-amber-600' : 'text-red-500';
+  const utilColor = utilizationPct >= 75 ? 'text-green-400' : utilizationPct >= 50 ? 'text-yellow-400' : 'text-red-400';
 
   return (
-    <div className="flex h-[calc(100vh-120px)] gap-0 rounded-2xl overflow-hidden border border-gray-200 shadow-sm bg-white">
+    <div className="flex h-[calc(100vh-160px)] gap-0 rounded-xl overflow-hidden border border-white/10">
 
-      {/* ── Left sidebar ────────────────────────────────────────────────── */}
-      <div className="w-72 flex-shrink-0 flex flex-col bg-gray-50 border-r border-gray-200">
+      {/* ── Sidebar ── */}
+      <div className="w-72 flex-shrink-0 flex flex-col bg-nim-darker border-r border-white/10">
 
         {/* Sidebar header */}
-        <div className="px-5 py-4 border-b border-gray-200">
-          <h2 className="text-sm font-bold text-gray-800">Setup</h2>
-          <p className="text-xs text-gray-400 mt-0.5">Configure foil and files</p>
+        <div className="px-5 py-4 border-b border-white/10">
+          <p className="text-xs font-bold tracking-widest uppercase text-nim-yellow">Setup</p>
+          <p className="text-xs text-white/30 mt-0.5">Foil width · files · quantities</p>
         </div>
 
-        {/* Scrollable content */}
+        {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto px-5 py-5">
           <FileSetupPanel
             foilWidthMm={foilWidthMm}
@@ -78,32 +77,30 @@ export function PrintPlanningTab() {
           />
         </div>
 
-        {/* ── Stats bar ── */}
+        {/* Stats */}
         {copies.length > 0 && (
-          <div className="px-5 py-4 border-t border-gray-200 grid grid-cols-3 gap-2">
-            <div className="text-center">
-              <p className="text-base font-bold text-gray-800">{copies.length}</p>
-              <p className="text-xs text-gray-400 leading-tight">copies</p>
+          <div className="border-t border-white/10 px-5 py-4 grid grid-cols-3 gap-2 text-center">
+            <div>
+              <p className="text-base font-bold text-white">{copies.length}</p>
+              <p className="text-xs text-white/30 leading-tight">copies</p>
             </div>
-            <div className="text-center border-x border-gray-200">
-              <p className="text-base font-bold text-gray-800">{Math.round(totalLengthMm)}</p>
-              <p className="text-xs text-gray-400 leading-tight">mm long</p>
+            <div className="border-x border-white/10">
+              <p className="text-base font-bold text-white">{Math.round(totalLengthMm)}</p>
+              <p className="text-xs text-white/30 leading-tight">mm</p>
             </div>
-            <div className="text-center">
+            <div>
               <p className={`text-base font-bold ${utilColor}`}>{utilizationPct}%</p>
-              <p className="text-xs text-gray-400 leading-tight">used</p>
+              <p className="text-xs text-white/30 leading-tight">used</p>
             </div>
           </div>
         )}
 
-        {/* ── Action buttons ── */}
-        <div className="px-5 py-4 border-t border-gray-200 space-y-2">
+        {/* Action buttons */}
+        <div className="border-t border-white/10 px-5 py-4 space-y-2">
           <button
             onClick={runAutoLayout}
             disabled={!canLayout}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all
-              bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.98]
-              disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 shadow-sm"
+            className="nim-btn-yellow w-full"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -115,12 +112,7 @@ export function PrintPlanningTab() {
           <button
             onClick={handleExport}
             disabled={!canExport || isExporting}
-            className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all active:scale-[0.98]
-              disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 shadow-sm ${
-              exportSuccess
-                ? 'bg-green-500 text-white'
-                : 'bg-gray-900 text-white hover:bg-gray-700'
-            }`}
+            className={`nim-btn-white w-full ${exportSuccess ? '!bg-green-500 !text-white' : ''}`}
           >
             {isExporting ? (
               <>
@@ -149,28 +141,21 @@ export function PrintPlanningTab() {
           </button>
 
           {exportError && (
-            <div className="flex items-start gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
-              <svg className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
+            <p className="text-xs text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">
               {exportError}
-            </div>
+            </p>
           )}
         </div>
       </div>
 
-      {/* ── Canvas area ─────────────────────────────────────────────────── */}
-      <div className="flex-1 min-w-0 flex flex-col">
-        {/* Canvas toolbar */}
-        <div className="px-4 py-3 border-b border-gray-200 flex items-center gap-3">
-          <h2 className="text-sm font-bold text-gray-800">Layout Preview</h2>
+      {/* ── Canvas ── */}
+      <div className="flex-1 min-w-0 flex flex-col bg-nim-black">
+        <div className="px-4 py-3 border-b border-white/10 flex items-center gap-3">
+          <p className="text-xs font-bold tracking-widest uppercase text-nim-yellow">Layout Preview</p>
           {copies.length === 0 && (
-            <span className="text-xs text-gray-400">
-              Add files and click Auto-Layout to get started
-            </span>
+            <span className="text-xs text-white/30">Add files and click Auto-Layout to get started</span>
           )}
         </div>
-
         <div className="flex-1 min-h-0 p-3">
           <LayoutCanvas
             foilWidthMm={foilWidthMm}
