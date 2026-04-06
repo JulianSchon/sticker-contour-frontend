@@ -1,0 +1,91 @@
+import type { ContourParams, ContourPreviewResponse } from '../types/contour.ts';
+import type { ExportCopy } from '../types/printPlanning.ts';
+
+const BASE = (import.meta.env.VITE_API_URL ?? '') + '/api';
+
+function buildFormData(file: File, params: ContourParams): FormData {
+  const fd = new FormData();
+  fd.append('image', file);
+  fd.append('threshold', String(params.threshold));
+  fd.append('kissOffset', String(params.kissOffset));
+  fd.append('perfOffset', String(params.perfOffset));
+  fd.append('smoothing', String(params.smoothing));
+  fd.append('cutMode', params.cutMode);
+  fd.append('enclose', String(params.enclose));
+  return fd;
+}
+
+export async function fetchContourPreview(
+  file: File,
+  params: ContourParams
+): Promise<ContourPreviewResponse> {
+  const res = await fetch(`${BASE}/contour-preview`, {
+    method: 'POST',
+    body: buildFormData(file, params),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error((err as { error?: string }).error ?? 'Preview failed');
+  }
+
+  return res.json() as Promise<ContourPreviewResponse>;
+}
+
+export async function downloadPdf(file: File, params: ContourParams): Promise<void> {
+  const res = await fetch(`${BASE}/generate`, {
+    method: 'POST',
+    body: buildFormData(file, params),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error((err as { error?: string }).error ?? 'PDF generation failed');
+  }
+
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'sticker-cutcontour.pdf';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+export async function fetchPdfDimensions(
+  file: File
+): Promise<{ widthMm: number; heightMm: number }> {
+  const fd = new FormData();
+  fd.append('file', file);
+  const res = await fetch(`${BASE}/print-planning/pdf-info`, { method: 'POST', body: fd });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error((err as { error?: string }).error ?? 'Failed to read PDF dimensions');
+  }
+  return res.json();
+}
+
+export async function exportPrintLayout(
+  files: File[],
+  layout: { foilWidthMm: number; totalLengthMm: number; copies: ExportCopy[] }
+): Promise<void> {
+  const fd = new FormData();
+  files.forEach(f => fd.append('files', f, f.name));
+  fd.append('layout', JSON.stringify(layout));
+  const res = await fetch(`${BASE}/print-planning/export`, { method: 'POST', body: fd });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error((err as { error?: string }).error ?? 'Export failed');
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'print-foil.pdf';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
