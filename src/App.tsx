@@ -34,115 +34,132 @@ export default function App() {
   return (
     <div className="min-h-screen bg-nim-black flex flex-col">
 
-      {/* ── Top bar ── */}
-      <div className="bg-nim-darker border-b border-white/5 px-6 py-2 flex items-center justify-between text-xs text-white/30">
-        <span>NIMSTICK CUTZ — INTERNAL PRINT TOOL</span>
-        <span>Roland VersaWorks · Mimaki RasterLink</span>
-      </div>
-
       {/* ── Header ── */}
-      <header className="bg-nim-black border-b-4 border-nim-yellow px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
+      <header className="bg-nim-darker border-b-2 border-nim-yellow/80 sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between gap-6">
 
           {/* Logo */}
-          <div className="flex items-center gap-3">
-            {/* Nimstick-style badge */}
-            <div className="relative">
-              <div
-                className="bg-nim-yellow px-3 py-1 rounded-lg"
-                style={{ clipPath: 'polygon(0 0, 100% 0, 100% 75%, 95% 100%, 0 100%)' }}
-              >
-                <span
-                  className="font-display text-nim-black text-2xl tracking-tight leading-none"
-                  style={{ WebkitTextStroke: '1px #111' }}
-                >
-                  NIMSTICK
-                </span>
-              </div>
-            </div>
+          <div className="flex items-center gap-4">
+            <img
+              src="/nimstick-logo.png"
+              alt="Nimstick"
+              className="h-10 w-auto"
+              onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+            <div className="h-6 w-px bg-white/10" />
             <div>
-              <div className="text-white font-bold text-lg tracking-widest uppercase leading-tight">
-                CUTZ
-              </div>
-              <div className="text-white/30 text-xs tracking-widest uppercase">
+              <p className="text-white font-bold text-sm tracking-widest uppercase leading-none">CUTZ</p>
+              <p className="text-white/30 text-xs tracking-wider mt-0.5">
                 {tab === 'print-planning' ? 'Print with OPOS Regmarks' : 'Contour Cut Generator'}
-              </div>
+              </p>
             </div>
           </div>
 
           {/* Tab switcher */}
-          <div className="flex gap-1 bg-white/5 p-1 rounded-lg border border-white/10">
-            <button
-              onClick={() => setTab('contour')}
-              className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-widest transition-all ${
-                tab === 'contour'
-                  ? 'bg-nim-yellow text-nim-black shadow-sm'
-                  : 'text-white/40 hover:text-white/70'
-              }`}
-            >
-              Contour
-            </button>
-            <button
-              onClick={() => setTab('print-planning')}
-              className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-widest transition-all ${
-                tab === 'print-planning'
-                  ? 'bg-nim-yellow text-nim-black shadow-sm'
-                  : 'text-white/40 hover:text-white/70'
-              }`}
-            >
-              Print Planning
-            </button>
-          </div>
+          <nav className="flex gap-1 bg-white/5 p-1 rounded-lg border border-white/10">
+            {([
+              { id: 'contour',        label: 'Contour Generator' },
+              { id: 'print-planning', label: 'Print Planning'    },
+            ] as { id: Tab; label: string }[]).map(t => (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-widest transition-all ${
+                  tab === t.id
+                    ? 'bg-nim-yellow text-nim-black shadow'
+                    : 'text-white/40 hover:text-white/70'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </nav>
         </div>
       </header>
 
       {/* ── Main ── */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8">
+
         {tab === 'contour' && (
-          <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6">
 
-            {/* Left column */}
-            <div className="space-y-5">
+            {/* ── Left sidebar ── */}
+            <div className="flex flex-col gap-4">
 
-              <section>
-                <p className="nim-label mb-3">01 — Upload Image</p>
-                <ImageUpload onImageSelected={handleImageSelected} />
-                {file && (
-                  <p className="mt-2 text-xs text-white/30 truncate">{file.name} — {(file.size / 1024).toFixed(0)} KB</p>
-                )}
-              </section>
+              {/* Upload */}
+              <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
+                <div className="px-5 pt-5 pb-2">
+                  <StepLabel n="01" label="Upload Image" />
+                </div>
+                <div className="px-5 pb-5">
+                  <ImageUpload onImageSelected={handleImageSelected} />
+                  {file && (
+                    <p className="mt-2 text-xs text-white/25 truncate flex items-center gap-1.5">
+                      <svg className="w-3 h-3 text-nim-yellow shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      {file.name} — {(file.size / 1024).toFixed(0)} KB
+                    </p>
+                  )}
+                </div>
+              </div>
 
-              <section>
-                <p className="nim-label mb-3">02 — Parameters</p>
-                <div className="nim-card p-4">
+              {/* Parameters */}
+              <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
+                <div className="px-5 pt-5 pb-2">
+                  <StepLabel n="02" label="Adjust Parameters" />
+                </div>
+                <div className="px-5 pb-5">
                   <ParameterPanel params={params} onChange={setParams} />
                 </div>
-              </section>
+              </div>
 
-              <section>
-                <p className="nim-label mb-3">03 — Download</p>
-                <DownloadButton file={file} params={params} />
-              </section>
+              {/* Download */}
+              <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
+                <div className="px-5 pt-5 pb-2">
+                  <StepLabel n="03" label="Download PDF" />
+                </div>
+                <div className="px-5 pb-5">
+                  <DownloadButton file={file} params={params} />
+                </div>
+              </div>
 
             </div>
 
-            {/* Right column — preview */}
+            {/* ── Preview ── */}
             <div className="flex flex-col gap-3">
-              <p className="nim-label">Live Preview</p>
+              <div className="flex items-center justify-between">
+                <p className="nim-label">Live Preview</p>
+                {isLoading && (
+                  <span className="flex items-center gap-1.5 text-xs text-nim-yellow/70">
+                    <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                    </svg>
+                    Detecting contour…
+                  </span>
+                )}
+              </div>
 
               {error && (
-                <div className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-xl px-4 py-3">
-                  <strong>Contour detection failed:</strong> {error.message}
+                <div className="text-sm text-red-400 bg-red-950/40 border border-red-800/50 rounded-xl px-4 py-3 flex items-start gap-2">
+                  <svg className="w-4 h-4 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <span><strong>Detection failed:</strong> {error.message}</span>
                 </div>
               )}
 
-              <CanvasPreview
-                imageDataUrl={imageDataUrl}
-                contour={contour ?? null}
-                params={params}
-                isLoading={isLoading}
-              />
+              <div className="flex-1 rounded-2xl overflow-hidden border border-white/10" style={{ minHeight: '500px' }}>
+                <CanvasPreview
+                  imageDataUrl={imageDataUrl}
+                  contour={contour ?? null}
+                  params={params}
+                  isLoading={isLoading}
+                />
+              </div>
             </div>
+
           </div>
         )}
 
@@ -150,9 +167,23 @@ export default function App() {
       </main>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-white/5 px-6 py-3 text-center text-xs text-white/20">
-        © Nimstick · nimstick.se
+      <footer className="border-t border-white/5 px-6 py-4 flex items-center justify-between text-xs text-white/20">
+        <span>Nimstick Cutz — Internal Print Tool</span>
+        <a href="https://nimstick.se" target="_blank" rel="noreferrer" className="hover:text-white/40 transition-colors">
+          nimstick.se ↗
+        </a>
       </footer>
+    </div>
+  );
+}
+
+function StepLabel({ n, label }: { n: string; label: string }) {
+  return (
+    <div className="flex items-center gap-2 mb-1">
+      <span className="w-5 h-5 rounded-md bg-nim-yellow flex items-center justify-center text-nim-black text-xs font-black leading-none shrink-0">
+        {n}
+      </span>
+      <span className="text-xs font-bold uppercase tracking-widest text-white/50">{label}</span>
     </div>
   );
 }

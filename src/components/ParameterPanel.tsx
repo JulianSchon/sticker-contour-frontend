@@ -16,22 +16,27 @@ interface SliderProps {
 }
 
 function Slider({ label, value, min, max, step, unit = '', onChange }: SliderProps) {
+  const pct = ((value - min) / (max - min)) * 100;
   return (
-    <div className="space-y-1">
-      <div className="flex justify-between text-sm">
-        <label className="font-medium text-gray-700">{label}</label>
-        <span className="text-gray-500 tabular-nums">{value}{unit}</span>
+    <div className="space-y-2">
+      {label && (
+        <div className="flex justify-between items-baseline">
+          <span className="text-xs font-semibold text-white/60">{label}</span>
+          <span className="text-xs font-bold text-nim-yellow tabular-nums">{value}{unit}</span>
+        </div>
+      )}
+      <div className="relative">
+        <input
+          type="range"
+          min={min} max={max} step={step} value={value}
+          onChange={e => onChange(parseFloat(e.target.value))}
+          className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+          style={{
+            background: `linear-gradient(to right, #FFE600 ${pct}%, rgba(255,255,255,0.1) ${pct}%)`,
+          }}
+        />
       </div>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
-      />
-      <div className="flex justify-between text-xs text-gray-400">
+      <div className="flex justify-between text-xs text-white/20">
         <span>{min}{unit}</span>
         <span>{max}{unit}</span>
       </div>
@@ -40,9 +45,9 @@ function Slider({ label, value, min, max, step, unit = '', onChange }: SliderPro
 }
 
 const CUT_MODES = [
-  { value: 'kiss', label: 'Kiss cut', desc: 'Solid line only' },
-  { value: 'perf', label: 'Perf cut', desc: 'Dashed line only' },
-  { value: 'both', label: 'Both', desc: 'Solid + dashed' },
+  { value: 'kiss', label: 'Kiss',  desc: 'Solid line',       color: '#ec4899' },
+  { value: 'perf', label: 'Perf',  desc: 'Dashed line',      color: '#f97316' },
+  { value: 'both', label: 'Both',  desc: 'Solid + dashed',   color: '#FFE600' },
 ] as const;
 
 export function ParameterPanel({ params, onChange }: Props) {
@@ -53,103 +58,98 @@ export function ParameterPanel({ params, onChange }: Props) {
   const showPerf = params.cutMode === 'perf' || params.cutMode === 'both';
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
+
       <Slider
         label="Threshold sensitivity"
         value={params.threshold}
-        min={1}
-        max={255}
-        step={1}
-        onChange={(v) => set('threshold', v)}
+        min={1} max={255} step={1}
+        onChange={v => set('threshold', v)}
       />
 
       <Slider
         label="Smoothing level"
         value={params.smoothing}
-        min={0}
-        max={4}
-        step={1}
-        onChange={(v) => set('smoothing', v)}
+        min={0} max={4} step={1}
+        onChange={v => set('smoothing', v)}
       />
 
+      {/* Cut mode */}
       <div className="space-y-2">
-        <span className="text-sm font-medium text-gray-700">Cut mode</span>
-        <div className="flex gap-2">
-          {CUT_MODES.map((mode) => (
+        <span className="text-xs font-semibold text-white/60">Cut mode</span>
+        <div className="grid grid-cols-3 gap-2">
+          {CUT_MODES.map(mode => (
             <button
               key={mode.value}
               onClick={() => set('cutMode', mode.value)}
-              className={`flex-1 py-2 px-2 rounded-lg border-2 text-sm font-medium transition-colors ${
+              className={`py-2.5 px-2 rounded-lg border-2 text-center transition-all ${
                 params.cutMode === mode.value
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                  ? 'border-nim-yellow bg-nim-yellow/10 text-nim-yellow'
+                  : 'border-white/10 text-white/40 hover:border-white/20 hover:text-white/60'
               }`}
             >
-              {mode.label}
-              <p className="text-xs font-normal mt-0.5 opacity-70">{mode.desc}</p>
+              <p className="text-xs font-bold uppercase tracking-wider">{mode.label}</p>
+              <p className="text-xs font-normal mt-0.5 opacity-60">{mode.desc}</p>
             </button>
           ))}
         </div>
       </div>
 
+      {/* Kiss offset */}
       {showKiss && (
-        <div className="pl-3 border-l-2 border-pink-400 space-y-1">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="inline-block w-6 h-0.5 bg-pink-500" />
-            <span className="text-xs font-semibold text-pink-600 uppercase tracking-wide">Kiss cut offset</span>
+        <div className="pl-3 border-l-2 border-pink-500/60 space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-5 h-0.5 bg-pink-500" />
+            <span className="text-xs font-bold text-pink-400 uppercase tracking-wider">Kiss cut offset</span>
           </div>
           <Slider
             label=""
             value={params.kissOffset}
-            min={0}
-            max={50}
-            step={1}
-            unit=" px"
-            onChange={(v) => set('kissOffset', v)}
+            min={0} max={50} step={1} unit=" px"
+            onChange={v => set('kissOffset', v)}
           />
         </div>
       )}
 
+      {/* Perf offset */}
       {showPerf && (
-        <div className="pl-3 border-l-2 border-orange-400 space-y-1">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="inline-block w-6 border-t-2 border-dashed border-orange-500" />
-            <span className="text-xs font-semibold text-orange-600 uppercase tracking-wide">Perf cut offset</span>
+        <div className="pl-3 border-l-2 border-orange-500/60 space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-5 border-t-2 border-dashed border-orange-500" />
+            <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">Perf cut offset</span>
           </div>
           <Slider
             label=""
             value={params.perfOffset}
-            min={0}
-            max={50}
-            step={1}
-            unit=" px"
-            onChange={(v) => set('perfOffset', v)}
+            min={0} max={50} step={1} unit=" px"
+            onChange={v => set('perfOffset', v)}
           />
         </div>
       )}
 
-      <div className="pt-1">
-        <button
-          onClick={() => set('enclose', !params.enclose)}
-          className={`w-full py-2 px-3 rounded-lg border-2 text-sm font-medium transition-colors flex items-center gap-2 ${
-            params.enclose
-              ? 'border-violet-500 bg-violet-50 text-violet-700'
-              : 'border-gray-200 text-gray-600 hover:border-gray-300'
-          }`}
-        >
-          <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${
-            params.enclose ? 'border-violet-500 bg-violet-500' : 'border-gray-400'
-          }`}>
-            {params.enclose && (
-              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-              </svg>
-            )}
-          </span>
-          <span>Enclose — outer contour only</span>
-          <span className="ml-auto text-xs font-normal opacity-60">removes inner cuts</span>
-        </button>
-      </div>
+      {/* Enclose toggle */}
+      <button
+        onClick={() => set('enclose', !params.enclose)}
+        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border-2 transition-all ${
+          params.enclose
+            ? 'border-nim-yellow bg-nim-yellow/10'
+            : 'border-white/10 hover:border-white/20'
+        }`}
+      >
+        <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
+          params.enclose ? 'border-nim-yellow bg-nim-yellow' : 'border-white/30'
+        }`}>
+          {params.enclose && (
+            <svg className="w-3 h-3 text-nim-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+            </svg>
+          )}
+        </span>
+        <span className={`text-xs font-bold uppercase tracking-wider ${params.enclose ? 'text-nim-yellow' : 'text-white/40'}`}>
+          Enclose
+        </span>
+        <span className="ml-auto text-xs text-white/25">outer contour only</span>
+      </button>
     </div>
   );
 }
