@@ -1,5 +1,5 @@
 import type { ContourParams, ContourPreviewResponse } from '../types/contour.ts';
-import type { ExportCopy } from '../types/printPlanning.ts';
+import type { ExportCopy, RegmarkType } from '../types/printPlanning.ts';
 
 function buildBase(): string {
   let url = import.meta.env.VITE_API_URL ?? '';
@@ -74,7 +74,7 @@ export async function fetchPdfDimensions(
 
 export async function exportPrintLayout(
   files: File[],
-  layout: { foilWidthMm: number; totalLengthMm: number; copies: ExportCopy[] }
+  layout: { foilWidthMm: number; totalLengthMm: number; copies: ExportCopy[]; regmarkType: RegmarkType }
 ): Promise<void> {
   const fd = new FormData();
   files.forEach(f => fd.append('files', f, f.name));

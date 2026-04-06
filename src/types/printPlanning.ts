@@ -26,6 +26,8 @@ export interface PackResult {
   utilizationPct: number;
 }
 
+export type RegmarkType = 'opos' | 'roland';
+
 export interface ExportCopy {
   fileIndex: number;
   x: number;

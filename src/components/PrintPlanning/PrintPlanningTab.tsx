@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { PlannedFile, PackedCopy, ExportCopy } from '../../types/printPlanning.ts';
+import type { PlannedFile, PackedCopy, ExportCopy, RegmarkType } from '../../types/printPlanning.ts';
 import { packItems } from '../../lib/packer.ts';
 import { exportPrintLayout } from '../../lib/api.ts';
 import { FileSetupPanel } from './FileSetupPanel.tsx';
@@ -11,6 +11,7 @@ export function PrintPlanningTab() {
   const [copies, setCopies] = useState<PackedCopy[]>([]);
   const [totalLengthMm, setTotalLengthMm] = useState(0);
   const [utilizationPct, setUtilizationPct] = useState(0);
+  const [regmarkType, setRegmarkType] = useState<RegmarkType>('opos');
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [exportSuccess, setExportSuccess] = useState(false);
@@ -39,7 +40,7 @@ export function PrintPlanningTab() {
       }));
       await exportPrintLayout(
         files.map(f => f.file),
-        { foilWidthMm, totalLengthMm, copies: exportCopies }
+        { foilWidthMm, totalLengthMm, copies: exportCopies, regmarkType }
       );
       setExportSuccess(true);
       setTimeout(() => setExportSuccess(false), 3000);
@@ -68,13 +69,65 @@ export function PrintPlanningTab() {
         </div>
 
         {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto px-5 py-5">
+        <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6">
           <FileSetupPanel
             foilWidthMm={foilWidthMm}
             onFoilWidthChange={setFoilWidthMm}
             files={files}
             onFilesChange={setFiles}
           />
+
+          {/* Regmark switcher */}
+          <div>
+            <p className="nim-label mb-3">Registration Marks</p>
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                {
+                  id: 'opos' as RegmarkType,
+                  label: 'OPOS',
+                  sub: 'Summa / Graphtec',
+                  icon: (
+                    <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+                      <rect x="3" y="3" width="5" height="5" />
+                      <rect x="16" y="3" width="5" height="5" />
+                      <rect x="3" y="16" width="5" height="5" />
+                      <rect x="16" y="16" width="5" height="5" />
+                      <rect x="9.5" y="3" width="5" height="5" />
+                      <rect x="9.5" y="16" width="5" height="5" />
+                    </svg>
+                  ),
+                },
+                {
+                  id: 'roland' as RegmarkType,
+                  label: 'Roland',
+                  sub: 'VersaWorks',
+                  icon: (
+                    <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+                      <circle cx="5" cy="5" r="3" />
+                      <circle cx="19" cy="5" r="3" />
+                      <circle cx="5" cy="19" r="3" />
+                      <circle cx="19" cy="19" r="3" />
+                      <rect x="9" y="19" width="6" height="2" />
+                    </svg>
+                  ),
+                },
+              ]).map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => setRegmarkType(opt.id)}
+                  className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 transition-all ${
+                    regmarkType === opt.id
+                      ? 'border-nim-yellow bg-nim-yellow/10 text-nim-yellow'
+                      : 'border-white/10 text-white/40 hover:border-white/20 hover:text-white/60'
+                  }`}
+                >
+                  {opt.icon}
+                  <span className="text-xs font-bold uppercase tracking-wider">{opt.label}</span>
+                  <span className="text-xs opacity-60 font-normal">{opt.sub}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Stats */}
@@ -162,6 +215,7 @@ export function PrintPlanningTab() {
             totalLengthMm={totalLengthMm}
             copies={copies}
             files={files}
+            regmarkType={regmarkType}
             onCopiesChange={setCopies}
           />
         </div>
