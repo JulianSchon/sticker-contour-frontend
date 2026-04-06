@@ -16,7 +16,8 @@ import {
   ROLAND_LMARK_W,
   ROLAND_BOT_W_MM,
   ROLAND_BOT_H_MM,
-  ROLAND_BOT_INSET_Y,
+  ROLAND_BOT_GAP_MM,
+  ROLAND_INSET_Y_MM,
   ROLAND_WORK_CLEARANCE_MM,
   getRolandCorners,
 } from '../../lib/rolandMarks.ts';
@@ -127,34 +128,32 @@ function RolandLayer({
   strokeW: number;
 }) {
   const corners = getRolandCorners(foilWidthMm, totalH);
-  const r = ROLAND_CIRCLE_R_MM;
+  const r   = ROLAND_CIRCLE_R_MM;
+  const lW  = ROLAND_LMARK_W;
   const lLen = ROLAND_LMARK_LEN;
-  const lW = ROLAND_LMARK_W;
-  const botCY = totalH + ROLAND_MARGIN_MM - ROLAND_BOT_INSET_Y;
 
-  // L-mark helper — draws two thin rects forming an L pointing toward content centre
-  function LMark({ cx, cy, side }: { cx: number; cy: number; side: 'tl' | 'tr' | 'bl' | 'br' }) {
-    const hSign = side === 'tl' || side === 'bl' ? 1 : -1;   // 1 = arm goes right
-    const vSign = side === 'tl' || side === 'tr' ? 1 : -1;   // 1 = arm goes down
+  // L-mark corners sit exactly at the four content-area boundary corners.
+  // Each mark has two arms of length lLen:
+  //   - one arm along the foil edge pointing toward the nearest circle
+  //   - one arm inward along the content boundary
+  const lMarks = [
+    // TL corner (0, 0): arm up toward circle, arm right into content
+    { key:'tl', cx:0,            cy:0,      ex:0,            ey:-lLen,       ix:lLen,          iy:0      },
+    // TR corner (foilW, 0)
+    { key:'tr', cx:foilWidthMm,  cy:0,      ex:foilWidthMm,  ey:-lLen,       ix:foilWidthMm-lLen, iy:0   },
+    // BL corner (0, totalH): arm down toward circle, arm right into content
+    { key:'bl', cx:0,            cy:totalH, ex:0,            ey:totalH+lLen, ix:lLen,          iy:totalH },
+    // BR corner (foilW, totalH)
+    { key:'br', cx:foilWidthMm,  cy:totalH, ex:foilWidthMm,  ey:totalH+lLen, ix:foilWidthMm-lLen, iy:totalH },
+  ];
 
-    // Corner of the L sits at circle centre offset toward the content
-    const lx = cx;
-    const ly = cy;
-
-    // Horizontal arm
-    const hx = hSign === 1 ? lx : lx - lLen;
-    // Vertical arm
-    const vy = vSign === 1 ? ly : ly - lLen;
-
-    return (
-      <g>
-        {/* Horizontal arm */}
-        <rect x={hx} y={ly - lW / 2} width={lLen} height={lW} fill="black" />
-        {/* Vertical arm */}
-        <rect x={lx - lW / 2} y={vy} width={lW} height={lLen} fill="black" />
-      </g>
-    );
-  }
+  // Bottom-right sensor rectangle:
+  //   right edge = BR circle left edge − BOT_GAP_MM
+  const brCircleLeftX = foilWidthMm - ROLAND_INSET_X_MM - r;
+  const botRectRightX = brCircleLeftX - ROLAND_BOT_GAP_MM;
+  const botRectX      = botRectRightX - ROLAND_BOT_W_MM;
+  const botCircleCY   = totalH + ROLAND_MARGIN_MM - ROLAND_INSET_Y_MM; // = totalH + 10
+  const botRectY      = botCircleCY - ROLAND_BOT_H_MM / 2;
 
   return (
     <>
@@ -162,15 +161,14 @@ function RolandLayer({
       <rect x={0} y={-ROLAND_MARGIN_MM} width={foilWidthMm} height={ROLAND_MARGIN_MM}
         fill="rgba(234,179,8,0.05)" stroke="rgba(234,179,8,0.25)" strokeWidth={strokeW} />
 
-      {/* Dark header bar */}
+      {/* Dark VersaWorks header bar */}
       <rect x={0} y={-ROLAND_MARGIN_MM} width={foilWidthMm} height={ROLAND_HEADER_MM}
-        fill="rgba(30,20,0,0.75)" />
+        fill="rgba(20,14,0,0.82)" />
       <text
         x={foilWidthMm / 2} y={-ROLAND_MARGIN_MM + ROLAND_HEADER_MM / 2}
         textAnchor="middle" dominantBaseline="middle"
-        fontSize={Math.max(3.5, 6 / zoom)}
-        fill="rgba(255,230,0,0.9)" fontFamily="sans-serif" fontWeight="700"
-        letterSpacing={2}
+        fontSize={Math.max(3, 5.5 / zoom)}
+        fill="rgba(255,230,0,0.9)" fontFamily="sans-serif" fontWeight="700" letterSpacing={2}
         style={{ pointerEvents: 'none', userSelect: 'none' }}
       >
         VersaWorks
@@ -180,84 +178,50 @@ function RolandLayer({
       <rect x={0} y={totalH} width={foilWidthMm} height={ROLAND_MARGIN_MM}
         fill="rgba(234,179,8,0.05)" stroke="rgba(234,179,8,0.25)" strokeWidth={strokeW} />
 
-      {/* 5 mm clearance zones — top and bottom of working area */}
+      {/* 5 mm clearance zones inside the content area */}
       <rect x={0} y={0} width={foilWidthMm} height={ROLAND_WORK_CLEARANCE_MM}
         fill="rgba(234,179,8,0.12)" />
       <rect x={0} y={totalH - ROLAND_WORK_CLEARANCE_MM} width={foilWidthMm} height={ROLAND_WORK_CLEARANCE_MM}
         fill="rgba(234,179,8,0.12)" />
-      {/* Clearance boundary lines */}
       <line x1={0} y1={ROLAND_WORK_CLEARANCE_MM} x2={foilWidthMm} y2={ROLAND_WORK_CLEARANCE_MM}
-        stroke="rgba(234,179,8,0.5)" strokeWidth={strokeW} strokeDasharray={`${3/zoom} ${3/zoom}`} />
+        stroke="rgba(234,179,8,0.55)" strokeWidth={strokeW} strokeDasharray={`${3/zoom} ${3/zoom}`} />
       <line x1={0} y1={totalH - ROLAND_WORK_CLEARANCE_MM} x2={foilWidthMm} y2={totalH - ROLAND_WORK_CLEARANCE_MM}
-        stroke="rgba(234,179,8,0.5)" strokeWidth={strokeW} strokeDasharray={`${3/zoom} ${3/zoom}`} />
-      {/* Clearance label — top */}
-      <text x={6 / zoom} y={ROLAND_WORK_CLEARANCE_MM / 2}
-        dominantBaseline="middle" fontSize={Math.max(3, 5.5 / zoom)}
-        fill="rgba(234,179,8,0.7)" fontFamily="sans-serif" fontWeight="700"
-        letterSpacing={0.5} style={{ pointerEvents: 'none', userSelect: 'none' }}
-      >
-        5 mm clearance
-      </text>
-      {/* Clearance label — bottom */}
-      <text x={6 / zoom} y={totalH - ROLAND_WORK_CLEARANCE_MM / 2}
-        dominantBaseline="middle" fontSize={Math.max(3, 5.5 / zoom)}
-        fill="rgba(234,179,8,0.7)" fontFamily="sans-serif" fontWeight="700"
-        letterSpacing={0.5} style={{ pointerEvents: 'none', userSelect: 'none' }}
-      >
-        5 mm clearance
-      </text>
+        stroke="rgba(234,179,8,0.55)" strokeWidth={strokeW} strokeDasharray={`${3/zoom} ${3/zoom}`} />
+      <text x={5 / zoom} y={ROLAND_WORK_CLEARANCE_MM / 2} dominantBaseline="middle"
+        fontSize={Math.max(3, 5 / zoom)} fill="rgba(234,179,8,0.75)"
+        fontFamily="sans-serif" fontWeight="700"
+        style={{ pointerEvents: 'none', userSelect: 'none' }}
+      >5 mm clearance</text>
+      <text x={5 / zoom} y={totalH - ROLAND_WORK_CLEARANCE_MM / 2} dominantBaseline="middle"
+        fontSize={Math.max(3, 5 / zoom)} fill="rgba(234,179,8,0.75)"
+        fontFamily="sans-serif" fontWeight="700"
+        style={{ pointerEvents: 'none', userSelect: 'none' }}
+      >5 mm clearance</text>
 
-      {/* Clearance halos for circles (white squares) */}
+      {/* White clearance halos around circles */}
       {Object.values(corners).map((c, i) => (
-        <rect key={`halo-${i}`}
-          x={c.x - r - 2} y={c.y - r - 2}
-          width={(r + 2) * 2} height={(r + 2) * 2}
-          fill="white" rx={r + 2}
-        />
+        <circle key={`halo-${i}`} cx={c.x} cy={c.y} r={r + 1.5} fill="white" />
       ))}
 
-      {/* Registration circles */}
+      {/* Registration circles (Ø10 mm, solid black, tangent to foil/margin edges) */}
       {Object.entries(corners).map(([key, c]) => (
-        <circle key={`circle-${key}`}
-          cx={c.x} cy={c.y} r={r} fill="black" />
+        <circle key={`circle-${key}`} cx={c.x} cy={c.y} r={r} fill="black" />
       ))}
 
-      {/* L-shaped crop marks */}
-      {(Object.entries(corners) as [keyof typeof corners, { x: number; y: number }][]).map(([key, c]) => (
-        <LMark key={`lmark-${key}`} cx={c.x} cy={c.y} side={key as 'tl' | 'tr' | 'bl' | 'br'} />
+      {/* L-shaped crop marks at content boundary corners */}
+      {lMarks.map(m => (
+        <g key={`lmark-${m.key}`}>
+          {/* Arm along foil edge toward circle */}
+          <line x1={m.cx} y1={m.cy} x2={m.ex} y2={m.ey}
+            stroke="black" strokeWidth={lW} strokeLinecap="square" />
+          {/* Arm inward along content boundary */}
+          <line x1={m.cx} y1={m.cy} x2={m.ix} y2={m.iy}
+            stroke="black" strokeWidth={lW} strokeLinecap="square" />
+        </g>
       ))}
 
-      {/* Bottom-centre rectangle */}
-      <rect
-        x={foilWidthMm / 2 - ROLAND_BOT_W_MM / 2}
-        y={botCY - ROLAND_BOT_H_MM / 2}
-        width={ROLAND_BOT_W_MM} height={ROLAND_BOT_H_MM}
-        fill="black"
-      />
-
-      {/* Side inset dimension hint (subtle) */}
-      <text
-        x={ROLAND_INSET_X_MM}
-        y={totalH + ROLAND_MARGIN_MM / 2}
-        textAnchor="middle" dominantBaseline="middle"
-        fontSize={Math.max(3.5, 6 / zoom)}
-        fill="rgba(234,179,8,0.45)" fontFamily="sans-serif" fontWeight="600"
-        letterSpacing={1}
-        style={{ pointerEvents: 'none', userSelect: 'none' }}
-      >
-        Roland
-      </text>
-      <text
-        x={foilWidthMm - ROLAND_INSET_X_MM}
-        y={totalH + ROLAND_MARGIN_MM / 2}
-        textAnchor="middle" dominantBaseline="middle"
-        fontSize={Math.max(3.5, 6 / zoom)}
-        fill="rgba(234,179,8,0.45)" fontFamily="sans-serif" fontWeight="600"
-        letterSpacing={1}
-        style={{ pointerEvents: 'none', userSelect: 'none' }}
-      >
-        Roland
-      </text>
+      {/* Bottom-right sensor rectangle (7×4 mm, 4 mm from BR circle left edge) */}
+      <rect x={botRectX} y={botRectY} width={ROLAND_BOT_W_MM} height={ROLAND_BOT_H_MM} fill="black" />
     </>
   );
 }
