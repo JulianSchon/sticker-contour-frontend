@@ -17,6 +17,7 @@ import {
   ROLAND_BOT_W_MM,
   ROLAND_BOT_H_MM,
   ROLAND_BOT_INSET_Y,
+  ROLAND_WORK_CLEARANCE_MM,
   getRolandCorners,
 } from '../../lib/rolandMarks.ts';
 
@@ -178,6 +179,33 @@ function RolandLayer({
       {/* Bottom margin band */}
       <rect x={0} y={totalH} width={foilWidthMm} height={ROLAND_MARGIN_MM}
         fill="rgba(234,179,8,0.05)" stroke="rgba(234,179,8,0.25)" strokeWidth={strokeW} />
+
+      {/* 5 mm clearance zones — top and bottom of working area */}
+      <rect x={0} y={0} width={foilWidthMm} height={ROLAND_WORK_CLEARANCE_MM}
+        fill="rgba(234,179,8,0.12)" />
+      <rect x={0} y={totalH - ROLAND_WORK_CLEARANCE_MM} width={foilWidthMm} height={ROLAND_WORK_CLEARANCE_MM}
+        fill="rgba(234,179,8,0.12)" />
+      {/* Clearance boundary lines */}
+      <line x1={0} y1={ROLAND_WORK_CLEARANCE_MM} x2={foilWidthMm} y2={ROLAND_WORK_CLEARANCE_MM}
+        stroke="rgba(234,179,8,0.5)" strokeWidth={strokeW} strokeDasharray={`${3/zoom} ${3/zoom}`} />
+      <line x1={0} y1={totalH - ROLAND_WORK_CLEARANCE_MM} x2={foilWidthMm} y2={totalH - ROLAND_WORK_CLEARANCE_MM}
+        stroke="rgba(234,179,8,0.5)" strokeWidth={strokeW} strokeDasharray={`${3/zoom} ${3/zoom}`} />
+      {/* Clearance label — top */}
+      <text x={6 / zoom} y={ROLAND_WORK_CLEARANCE_MM / 2}
+        dominantBaseline="middle" fontSize={Math.max(3, 5.5 / zoom)}
+        fill="rgba(234,179,8,0.7)" fontFamily="sans-serif" fontWeight="700"
+        letterSpacing={0.5} style={{ pointerEvents: 'none', userSelect: 'none' }}
+      >
+        5 mm clearance
+      </text>
+      {/* Clearance label — bottom */}
+      <text x={6 / zoom} y={totalH - ROLAND_WORK_CLEARANCE_MM / 2}
+        dominantBaseline="middle" fontSize={Math.max(3, 5.5 / zoom)}
+        fill="rgba(234,179,8,0.7)" fontFamily="sans-serif" fontWeight="700"
+        letterSpacing={0.5} style={{ pointerEvents: 'none', userSelect: 'none' }}
+      >
+        5 mm clearance
+      </text>
 
       {/* Clearance halos for circles (white squares) */}
       {Object.values(corners).map((c, i) => (

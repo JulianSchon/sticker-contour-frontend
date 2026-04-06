@@ -4,10 +4,14 @@
  * Layout (top to bottom on the foil):
  *   ┌─────────────────────────────────────┐  ← outer top edge
  *   │  dark header band ("VersaWorks")    │  ROLAND_HEADER_MM tall
- *   │  ●─── tl circle    tr circle ───●  │  circles at ROLAND_INSET_X/Y from edges
- *   ├─────────────────────────────────────┤  ← content top (y = 0)
+ *   │  ●─── tl circle    tr circle ───●  │  circles at ROLAND_INSET_X/Y from outer edge
+ *   ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤  ← margin band inner edge (y = 0 rel)
+ *   │  ◀── 5 mm clearance zone ──▶       │  ROLAND_WORK_CLEARANCE_MM
+ *   ├─────────────────────────────────────┤  ← safe print/cut working area starts
  *   │           sticker content           │
- *   ├─────────────────────────────────────┤  ← content bottom (y = totalLengthMm)
+ *   ├─────────────────────────────────────┤  ← safe working area ends
+ *   │  ◀── 5 mm clearance zone ──▶       │
+ *   ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤  ← margin band inner edge
  *   │  ●─── bl circle    br circle ───●  │
  *   │           ■ bottom-centre rect ■   │
  *   └─────────────────────────────────────┘  ← outer bottom edge
@@ -15,16 +19,17 @@
  * All dimensions in mm.
  */
 
-export const ROLAND_MARGIN_MM   = 30;   // extra band added top AND bottom in export
-export const ROLAND_HEADER_MM   = 10;   // dark header strip at top of top margin
-export const ROLAND_CIRCLE_R_MM = 7;    // registration circle radius
-export const ROLAND_INSET_X_MM  = 18;   // circle centre distance from left/right foil edge
-export const ROLAND_INSET_Y_MM  = 20;   // circle centre distance from outer edge of margin
-export const ROLAND_LMARK_LEN   = 7;    // L-mark arm length
-export const ROLAND_LMARK_W     = 1.5;  // L-mark arm thickness
-export const ROLAND_BOT_W_MM    = 20;   // bottom-centre rectangle width
-export const ROLAND_BOT_H_MM    = 4;    // bottom-centre rectangle height
-export const ROLAND_BOT_INSET_Y = 8;    // bottom rect centre from outer bottom edge
+export const ROLAND_MARGIN_MM          = 30;   // extra band added top AND bottom in export
+export const ROLAND_HEADER_MM          = 10;   // dark header strip at very top of margin
+export const ROLAND_CIRCLE_R_MM        = 5;    // registration circle radius (= 10 mm diameter)
+export const ROLAND_INSET_X_MM         = 18;   // circle centre from left/right foil edge
+export const ROLAND_INSET_Y_MM         = 20;   // circle centre from outer edge of margin
+export const ROLAND_LMARK_LEN          = 7;    // L-mark arm length
+export const ROLAND_LMARK_W            = 1.5;  // L-mark arm thickness
+export const ROLAND_BOT_W_MM           = 20;   // bottom-centre rectangle width
+export const ROLAND_BOT_H_MM           = 4;    // bottom-centre rectangle height
+export const ROLAND_BOT_INSET_Y        = 8;    // bottom rect centre from outer bottom edge
+export const ROLAND_WORK_CLEARANCE_MM  = 5;    // required clearance from margin band to working area
 
 export interface CornerPositions {
   tl: { x: number; y: number };
