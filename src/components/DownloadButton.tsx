@@ -18,10 +18,9 @@ export function DownloadButton({ file, params, disabled, widthCm, heightCm }: Pr
   const [success, setSuccess] = useState(false);
 
   const buildFilename = () => {
-    const parts = ['sticker-cutcontour'];
-    if (widthCm) parts.push(`${widthCm}cm`);
-    if (heightCm) parts.push(`x${heightCm}cm`);
-    return parts.join('-') + '.pdf';
+    if (widthCm && heightCm) return `sticker-cutcontour-${widthCm}x${heightCm}cm.pdf`;
+    if (widthCm) return `sticker-cutcontour-${widthCm}cm.pdf`;
+    return 'sticker-cutcontour.pdf';
   };
 
   const handleClick = async () => {
