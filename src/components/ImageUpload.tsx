@@ -121,9 +121,16 @@ export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
     const val = parseFloat(raw);
     const wCm = isNaN(val) || val <= 0 ? null : val;
     setWidthCm(wCm);
-    onSizeChange?.(wCm, heightCm);
+    let hCm = heightCm;
+    if (wCm && imageDimensions) {
+      hCm = Math.round((wCm * imageDimensions.h) / imageDimensions.w);
+      hCm = hCm < 1 ? 1 : hCm;
+      setHeightCm(hCm);
+      setHeightInput(String(hCm));
+    }
+    onSizeChange?.(wCm, hCm);
     if (imageDimensions) {
-      setResolutionStatus(checkResolution(imageDimensions.w, imageDimensions.h, wCm, heightCm));
+      setResolutionStatus(checkResolution(imageDimensions.w, imageDimensions.h, wCm, hCm));
     }
   };
 
@@ -133,9 +140,16 @@ export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
     const val = parseFloat(raw);
     const hCm = isNaN(val) || val <= 0 ? null : val;
     setHeightCm(hCm);
-    onSizeChange?.(widthCm, hCm);
+    let wCm = widthCm;
+    if (hCm && imageDimensions) {
+      wCm = Math.round((hCm * imageDimensions.w) / imageDimensions.h);
+      wCm = wCm < 1 ? 1 : wCm;
+      setWidthCm(wCm);
+      setWidthInput(String(wCm));
+    }
+    onSizeChange?.(wCm, hCm);
     if (imageDimensions) {
-      setResolutionStatus(checkResolution(imageDimensions.w, imageDimensions.h, widthCm, hCm));
+      setResolutionStatus(checkResolution(imageDimensions.w, imageDimensions.h, wCm, hCm));
     }
   };
 
@@ -165,7 +179,7 @@ export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
                 type="number"
                 min="1"
                 max="200"
-                step="0.5"
+                step="1"
                 value={axis === 'width' ? widthInput : heightInput}
                 onChange={axis === 'width' ? handleWidth : handleHeight}
                 placeholder="e.g. 10"
