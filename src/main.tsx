@@ -7,15 +7,23 @@ import './index.css';
 // In wordpress mode, notify the parent of our document height so the iframe
 // can resize to fit without scrollbars.
 if (import.meta.env.VITE_MODE === 'wordpress') {
+  let lastHeight = 0;
+  let rafId: ReturnType<typeof requestAnimationFrame> | null = null;
+
   const sendHeight = () => {
-    window.parent.postMessage(
-      { type: 'nimstick_resize', height: document.body.scrollHeight },
-      '*'
-    );
+    if (rafId) return;
+    rafId = requestAnimationFrame(() => {
+      rafId = null;
+      const height = document.documentElement.offsetHeight;
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ type: 'nimstick_resize', height }, '*');
+      }
+    });
   };
-  // Send on load and whenever the DOM changes size
+
   window.addEventListener('load', sendHeight);
-  new ResizeObserver(sendHeight).observe(document.body);
+  new ResizeObserver(sendHeight).observe(document.documentElement);
 }
 
 const queryClient = new QueryClient({
