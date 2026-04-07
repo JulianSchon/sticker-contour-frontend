@@ -18,6 +18,8 @@ const DEFAULT_PARAMS: ContourParams = {
 
 type Tab = 'contour' | 'print-planning';
 
+const IS_WORDPRESS = import.meta.env.VITE_MODE === 'wordpress';
+
 export default function App() {
   const [tab, setTab] = useState<Tab>('contour');
   const [file, setFile] = useState<File | null>(null);
@@ -55,25 +57,27 @@ export default function App() {
             </div>
           </div>
 
-          {/* Tab switcher */}
-          <nav className="flex gap-1 bg-white/5 p-1 rounded-lg border border-white/10">
-            {([
-              { id: 'contour',        label: 'Contour Generator' },
-              { id: 'print-planning', label: 'Print Planning'    },
-            ] as { id: Tab; label: string }[]).map(t => (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-widest transition-all ${
-                  tab === t.id
-                    ? 'bg-nim-yellow text-nim-black shadow'
-                    : 'text-white/40 hover:text-white/70'
-                }`}
-              >
-                {t.label}
-              </button>
-            ))}
-          </nav>
+          {/* Tab switcher — hidden in wordpress mode */}
+          {!IS_WORDPRESS && (
+            <nav className="flex gap-1 bg-white/5 p-1 rounded-lg border border-white/10">
+              {([
+                { id: 'contour',        label: 'Contour Generator' },
+                { id: 'print-planning', label: 'Print Planning'    },
+              ] as { id: Tab; label: string }[]).map(t => (
+                <button
+                  key={t.id}
+                  onClick={() => setTab(t.id)}
+                  className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-widest transition-all ${
+                    tab === t.id
+                      ? 'bg-nim-yellow text-nim-black shadow'
+                      : 'text-white/40 hover:text-white/70'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </nav>
+          )}
         </div>
       </header>
 
@@ -114,10 +118,10 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Download */}
+              {/* Download / Add to Cart */}
               <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
                 <div className="px-5 pt-5 pb-2">
-                  <StepLabel n="03" label="Download PDF" />
+                  <StepLabel n="03" label={IS_WORDPRESS ? 'Add to Cart' : 'Download PDF'} />
                 </div>
                 <div className="px-5 pb-5">
                   <DownloadButton file={file} params={params} />
@@ -166,13 +170,15 @@ export default function App() {
         {tab === 'print-planning' && <PrintPlanningTab />}
       </main>
 
-      {/* ── Footer ── */}
-      <footer className="border-t border-white/5 px-6 py-4 flex items-center justify-between text-xs text-white/20">
-        <span>Nimstick Cutz — Internal Print Tool</span>
-        <a href="https://nimstick.se" target="_blank" rel="noreferrer" className="hover:text-white/40 transition-colors">
-          nimstick.se ↗
-        </a>
-      </footer>
+      {/* ── Footer — hidden in wordpress mode ── */}
+      {!IS_WORDPRESS && (
+        <footer className="border-t border-white/5 px-6 py-4 flex items-center justify-between text-xs text-white/20">
+          <span>Nimstick Cutz — Internal Print Tool</span>
+          <a href="https://nimstick.se" target="_blank" rel="noreferrer" className="hover:text-white/40 transition-colors">
+            nimstick.se ↗
+          </a>
+        </footer>
+      )}
     </div>
   );
 }

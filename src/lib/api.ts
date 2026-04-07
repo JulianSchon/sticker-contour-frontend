@@ -37,6 +37,20 @@ export async function fetchContourPreview(
   return res.json() as Promise<ContourPreviewResponse>;
 }
 
+export async function generatePdfBlob(file: File, params: ContourParams): Promise<Blob> {
+  const res = await fetch(`${BASE}/generate`, {
+    method: 'POST',
+    body: buildFormData(file, params),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error((err as { error?: string }).error ?? 'PDF generation failed');
+  }
+
+  return res.blob();
+}
+
 export async function downloadPdf(file: File, params: ContourParams): Promise<void> {
   const res = await fetch(`${BASE}/generate`, {
     method: 'POST',

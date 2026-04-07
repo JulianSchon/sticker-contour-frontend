@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { downloadPdf } from '../lib/api.ts';
+import { downloadPdf, generatePdfBlob } from '../lib/api.ts';
 import type { ContourParams } from '../types/contour.ts';
 
 interface Props {
@@ -7,6 +7,8 @@ interface Props {
   params: ContourParams;
   disabled?: boolean;
 }
+
+const IS_WORDPRESS = import.meta.env.VITE_MODE === 'wordpress';
 
 export function DownloadButton({ file, params, disabled }: Props) {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -19,7 +21,15 @@ export function DownloadButton({ file, params, disabled }: Props) {
     setError(null);
     setSuccess(false);
     try {
-      await downloadPdf(file, params);
+      if (IS_WORDPRESS) {
+        const pdfBlob = await generatePdfBlob(file, params);
+        window.parent.postMessage(
+          { type: 'nimstick_add_to_cart', pdf: pdfBlob, image: file },
+          '*'
+        );
+      } else {
+        await downloadPdf(file, params);
+      }
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
@@ -28,6 +38,9 @@ export function DownloadButton({ file, params, disabled }: Props) {
       setIsGenerating(false);
     }
   };
+
+  const label = IS_WORDPRESS ? 'Add to Cart' : 'Download PDF';
+  const successLabel = IS_WORDPRESS ? 'Added to Cart!' : 'Downloaded!';
 
   return (
     <div className="space-y-3">
@@ -42,14 +55,22 @@ export function DownloadButton({ file, params, disabled }: Props) {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
             </svg>
-            Generating…
+            {IS_WORDPRESS ? 'Generating…' : 'Generating…'}
           </>
         ) : success ? (
           <>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
             </svg>
-            Downloaded!
+            {successLabel}
+          </>
+        ) : IS_WORDPRESS ? (
+          <>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            {label}
           </>
         ) : (
           <>
@@ -57,7 +78,7 @@ export function DownloadButton({ file, params, disabled }: Props) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            Download PDF
+            {label}
           </>
         )}
       </button>
@@ -69,7 +90,7 @@ export function DownloadButton({ file, params, disabled }: Props) {
       )}
 
       <p className="text-xs text-white/20 text-center leading-relaxed">
-        Print-ready PDF · CutContour spot color
+        {IS_WORDPRESS ? 'Custom sticker · CutContour PDF' : 'Print-ready PDF · CutContour spot color'}
       </p>
     </div>
   );
