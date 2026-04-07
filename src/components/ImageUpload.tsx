@@ -20,38 +20,57 @@ function cmToPixels(cm: number, dpi: number) {
 
 type ResolutionStatus = 'ok' | 'low' | 'blocked' | 'idle';
 
-function checkResolution(w: number, h: number, sizeCm: number | null): ResolutionStatus {
-  if (sizeCm === null || sizeCm <= 0) {
-    // Fallback to fixed thresholds when no size entered
-    if (w < 200 || h < 200) return 'blocked';
-    if (w < 500 || h < 500) return 'low';
+function checkResolution(
+  imgW: number, imgH: number,
+  widthCm: number | null, heightCm: number | null
+): ResolutionStatus {
+  // If neither dimension entered, fall back to fixed thresholds
+  if (!widthCm && !heightCm) {
+    if (imgW < 200 || imgH < 200) return 'blocked';
+    if (imgW < 500 || imgH < 500) return 'low';
     return 'ok';
   }
-  const minPx  = cmToPixels(sizeCm, DPI_MIN);
-  const goodPx = cmToPixels(sizeCm, DPI_GOOD);
-  if (w < minPx  || h < minPx)  return 'blocked';
-  if (w < goodPx || h < goodPx) return 'low';
+  // Check each axis that has been specified
+  const checks: boolean[] = [];
+  const goodChecks: boolean[] = [];
+  if (widthCm && widthCm > 0) {
+    checks.push(imgW >= cmToPixels(widthCm, DPI_MIN));
+    goodChecks.push(imgW >= cmToPixels(widthCm, DPI_GOOD));
+  }
+  if (heightCm && heightCm > 0) {
+    checks.push(imgH >= cmToPixels(heightCm, DPI_MIN));
+    goodChecks.push(imgH >= cmToPixels(heightCm, DPI_GOOD));
+  }
+  if (checks.some(c => !c))     return 'blocked';
+  if (goodChecks.some(c => !c)) return 'low';
   return 'ok';
+}
+
+function effectiveDpi(imgPx: number, sizeCm: number) {
+  return Math.round((imgPx / sizeCm) * 2.54);
 }
 
 export function ImageUpload({ onImageSelected }: Props) {
   const [resolutionStatus, setResolutionStatus] = useState<ResolutionStatus>('idle');
   const [imageDimensions, setImageDimensions] = useState<{ w: number; h: number } | null>(null);
-  const [sizeCm, setSizeCm] = useState<number | null>(null);
-  const [sizeInput, setSizeInput] = useState('');
+  const [widthCm, setWidthCm]   = useState<number | null>(null);
+  const [heightCm, setHeightCm] = useState<number | null>(null);
+  const [widthInput, setWidthInput]   = useState('');
+  const [heightInput, setHeightInput] = useState('');
 
-  const evaluate = useCallback((w: number, h: number, size: number | null, file: File, dataUrl: string) => {
-    const status = checkResolution(w, h, size);
+  const evaluate = useCallback((
+    imgW: number, imgH: number,
+    wCm: number | null, hCm: number | null,
+    file: File, dataUrl: string
+  ) => {
+    const status = checkResolution(imgW, imgH, wCm, hCm);
     setResolutionStatus(status);
-    if (status !== 'blocked') {
-      onImageSelected(file, dataUrl);
-    }
+    if (status !== 'blocked') onImageSelected(file, dataUrl);
   }, [onImageSelected]);
 
   const onDrop = useCallback((accepted: File[]) => {
     const file = accepted[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataUrl = e.target?.result as string;
@@ -60,22 +79,32 @@ export function ImageUpload({ onImageSelected }: Props) {
         const w = img.naturalWidth;
         const h = img.naturalHeight;
         setImageDimensions({ w, h });
-        evaluate(w, h, sizeCm, file, dataUrl);
+        evaluate(w, h, widthCm, heightCm, file, dataUrl);
       };
       img.src = dataUrl;
     };
     reader.readAsDataURL(file);
-  }, [sizeCm, evaluate]);
+  }, [widthCm, heightCm, evaluate]);
 
-  const handleSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleWidth = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
-    setSizeInput(raw);
-    const parsed = parseFloat(raw);
-    const size = isNaN(parsed) || parsed <= 0 ? null : parsed;
-    setSizeCm(size);
+    setWidthInput(raw);
+    const val = parseFloat(raw);
+    const wCm = isNaN(val) || val <= 0 ? null : val;
+    setWidthCm(wCm);
     if (imageDimensions) {
-      const status = checkResolution(imageDimensions.w, imageDimensions.h, size);
-      setResolutionStatus(status);
+      setResolutionStatus(checkResolution(imageDimensions.w, imageDimensions.h, wCm, heightCm));
+    }
+  };
+
+  const handleHeight = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    setHeightInput(raw);
+    const val = parseFloat(raw);
+    const hCm = isNaN(val) || val <= 0 ? null : val;
+    setHeightCm(hCm);
+    if (imageDimensions) {
+      setResolutionStatus(checkResolution(imageDimensions.w, imageDimensions.h, widthCm, hCm));
     }
   };
 
@@ -86,39 +115,47 @@ export function ImageUpload({ onImageSelected }: Props) {
     maxSize: 20 * 1024 * 1024,
   });
 
-  const effectiveDpi = imageDimensions && sizeCm && sizeCm > 0
-    ? Math.round((imageDimensions.w / sizeCm) * 2.54)
-    : null;
+  const dpiW = imageDimensions && widthCm  ? effectiveDpi(imageDimensions.w, widthCm)  : null;
+  const dpiH = imageDimensions && heightCm ? effectiveDpi(imageDimensions.h, heightCm) : null;
+  const dpiDisplay = dpiW !== null && dpiH !== null
+    ? Math.min(dpiW, dpiH)
+    : (dpiW ?? dpiH);
 
   return (
     <div className="space-y-2">
 
-      {/* Size input */}
-      <div className="flex items-center gap-2">
-        <label className="text-xs font-semibold text-white/60 shrink-0">Sticker size</label>
-        <div className="relative flex-1">
-          <input
-            type="number"
-            min="1"
-            max="100"
-            step="0.5"
-            value={sizeInput}
-            onChange={handleSizeChange}
-            placeholder="e.g. 10"
-            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-nim-yellow/50 pr-8"
-          />
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/30">cm</span>
-        </div>
-        {effectiveDpi !== null && (
-          <span className={`text-xs font-bold shrink-0 ${
-            resolutionStatus === 'ok'      ? 'text-green-400'
-            : resolutionStatus === 'low'   ? 'text-yellow-400'
-            : 'text-red-400'
-          }`}>
-            {effectiveDpi} DPI
-          </span>
-        )}
+      {/* Size inputs */}
+      <div className="grid grid-cols-2 gap-2">
+        {(['width', 'height'] as const).map((axis) => (
+          <div key={axis}>
+            <label className="text-xs font-semibold text-white/60 block mb-1 capitalize">{axis}</label>
+            <div className="relative">
+              <input
+                type="number"
+                min="1"
+                max="200"
+                step="0.5"
+                value={axis === 'width' ? widthInput : heightInput}
+                onChange={axis === 'width' ? handleWidth : handleHeight}
+                placeholder="e.g. 10"
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-nim-yellow/50 pr-8"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/30">cm</span>
+            </div>
+          </div>
+        ))}
       </div>
+
+      {/* DPI indicator */}
+      {dpiDisplay !== null && (
+        <p className={`text-xs font-bold ${
+          resolutionStatus === 'ok'    ? 'text-green-400'
+          : resolutionStatus === 'low' ? 'text-yellow-400'
+          : 'text-red-400'
+        }`}>
+          Effective resolution: {dpiDisplay} DPI
+        </p>
+      )}
 
       {/* Drop zone */}
       <div
@@ -168,10 +205,10 @@ export function ImageUpload({ onImageSelected }: Props) {
           <div>
             <p className="text-xs font-bold text-red-400">
               Resolution too low ({imageDimensions.w}×{imageDimensions.h}px
-              {effectiveDpi !== null ? `, ${effectiveDpi} DPI` : ''})
+              {dpiDisplay !== null ? `, ${dpiDisplay} DPI` : ''})
             </p>
             <p className="text-xs text-red-400/70 mt-0.5">
-              {sizeCm ? `Minimum ${DPI_MIN} DPI required for a ${sizeCm}cm sticker.` : 'Minimum 200×200px required.'} Please upload a higher resolution image.
+              Minimum {DPI_MIN} DPI required. Please upload a higher resolution image.
             </p>
           </div>
         </div>
@@ -185,10 +222,10 @@ export function ImageUpload({ onImageSelected }: Props) {
           <div>
             <p className="text-xs font-bold text-yellow-400">
               Low resolution ({imageDimensions.w}×{imageDimensions.h}px
-              {effectiveDpi !== null ? `, ${effectiveDpi} DPI` : ''})
+              {dpiDisplay !== null ? `, ${dpiDisplay} DPI` : ''})
             </p>
             <p className="text-xs text-yellow-400/70 mt-0.5">
-              {sizeCm ? `Recommended ${DPI_GOOD} DPI for a ${sizeCm}cm sticker. Print quality may be reduced.` : 'Recommended minimum is 500×500px. Print quality may be reduced.'}
+              Recommended {DPI_GOOD} DPI for best print quality. Result may look pixelated.
             </p>
           </div>
         </div>
@@ -201,7 +238,7 @@ export function ImageUpload({ onImageSelected }: Props) {
           </svg>
           <p className="text-xs font-bold text-green-400">
             Good resolution ({imageDimensions.w}×{imageDimensions.h}px
-            {effectiveDpi !== null ? `, ${effectiveDpi} DPI` : ''})
+            {dpiDisplay !== null ? `, ${dpiDisplay} DPI` : ''})
           </p>
         </div>
       )}
