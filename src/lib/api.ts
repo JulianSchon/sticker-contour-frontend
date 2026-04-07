@@ -51,7 +51,7 @@ export async function generatePdfBlob(file: File, params: ContourParams): Promis
   return res.blob();
 }
 
-export async function downloadPdf(file: File, params: ContourParams): Promise<void> {
+export async function downloadPdf(file: File, params: ContourParams, filename = 'sticker-cutcontour.pdf'): Promise<void> {
   const res = await fetch(`${BASE}/generate`, {
     method: 'POST',
     body: buildFormData(file, params),
@@ -66,7 +66,7 @@ export async function downloadPdf(file: File, params: ContourParams): Promise<vo
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'sticker-cutcontour.pdf';
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   a.remove();

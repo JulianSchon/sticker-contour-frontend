@@ -25,6 +25,8 @@ export default function App() {
   const [file, setFile] = useState<File | null>(null);
   const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
   const [params, setParams] = useState<ContourParams>(DEFAULT_PARAMS);
+  const [stickerWidthCm, setStickerWidthCm] = useState<number | null>(null);
+  const [stickerHeightCm, setStickerHeightCm] = useState<number | null>(null);
 
   const { data: contour, isLoading, error } = useContour(file, params);
 
@@ -96,7 +98,10 @@ export default function App() {
                   <StepLabel n="01" label="Upload Image" />
                 </div>
                 <div className="px-5 pb-5">
-                  <ImageUpload onImageSelected={handleImageSelected} />
+                  <ImageUpload
+                    onImageSelected={handleImageSelected}
+                    onSizeChange={(w, h) => { setStickerWidthCm(w); setStickerHeightCm(h); }}
+                  />
                   {file && (
                     <p className="mt-2 text-xs text-white/25 truncate flex items-center gap-1.5">
                       <svg className="w-3 h-3 text-nim-yellow shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -124,7 +129,7 @@ export default function App() {
                   <StepLabel n="03" label={IS_WORDPRESS ? 'Save Design' : 'Download PDF'} />
                 </div>
                 <div className="px-5 pb-5">
-                  <DownloadButton file={file} params={params} />
+                  <DownloadButton file={file} params={params} widthCm={stickerWidthCm} heightCm={stickerHeightCm} />
                 </div>
               </div>
 

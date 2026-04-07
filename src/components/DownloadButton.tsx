@@ -6,14 +6,23 @@ interface Props {
   file: File | null;
   params: ContourParams;
   disabled?: boolean;
+  widthCm?: number | null;
+  heightCm?: number | null;
 }
 
 const IS_WORDPRESS = import.meta.env.VITE_MODE === 'wordpress';
 
-export function DownloadButton({ file, params, disabled }: Props) {
+export function DownloadButton({ file, params, disabled, widthCm, heightCm }: Props) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  const buildFilename = () => {
+    const parts = ['sticker-cutcontour'];
+    if (widthCm) parts.push(`${widthCm}cm`);
+    if (heightCm) parts.push(`x${heightCm}cm`);
+    return parts.join('-') + '.pdf';
+  };
 
   const handleClick = async () => {
     if (!file) return;
@@ -28,7 +37,7 @@ export function DownloadButton({ file, params, disabled }: Props) {
           '*'
         );
       } else {
-        await downloadPdf(file, params);
+        await downloadPdf(file, params, buildFilename());
       }
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);

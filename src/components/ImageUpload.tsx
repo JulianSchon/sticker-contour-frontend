@@ -4,6 +4,7 @@ import { enhanceImage } from '../lib/api.ts';
 
 interface Props {
   onImageSelected: (file: File, dataUrl: string) => void;
+  onSizeChange?: (widthCm: number | null, heightCm: number | null) => void;
 }
 
 const ACCEPTED = {
@@ -51,7 +52,7 @@ function effectiveDpi(imgPx: number, sizeCm: number) {
   return Math.round((imgPx / sizeCm) * 2.54);
 }
 
-export function ImageUpload({ onImageSelected }: Props) {
+export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
   const [resolutionStatus, setResolutionStatus] = useState<ResolutionStatus>('idle');
   const [imageDimensions, setImageDimensions] = useState<{ w: number; h: number } | null>(null);
   const [widthCm, setWidthCm]   = useState<number | null>(null);
@@ -120,6 +121,7 @@ export function ImageUpload({ onImageSelected }: Props) {
     const val = parseFloat(raw);
     const wCm = isNaN(val) || val <= 0 ? null : val;
     setWidthCm(wCm);
+    onSizeChange?.(wCm, heightCm);
     if (imageDimensions) {
       setResolutionStatus(checkResolution(imageDimensions.w, imageDimensions.h, wCm, heightCm));
     }
@@ -131,6 +133,7 @@ export function ImageUpload({ onImageSelected }: Props) {
     const val = parseFloat(raw);
     const hCm = isNaN(val) || val <= 0 ? null : val;
     setHeightCm(hCm);
+    onSizeChange?.(widthCm, hCm);
     if (imageDimensions) {
       setResolutionStatus(checkResolution(imageDimensions.w, imageDimensions.h, widthCm, hCm));
     }
