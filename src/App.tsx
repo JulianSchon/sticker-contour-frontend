@@ -121,7 +121,7 @@ export default function App() {
               {/* Download / Add to Cart */}
               <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
                 <div className="px-5 pt-5 pb-2">
-                  <StepLabel n="03" label={IS_WORDPRESS ? 'Add to Cart' : 'Download PDF'} />
+                  <StepLabel n="03" label={IS_WORDPRESS ? 'Save Design' : 'Download PDF'} />
                 </div>
                 <div className="px-5 pb-5">
                   <DownloadButton file={file} params={params} />

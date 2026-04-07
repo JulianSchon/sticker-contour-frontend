@@ -24,7 +24,7 @@ export function DownloadButton({ file, params, disabled }: Props) {
       if (IS_WORDPRESS) {
         const pdfBlob = await generatePdfBlob(file, params);
         window.parent.postMessage(
-          { type: 'nimstick_add_to_cart', pdf: pdfBlob, image: file },
+          { type: 'nimstick_save_design', pdf: pdfBlob, image: file },
           '*'
         );
       } else {
@@ -39,8 +39,8 @@ export function DownloadButton({ file, params, disabled }: Props) {
     }
   };
 
-  const label = IS_WORDPRESS ? 'Add to Cart' : 'Download PDF';
-  const successLabel = IS_WORDPRESS ? 'Added to Cart!' : 'Downloaded!';
+  const label = IS_WORDPRESS ? 'Save Design' : 'Download PDF';
+  const successLabel = IS_WORDPRESS ? 'Design Saved!' : 'Downloaded!';
 
   return (
     <div className="space-y-3">
