@@ -11,7 +11,7 @@ const DEFAULT_PARAMS: ContourParams = {
   threshold: 128,
   kissOffset: 50,
   perfOffset: 50,
-  smoothing: 1,
+  smoothing: 4,
   enclose: false,
   cutMode: 'kiss',
 };
