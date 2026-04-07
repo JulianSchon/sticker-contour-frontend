@@ -73,6 +73,27 @@ export async function downloadPdf(file: File, params: ContourParams): Promise<vo
   URL.revokeObjectURL(url);
 }
 
+export async function enhanceImage(file: File): Promise<{ file: File; dataUrl: string }> {
+  const fd = new FormData();
+  fd.append('image', file);
+
+  const res = await fetch(`${BASE}/enhance`, { method: 'POST', body: fd });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error((err as { error?: string }).error ?? 'Enhancement failed');
+  }
+
+  const blob = await res.blob();
+  const enhancedFile = new File([blob], 'enhanced.png', { type: 'image/png' });
+  const dataUrl = await new Promise<string>((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target?.result as string);
+    reader.readAsDataURL(blob);
+  });
+
+  return { file: enhancedFile, dataUrl };
+}
+
 export async function fetchPdfDimensions(
   file: File
 ): Promise<{ widthMm: number; heightMm: number }> {

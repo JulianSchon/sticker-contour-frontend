@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { enhanceImage } from '../lib/api.ts';
 
 interface Props {
   onImageSelected: (file: File, dataUrl: string) => void;
@@ -57,6 +58,9 @@ export function ImageUpload({ onImageSelected }: Props) {
   const [heightCm, setHeightCm] = useState<number | null>(null);
   const [widthInput, setWidthInput]   = useState('');
   const [heightInput, setHeightInput] = useState('');
+  const [isEnhancing, setIsEnhancing] = useState(false);
+  const [enhanceError, setEnhanceError] = useState<string | null>(null);
+  const [currentFile, setCurrentFile] = useState<File | null>(null);
 
   const evaluate = useCallback((
     imgW: number, imgH: number,
@@ -71,6 +75,8 @@ export function ImageUpload({ onImageSelected }: Props) {
   const onDrop = useCallback((accepted: File[]) => {
     const file = accepted[0];
     if (!file) return;
+    setCurrentFile(file);
+    setEnhanceError(null);
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataUrl = e.target?.result as string;
@@ -85,6 +91,28 @@ export function ImageUpload({ onImageSelected }: Props) {
     };
     reader.readAsDataURL(file);
   }, [widthCm, heightCm, evaluate]);
+
+  const handleEnhance = async () => {
+    if (!currentFile) return;
+    setIsEnhancing(true);
+    setEnhanceError(null);
+    try {
+      const { file: enhanced, dataUrl } = await enhanceImage(currentFile);
+      setCurrentFile(enhanced);
+      const img = new Image();
+      img.onload = () => {
+        const w = img.naturalWidth;
+        const h = img.naturalHeight;
+        setImageDimensions({ w, h });
+        evaluate(w, h, widthCm, heightCm, enhanced, dataUrl);
+      };
+      img.src = dataUrl;
+    } catch (err) {
+      setEnhanceError(err instanceof Error ? err.message : 'Enhancement failed');
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
 
   const handleWidth = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
@@ -197,36 +225,54 @@ export function ImageUpload({ onImageSelected }: Props) {
       </div>
 
       {/* Resolution feedback */}
-      {resolutionStatus === 'blocked' && imageDimensions && (
-        <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-red-950/50 border border-red-800">
-          <svg className="w-4 h-4 text-red-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+      {(resolutionStatus === 'blocked' || resolutionStatus === 'low') && imageDimensions && (
+        <div className={`flex items-start gap-2 px-3 py-2.5 rounded-lg ${
+          resolutionStatus === 'blocked'
+            ? 'bg-red-950/50 border border-red-800'
+            : 'bg-yellow-950/50 border border-yellow-700'
+        }`}>
+          <svg className={`w-4 h-4 shrink-0 mt-0.5 ${resolutionStatus === 'blocked' ? 'text-red-400' : 'text-yellow-400'}`} fill="currentColor" viewBox="0 0 20 20">
+            {resolutionStatus === 'blocked'
+              ? <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              : <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            }
           </svg>
-          <div>
-            <p className="text-xs font-bold text-red-400">
-              Resolution too low ({imageDimensions.w}×{imageDimensions.h}px
+          <div className="flex-1">
+            <p className={`text-xs font-bold ${resolutionStatus === 'blocked' ? 'text-red-400' : 'text-yellow-400'}`}>
+              {resolutionStatus === 'blocked' ? 'Resolution too low' : 'Low resolution'} ({imageDimensions.w}×{imageDimensions.h}px
               {dpiDisplay !== null ? `, ${dpiDisplay} DPI` : ''})
             </p>
-            <p className="text-xs text-red-400/70 mt-0.5">
-              Minimum {DPI_MIN} DPI required. Please upload a higher resolution image.
+            <p className={`text-xs mt-0.5 ${resolutionStatus === 'blocked' ? 'text-red-400/70' : 'text-yellow-400/70'}`}>
+              {resolutionStatus === 'blocked'
+                ? `Minimum ${DPI_MIN} DPI required.`
+                : `Recommended ${DPI_GOOD} DPI for best print quality.`
+              } Use AI to enhance.
             </p>
-          </div>
-        </div>
-      )}
-
-      {resolutionStatus === 'low' && imageDimensions && (
-        <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-yellow-950/50 border border-yellow-700">
-          <svg className="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-          </svg>
-          <div>
-            <p className="text-xs font-bold text-yellow-400">
-              Low resolution ({imageDimensions.w}×{imageDimensions.h}px
-              {dpiDisplay !== null ? `, ${dpiDisplay} DPI` : ''})
-            </p>
-            <p className="text-xs text-yellow-400/70 mt-0.5">
-              Recommended {DPI_GOOD} DPI for best print quality. Result may look pixelated.
-            </p>
+            <button
+              onClick={handleEnhance}
+              disabled={isEnhancing}
+              className="mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-nim-yellow text-nim-black text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed hover:bg-nim-yellow/90 transition-colors"
+            >
+              {isEnhancing ? (
+                <>
+                  <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                  Enhancing… (this may take ~30s)
+                </>
+              ) : (
+                <>
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                  Enhance with AI (4× upscale)
+                </>
+              )}
+            </button>
+            {enhanceError && (
+              <p className="text-xs text-red-400 mt-1">{enhanceError}</p>
+            )}
           </div>
         </div>
       )}
