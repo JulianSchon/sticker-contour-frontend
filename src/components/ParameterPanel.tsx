@@ -105,7 +105,7 @@ export function ParameterPanel({ params, onChange }: Props) {
           <Slider
             label=""
             value={params.kissOffset}
-            min={0} max={50} step={1} unit=" px"
+            min={-15} max={50} step={1} unit=" px"
             onChange={v => set('kissOffset', v)}
           />
         </div>
@@ -121,7 +121,7 @@ export function ParameterPanel({ params, onChange }: Props) {
           <Slider
             label=""
             value={params.perfOffset}
-            min={0} max={50} step={1} unit=" px"
+            min={-15} max={50} step={1} unit=" px"
             onChange={v => set('perfOffset', v)}
           />
         </div>
