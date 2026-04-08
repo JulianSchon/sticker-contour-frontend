@@ -84,6 +84,7 @@ export function ShapeSelector({ value, onChange, shapeSize, onSizeChange, shapeO
 
       {/* Size slider — only for geometric shapes */}
       {value !== 'contour' && (
+        <div className="space-y-4">
         <div className="space-y-2">
           <div className="flex justify-between items-baseline">
             <span className="text-xs font-semibold text-white">{lang === 'sv' ? 'Storlek' : 'Size'}</span>
@@ -138,6 +139,7 @@ export function ShapeSelector({ value, onChange, shapeSize, onSizeChange, shapeO
             </button>
           </div>
           <p className="text-xs text-white/20 text-center">{shapeOffsetX > 0 ? '+' : ''}{shapeOffsetX}% / {shapeOffsetY > 0 ? '+' : ''}{shapeOffsetY}%</p>
+        </div>
         </div>
       )}
     </div>

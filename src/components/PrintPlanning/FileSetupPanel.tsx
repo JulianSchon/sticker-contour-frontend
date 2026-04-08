@@ -113,7 +113,7 @@ export function FileSetupPanel({ foilWidthMm, onFoilWidthChange, files, onFilesC
             </button>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* Drop zone */}
       <div>
