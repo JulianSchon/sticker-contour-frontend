@@ -18,6 +18,7 @@ const DEFAULT_PARAMS: ContourParams = {
   enclose: false,
   cutMode: 'kiss',
   shapeType: 'contour',
+  shapeSize: 90,
 };
 
 type Tab = 'contour' | 'print-planning';
@@ -139,6 +140,8 @@ export default function App() {
                   <ShapeSelector
                     value={params.shapeType}
                     onChange={shape => setParams(p => ({ ...p, shapeType: shape }))}
+                    shapeSize={params.shapeSize}
+                    onSizeChange={size => setParams(p => ({ ...p, shapeSize: size }))}
                   />
                 </div>
               </div>

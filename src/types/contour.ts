@@ -8,6 +8,7 @@ export interface ContourParams {
   enclose: boolean;
   cutMode: 'kiss' | 'perf' | 'both';
   shapeType: ShapeType;
+  shapeSize: number; // 10-100 percent of image dimensions
 }
 
 export interface ContourPreviewResponse {

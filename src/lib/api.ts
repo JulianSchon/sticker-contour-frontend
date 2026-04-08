@@ -18,6 +18,7 @@ function buildFormData(file: File, params: ContourParams): FormData {
   fd.append('cutMode', params.cutMode);
   fd.append('enclose', String(params.enclose));
   fd.append('shapeType', params.shapeType);
+  fd.append('shapeSize', String(params.shapeSize));
   return fd;
 }
 

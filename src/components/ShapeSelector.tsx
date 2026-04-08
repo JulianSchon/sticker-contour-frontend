@@ -4,6 +4,8 @@ import { useLang } from '../lib/LangContext.ts';
 interface Props {
   value: ShapeType;
   onChange: (shape: ShapeType) => void;
+  shapeSize: number;
+  onSizeChange: (size: number) => void;
 }
 
 const SHAPES: { value: ShapeType; labelEn: string; labelSv: string; icon: React.ReactNode }[] = [
@@ -50,27 +52,54 @@ const SHAPES: { value: ShapeType; labelEn: string; labelSv: string; icon: React.
   },
 ];
 
-export function ShapeSelector({ value, onChange }: Props) {
+export function ShapeSelector({ value, onChange, shapeSize, onSizeChange }: Props) {
   const { lang } = useLang();
+  const pct = ((shapeSize - 10) / (100 - 10)) * 100;
 
   return (
-    <div className="grid grid-cols-4 gap-2">
-      {SHAPES.map(shape => (
-        <button
-          key={shape.value}
-          onClick={() => onChange(shape.value)}
-          className={`flex flex-col items-center gap-1.5 py-3 px-1 rounded-xl border-2 transition-all ${
-            value === shape.value
-              ? 'border-nim-yellow bg-nim-yellow/10 text-nim-yellow'
-              : 'border-white/10 text-white/40 hover:border-white/20 hover:text-white/60'
-          }`}
-        >
-          {shape.icon}
-          <span className="text-xs font-bold uppercase tracking-wide">
-            {lang === 'sv' ? shape.labelSv : shape.labelEn}
-          </span>
-        </button>
-      ))}
+    <div className="space-y-4">
+      <div className="grid grid-cols-4 gap-2">
+        {SHAPES.map(shape => (
+          <button
+            key={shape.value}
+            onClick={() => onChange(shape.value)}
+            className={`flex flex-col items-center gap-1.5 py-3 px-1 rounded-xl border-2 transition-all ${
+              value === shape.value
+                ? 'border-nim-yellow bg-nim-yellow/10 text-nim-yellow'
+                : 'border-white/10 text-white/40 hover:border-white/20 hover:text-white/60'
+            }`}
+          >
+            {shape.icon}
+            <span className="text-xs font-bold uppercase tracking-wide">
+              {lang === 'sv' ? shape.labelSv : shape.labelEn}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {/* Size slider — only for geometric shapes */}
+      {value !== 'contour' && (
+        <div className="space-y-2">
+          <div className="flex justify-between items-baseline">
+            <span className="text-xs font-semibold text-white">{lang === 'sv' ? 'Storlek' : 'Size'}</span>
+            <span className="text-xs font-bold text-nim-yellow tabular-nums">{shapeSize}%</span>
+          </div>
+          <input
+            type="range"
+            min={10}
+            max={100}
+            step={1}
+            value={shapeSize}
+            onChange={e => onSizeChange(parseInt(e.target.value))}
+            className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+            style={{ background: `linear-gradient(to right, #ffed00 ${pct}%, rgba(255,255,255,0.1) ${pct}%)` }}
+          />
+          <div className="flex justify-between text-xs text-white/20">
+            <span>10%</span>
+            <span>100%</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
