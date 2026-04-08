@@ -35,7 +35,7 @@ export function DownloadButton({ file, params, disabled, widthCm, heightCm }: Pr
       if (IS_WORDPRESS) {
         const pdfBlob = await generatePdfBlob(file, params);
         window.parent.postMessage(
-          { type: 'nimstick_save_design', pdf: pdfBlob, image: file, filename: buildFilename(), width: widthCm, height: heightCm },
+          { type: 'nimstick_save_design', pdf: pdfBlob, image: file, filename: buildFilename(), width: widthCm, height: heightCm, cutMode: params.cutMode },
           '*'
         );
       } else {
