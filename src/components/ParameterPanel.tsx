@@ -1,4 +1,5 @@
 import type { ContourParams } from '../types/contour.ts';
+import { useLang } from '../lib/LangContext.ts';
 
 interface Props {
   params: ContourParams;
@@ -44,31 +45,33 @@ function Slider({ label, value, min, max, step, unit = '', onChange }: SliderPro
   );
 }
 
-const CUT_MODES = [
-  { value: 'kiss', label: 'Kiss',  desc: 'Solid line',       color: '#ec4899' },
-  { value: 'perf', label: 'Perf',  desc: 'Dashed line',      color: '#f97316' },
-  { value: 'both', label: 'Both',  desc: 'Solid + dashed',   color: '#FFE600' },
-] as const;
 
 export function ParameterPanel({ params, onChange }: Props) {
+  const { t } = useLang();
   const set = <K extends keyof ContourParams>(key: K, value: ContourParams[K]) =>
     onChange({ ...params, [key]: value });
 
   const showKiss = params.cutMode === 'kiss' || params.cutMode === 'both';
   const showPerf = params.cutMode === 'perf' || params.cutMode === 'both';
 
+  const CUT_MODES = [
+    { value: 'kiss', label: 'Kiss', desc: t.solidLine,    color: '#ec4899' },
+    { value: 'perf', label: 'Perf', desc: t.dashedLine,   color: '#f97316' },
+    { value: 'both', label: 'Both', desc: t.solidDashed,  color: '#FFE600' },
+  ] as const;
+
   return (
     <div className="space-y-6">
 
       <Slider
-        label="Threshold sensitivity"
+        label={t.thresholdSensitivity}
         value={params.threshold}
         min={1} max={255} step={1}
         onChange={v => set('threshold', v)}
       />
 
       <Slider
-        label="Smoothing level"
+        label={t.smoothingLevel}
         value={params.smoothing}
         min={0} max={4} step={1}
         onChange={v => set('smoothing', v)}
@@ -76,7 +79,7 @@ export function ParameterPanel({ params, onChange }: Props) {
 
       {/* Cut mode */}
       <div className="space-y-2">
-        <span className="text-xs font-semibold text-white/60">Cut mode</span>
+        <span className="text-xs font-semibold text-white/60">{t.cutMode}</span>
         <div className="grid grid-cols-3 gap-2">
           {CUT_MODES.map(mode => (
             <button
@@ -100,7 +103,7 @@ export function ParameterPanel({ params, onChange }: Props) {
         <div className="pl-3 border-l-2 border-pink-500/60 space-y-2">
           <div className="flex items-center gap-2">
             <span className="inline-block w-5 h-0.5 bg-pink-500" />
-            <span className="text-xs font-bold text-pink-400 uppercase tracking-wider">Kiss cut offset</span>
+            <span className="text-xs font-bold text-pink-400 uppercase tracking-wider">{t.kissCutOffset}</span>
           </div>
           <Slider
             label=""
@@ -116,7 +119,7 @@ export function ParameterPanel({ params, onChange }: Props) {
         <div className="pl-3 border-l-2 border-orange-500/60 space-y-2">
           <div className="flex items-center gap-2">
             <span className="inline-block w-5 border-t-2 border-dashed border-orange-500" />
-            <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">Perf cut offset</span>
+            <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">{t.perfCutOffset}</span>
           </div>
           <Slider
             label=""
@@ -146,9 +149,9 @@ export function ParameterPanel({ params, onChange }: Props) {
           )}
         </span>
         <span className={`text-xs font-bold uppercase tracking-wider ${params.enclose ? 'text-nim-yellow' : 'text-white/40'}`}>
-          Enclose
+          {t.enclose}
         </span>
-        <span className="ml-auto text-xs text-white/25">outer contour only</span>
+        <span className="ml-auto text-xs text-white/25">{t.outerContourOnly}</span>
       </button>
     </div>
   );

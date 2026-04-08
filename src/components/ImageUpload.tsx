@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { enhanceImage } from '../lib/api.ts';
+import { useLang } from '../lib/LangContext.ts';
 
 interface Props {
   onImageSelected: (file: File, dataUrl: string) => void;
@@ -53,6 +54,7 @@ function effectiveDpi(imgPx: number, sizeCm: number) {
 }
 
 export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
+  const { t } = useLang();
   const [resolutionStatus, setResolutionStatus] = useState<ResolutionStatus>('idle');
   const [imageDimensions, setImageDimensions] = useState<{ w: number; h: number } | null>(null);
   const [widthCm, setWidthCm]   = useState<number | null>(null);
@@ -173,7 +175,7 @@ export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
       <div className="grid grid-cols-2 gap-2">
         {(['width', 'height'] as const).map((axis) => (
           <div key={axis}>
-            <label className="text-xs font-semibold text-white/60 block mb-1 capitalize">{axis}</label>
+            <label className="text-xs font-semibold text-white/60 block mb-1 capitalize">{axis === 'width' ? t.width : t.height}</label>
             <div className="relative">
               <input
                 type="number"
@@ -198,7 +200,7 @@ export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
           : resolutionStatus === 'low' ? 'text-yellow-400'
           : 'text-red-400'
         }`}>
-          Effective resolution: {dpiDisplay} DPI
+          {t.effectiveResolution}: {dpiDisplay} DPI
         </p>
       )}
 
@@ -218,14 +220,14 @@ export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
             <svg className="w-8 h-8 text-red-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
-            <p className="text-sm font-bold text-red-400">PNG, JPEG or WEBP only</p>
+            <p className="text-sm font-bold text-red-400">{t.wrongFormat}</p>
           </>
         ) : isDragActive ? (
           <>
             <svg className="w-8 h-8 text-nim-yellow mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
             </svg>
-            <p className="text-sm font-bold text-nim-yellow uppercase tracking-wider">Drop it!</p>
+            <p className="text-sm font-bold text-nim-yellow uppercase tracking-wider">{t.dropIt}</p>
           </>
         ) : (
           <>
@@ -235,8 +237,8 @@ export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
                   d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
               </svg>
             </div>
-            <p className="text-sm font-semibold text-white/70">Drag & drop your sticker image</p>
-            <p className="text-xs text-white/30 mt-1">PNG · JPEG · WEBP — up to 20 MB</p>
+            <p className="text-sm font-semibold text-white/70">{t.dragDrop}</p>
+            <p className="text-xs text-white/30 mt-1">{t.dropFormats}</p>
           </>
         )}
       </div>
@@ -256,14 +258,14 @@ export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
           </svg>
           <div className="flex-1">
             <p className={`text-xs font-bold ${resolutionStatus === 'blocked' ? 'text-red-400' : 'text-yellow-400'}`}>
-              {resolutionStatus === 'blocked' ? 'Resolution too low' : 'Low resolution'} ({imageDimensions.w}×{imageDimensions.h}px
+              {resolutionStatus === 'blocked' ? t.resolutionTooLow : t.lowResolution} ({imageDimensions.w}×{imageDimensions.h}px
               {dpiDisplay !== null ? `, ${dpiDisplay} DPI` : ''})
             </p>
             <p className={`text-xs mt-0.5 ${resolutionStatus === 'blocked' ? 'text-red-400/70' : 'text-yellow-400/70'}`}>
               {resolutionStatus === 'blocked'
-                ? `Minimum ${DPI_MIN} DPI required.`
-                : `Recommended ${DPI_GOOD} DPI for best print quality.`
-              } Use AI to enhance.
+                ? `${t.minRequired} ${DPI_MIN} ${t.dpiRequired}`
+                : `${t.recommendedDpi} ${DPI_GOOD} ${t.dpiQuality}`
+              } {t.useAI}
             </p>
             <button
               onClick={handleEnhance}
@@ -276,14 +278,14 @@ export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                   </svg>
-                  Enhancing… (this may take ~30s)
+                  {t.enhancing}
                 </>
               ) : (
                 <>
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                   </svg>
-                  Enhance with AI (4× upscale)
+                  {t.enhanceBtn}
                 </>
               )}
             </button>
@@ -300,7 +302,7 @@ export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
           </svg>
           <p className="text-xs font-bold text-green-400">
-            Good resolution ({imageDimensions.w}×{imageDimensions.h}px
+            {t.goodResolution} ({imageDimensions.w}×{imageDimensions.h}px
             {dpiDisplay !== null ? `, ${dpiDisplay} DPI` : ''})
           </p>
         </div>

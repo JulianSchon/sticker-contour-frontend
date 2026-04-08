@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { downloadPdf, generatePdfBlob } from '../lib/api.ts';
 import type { ContourParams } from '../types/contour.ts';
+import { useLang } from '../lib/LangContext.ts';
 
 interface Props {
   file: File | null;
@@ -13,6 +14,7 @@ interface Props {
 const IS_WORDPRESS = import.meta.env.VITE_MODE === 'wordpress';
 
 export function DownloadButton({ file, params, disabled, widthCm, heightCm }: Props) {
+  const { t } = useLang();
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -48,8 +50,8 @@ export function DownloadButton({ file, params, disabled, widthCm, heightCm }: Pr
     }
   };
 
-  const label = IS_WORDPRESS ? 'Save Design' : 'Download PDF';
-  const successLabel = IS_WORDPRESS ? 'Design Saved!' : 'Downloaded!';
+  const label = IS_WORDPRESS ? t.saveDesign : t.downloadPdf;
+  const successLabel = IS_WORDPRESS ? t.designSaved : t.downloaded;
 
   return (
     <div className="space-y-3">
@@ -64,7 +66,7 @@ export function DownloadButton({ file, params, disabled, widthCm, heightCm }: Pr
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
             </svg>
-            {IS_WORDPRESS ? 'Generating…' : 'Generating…'}
+            {t.generating}
           </>
         ) : success ? (
           <>
@@ -99,7 +101,7 @@ export function DownloadButton({ file, params, disabled, widthCm, heightCm }: Pr
       )}
 
       <p className="text-xs text-white/20 text-center leading-relaxed">
-        {IS_WORDPRESS ? 'Custom sticker · CutContour PDF' : 'Print-ready PDF · CutContour spot color'}
+        {IS_WORDPRESS ? t.customSticker : t.printReady}
       </p>
     </div>
   );
