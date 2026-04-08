@@ -100,13 +100,7 @@ export default function App() {
                 <div className="px-5 pb-5">
                   <ImageUpload
                     onImageSelected={handleImageSelected}
-                    onSizeChange={(w, h) => {
-                      setStickerWidthCm(w);
-                      setStickerHeightCm(h);
-                      if (IS_WORDPRESS) {
-                        window.parent.postMessage({ type: 'nimstick_size', width: w, height: h }, '*');
-                      }
-                    }}
+                    onSizeChange={(w, h) => { setStickerWidthCm(w); setStickerHeightCm(h); }}
                   />
                   {file && (
                     <p className="mt-2 text-xs text-white/25 truncate flex items-center gap-1.5">
