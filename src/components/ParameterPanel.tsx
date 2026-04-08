@@ -4,6 +4,7 @@ import { useLang } from '../lib/LangContext.ts';
 interface Props {
   params: ContourParams;
   onChange: (params: ContourParams) => void;
+  onKissArkClick?: () => void;
 }
 
 interface SliderProps {
@@ -46,8 +47,8 @@ function Slider({ label, value, min, max, step, unit = '', onChange }: SliderPro
 }
 
 
-export function ParameterPanel({ params, onChange }: Props) {
-  const { t } = useLang();
+export function ParameterPanel({ params, onChange, onKissArkClick }: Props) {
+  const { t, lang } = useLang();
   const set = <K extends keyof ContourParams>(key: K, value: ContourParams[K]) =>
     onChange({ ...params, [key]: value });
 
@@ -55,9 +56,9 @@ export function ParameterPanel({ params, onChange }: Props) {
   const showPerf = params.cutMode === 'perf' || params.cutMode === 'both';
 
   const CUT_MODES = [
-    { value: 'kiss', label: 'Kiss', desc: t.solidLine,    color: '#ec4899' },
-    { value: 'perf', label: 'Perf', desc: t.dashedLine,   color: '#f97316' },
-    { value: 'both', label: 'Both', desc: t.solidDashed,  color: '#FFE600' },
+    { value: 'perf', label: 'Perf', desc: t.dashedLine,  color: '#f97316' },
+    { value: 'both', label: 'Both', desc: t.solidDashed, color: '#FFE600' },
+    { value: 'kiss', label: onKissArkClick ? (lang === 'sv' ? 'Kiss Ark' : 'Kiss Ark') : 'Kiss', desc: t.solidLine, color: '#ec4899' },
   ] as const;
 
   return (
@@ -81,20 +82,35 @@ export function ParameterPanel({ params, onChange }: Props) {
       <div className="space-y-2">
         <span className="text-xs font-semibold text-white">{t.cutMode}</span>
         <div className="grid grid-cols-3 gap-2">
-          {CUT_MODES.map(mode => (
-            <button
-              key={mode.value}
-              onClick={() => set('cutMode', mode.value)}
-              className={`py-2.5 px-2 rounded-lg border-2 text-center transition-all ${
-                params.cutMode === mode.value
-                  ? 'border-nim-yellow bg-nim-yellow/10 text-nim-yellow'
-                  : 'border-white/10 text-white/40 hover:border-white/20 hover:text-white/60'
-              }`}
-            >
-              <p className="text-xs font-bold uppercase tracking-wider">{mode.label}</p>
-              <p className="text-xs font-normal mt-0.5 opacity-60">{mode.desc}</p>
-            </button>
-          ))}
+          {CUT_MODES.map(mode => {
+            const isKissArk = mode.value === 'kiss' && !!onKissArkClick;
+            return (
+              <button
+                key={mode.value}
+                onClick={() => {
+                  if (isKissArk) { onKissArkClick(); }
+                  else { set('cutMode', mode.value); }
+                }}
+                className={`py-2.5 px-2 rounded-lg border-2 text-center transition-all relative ${
+                  isKissArk
+                    ? 'border-pink-500/60 bg-pink-500/10 text-pink-400 hover:border-pink-400 hover:bg-pink-500/20'
+                    : params.cutMode === mode.value
+                    ? 'border-nim-yellow bg-nim-yellow/10 text-nim-yellow'
+                    : 'border-white/10 text-white/40 hover:border-white/20 hover:text-white/60'
+                }`}
+              >
+                <p className="text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1">
+                  {mode.label}
+                  {isKissArk && (
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                    </svg>
+                  )}
+                </p>
+                <p className="text-xs font-normal mt-0.5 opacity-60">{mode.desc}</p>
+              </button>
+            );
+          })}
         </div>
       </div>
 

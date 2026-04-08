@@ -17,7 +17,7 @@ const DEFAULT_PARAMS: ContourParams = {
   perfOffset: 50,
   smoothing: 4,
   enclose: false,
-  cutMode: 'kiss',
+  cutMode: 'perf',
   shapeType: 'contour',
   shapeSize: 90,
   shapeOffsetX: 0,
@@ -33,6 +33,10 @@ export default function App() {
   const [file, setFile] = useState<File | null>(null);
   const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
   const [params, setParams] = useState<ContourParams>(DEFAULT_PARAMS);
+  const [sheetInitKey, setSheetInitKey] = useState(0);
+  const [sheetInitFile, setSheetInitFile] = useState<File | null>(null);
+  const [sheetInitDataUrl, setSheetInitDataUrl] = useState<string | null>(null);
+  const [sheetInitParams, setSheetInitParams] = useState<ContourParams | null>(null);
   const [stickerWidthCm, setStickerWidthCm] = useState<number | null>(null);
   const [stickerHeightCm, setStickerHeightCm] = useState<number | null>(null);
   const [lang, setLang] = useState<Lang>('sv');
@@ -44,6 +48,14 @@ export default function App() {
     setFile(f);
     setImageDataUrl(dataUrl);
   };
+
+  const handleKissArkClick = IS_WORDPRESS ? () => {
+    setSheetInitFile(file);
+    setSheetInitDataUrl(imageDataUrl);
+    setSheetInitParams({ ...params, cutMode: 'kiss' });
+    setSheetInitKey(k => k + 1);
+    setTab('print-planning');
+  } : undefined;
 
   return (
     <LangContext.Provider value={{ lang, t, setLang }}>
@@ -156,7 +168,7 @@ export default function App() {
                   <StepLabel n="03" label={t.step02} />
                 </div>
                 <div className="px-5 pb-5">
-                  <ParameterPanel params={params} onChange={setParams} />
+                  <ParameterPanel params={params} onChange={setParams} onKissArkClick={handleKissArkClick} />
                 </div>
               </div>
 
@@ -209,7 +221,16 @@ export default function App() {
           </div>
         )}
 
-        {tab === 'print-planning' && (IS_WORDPRESS ? <WordpressPrintPlanningTab /> : <PrintPlanningTab />)}
+        {tab === 'print-planning' && (IS_WORDPRESS
+          ? <WordpressPrintPlanningTab
+              key={sheetInitKey}
+              initialFile={sheetInitFile}
+              initialImageDataUrl={sheetInitDataUrl}
+              initialParams={sheetInitParams}
+              initialWidthCm={stickerWidthCm}
+              initialHeightCm={stickerHeightCm}
+            />
+          : <PrintPlanningTab />)}
       </main>
 
       {/* ── Footer — hidden in wordpress mode ── */}

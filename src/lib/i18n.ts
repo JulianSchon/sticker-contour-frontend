@@ -6,7 +6,7 @@ export const translations = {
     taglineContour: 'Contour Cut Generator',
     taglinePrint: 'Print with OPOS Regmarks',
     tabContour: 'Contour Generator',
-    tabPrint: 'Print Planning',
+    tabPrint: 'Sheet',
 
     // Steps
     step01: 'Upload Image',
@@ -67,7 +67,7 @@ export const translations = {
     taglineContour: 'Kontursnitt-generator',
     taglinePrint: 'Utskriftsplanering med OPOS-märken',
     tabContour: 'Kontur-generator',
-    tabPrint: 'Utskriftsplanering',
+    tabPrint: 'Ark',
 
     // Steps
     step01: 'Ladda upp bild',
