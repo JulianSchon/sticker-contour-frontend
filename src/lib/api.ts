@@ -19,6 +19,8 @@ function buildFormData(file: File, params: ContourParams): FormData {
   fd.append('enclose', String(params.enclose));
   fd.append('shapeType', params.shapeType);
   fd.append('shapeSize', String(params.shapeSize));
+  fd.append('shapeOffsetX', String(params.shapeOffsetX));
+  fd.append('shapeOffsetY', String(params.shapeOffsetY));
   return fd;
 }
 
@@ -111,7 +113,8 @@ export async function fetchPdfDimensions(
 
 export async function exportPrintLayout(
   files: File[],
-  layout: { foilWidthMm: number; totalLengthMm: number; copies: ExportCopy[]; regmarkType: RegmarkType }
+  layout: { foilWidthMm: number; totalLengthMm: number; copies: ExportCopy[]; regmarkType: RegmarkType },
+  filename = 'print-foil.pdf'
 ): Promise<void> {
   const fd = new FormData();
   files.forEach(f => fd.append('files', f, f.name));
@@ -125,7 +128,7 @@ export async function exportPrintLayout(
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'print-foil.pdf';
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   a.remove();

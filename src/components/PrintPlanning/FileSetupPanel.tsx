@@ -15,9 +15,10 @@ interface Props {
   onFoilWidthChange: (v: number) => void;
   files: PlannedFile[];
   onFilesChange: (files: PlannedFile[]) => void;
+  hideWidth?: boolean;
 }
 
-export function FileSetupPanel({ foilWidthMm, onFoilWidthChange, files, onFilesChange }: Props) {
+export function FileSetupPanel({ foilWidthMm, onFoilWidthChange, files, onFilesChange, hideWidth = false }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -83,7 +84,7 @@ export function FileSetupPanel({ foilWidthMm, onFoilWidthChange, files, onFilesC
     <div className="flex flex-col gap-6">
 
       {/* Foil width */}
-      <div>
+      {!hideWidth && <div>
         <p className="nim-label mb-3">Foil Width</p>
         <div className="flex items-center gap-2 mb-3">
           <input

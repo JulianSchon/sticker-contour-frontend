@@ -29,6 +29,7 @@ interface Props {
   files: PlannedFile[];
   regmarkType: RegmarkType;
   onCopiesChange: (copies: PackedCopy[]) => void;
+  pageLengthMm?: number;  // when set, canvas shows this fixed page height
 }
 
 const CANVAS_PAD_MM = 40;
@@ -227,7 +228,7 @@ function RolandLayer({
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export function LayoutCanvas({ foilWidthMm, totalLengthMm, copies, files, regmarkType, onCopiesChange }: Props) {
+export function LayoutCanvas({ foilWidthMm, totalLengthMm, copies, files, regmarkType, onCopiesChange, pageLengthMm }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -245,13 +246,15 @@ export function LayoutCanvas({ foilWidthMm, totalLengthMm, copies, files, regmar
   const [isPanning, setIsPanning] = useState(false);
   const panStart = useRef({ x: 0, y: 0 });
 
-  const marginMm = regmarkType === 'roland' ? ROLAND_MARGIN_MM : OPOS_MARGIN_MM;
+  const marginMm = regmarkType === 'roland' ? ROLAND_MARGIN_MM
+    : regmarkType === 'none' ? 0
+    : OPOS_MARGIN_MM;
 
   const fitView = useCallback(() => {
     if (!containerRef.current) return;
     const cw = containerRef.current.clientWidth;
     const ch = containerRef.current.clientHeight;
-    const totalH = totalLengthMm > 0 ? totalLengthMm : 300;
+    const totalH = pageLengthMm ?? (totalLengthMm > 0 ? totalLengthMm : 300);
     const viewH = totalH + marginMm * 2 + CANVAS_PAD_MM * 2;
     const viewW = foilWidthMm + CANVAS_PAD_MM * 2;
     const zoomX = (cw - 60) / viewW;
@@ -327,7 +330,7 @@ export function LayoutCanvas({ foilWidthMm, totalLengthMm, copies, files, regmar
     setIsPanning(false);
   }
 
-  const totalH = totalLengthMm > 0 ? totalLengthMm : 300;
+  const totalH = pageLengthMm ?? (totalLengthMm > 0 ? totalLengthMm : 300);
   const strokeW = 1 / zoom;
   const zoomPct = Math.round(zoom * 100);
 
@@ -429,10 +432,12 @@ export function LayoutCanvas({ foilWidthMm, totalLengthMm, copies, files, regmar
             fill="white" filter="url(#foil-shadow)" opacity={0.15} />
 
           {/* ── Registration marks ── */}
-          {regmarkType === 'opos'
-            ? <OposLayer foilWidthMm={foilWidthMm} totalH={totalH} zoom={zoom} strokeW={strokeW} />
-            : <RolandLayer foilWidthMm={foilWidthMm} totalH={totalH} zoom={zoom} strokeW={strokeW} />
-          }
+          {regmarkType === 'opos' && (
+            <OposLayer foilWidthMm={foilWidthMm} totalH={totalH} zoom={zoom} strokeW={strokeW} />
+          )}
+          {regmarkType === 'roland' && (
+            <RolandLayer foilWidthMm={foilWidthMm} totalH={totalH} zoom={zoom} strokeW={strokeW} />
+          )}
 
           {/* ── Foil body ── */}
           <rect x={0} y={0} width={foilWidthMm} height={totalH}
@@ -443,6 +448,18 @@ export function LayoutCanvas({ foilWidthMm, totalLengthMm, copies, files, regmar
             width={Math.max(0, foilWidthMm - GAP_MM * 2)} height={Math.max(0, totalH - GAP_MM * 2)}
             fill="none" stroke="#d1d5db" strokeWidth={strokeW * 0.7}
             strokeDasharray={`${4/zoom} ${4/zoom}`} />
+
+          {/* Page size label when fixed */}
+          {pageLengthMm != null && (
+            <text
+              x={foilWidthMm / 2} y={totalH - 6 / zoom}
+              textAnchor="middle" fontSize={10 / zoom}
+              fill="rgba(0,0,0,0.25)" fontFamily="sans-serif" fontWeight="700"
+              style={{ pointerEvents: 'none', userSelect: 'none' }}
+            >
+              {foilWidthMm === 210 ? 'A4' : 'A5'} — {foilWidthMm}×{pageLengthMm} mm
+            </text>
+          )}
 
           {/* Width annotation */}
           <text

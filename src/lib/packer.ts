@@ -60,9 +60,9 @@ function containedIn(a: FreeRect, b: FreeRect): boolean {
   return a.x >= b.x && a.y >= b.y && a.x + a.w <= b.x + b.w && a.y + a.h <= b.y + b.h;
 }
 
-export function packItems(files: PlannedFile[], foilWidthMm: number): PackResult {
+export function packItems(files: PlannedFile[], foilWidthMm: number, maxLengthMm?: number): PackResult {
   const usableW = foilWidthMm - 2 * GAP_MM;
-  const LARGE = 1e7; // effectively infinite roll length
+  const LARGE = maxLengthMm != null ? maxLengthMm - 2 * GAP_MM : 1e7;
 
   const todos: Todo[] = [];
   for (const f of files) {

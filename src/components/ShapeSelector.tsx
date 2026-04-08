@@ -6,6 +6,9 @@ interface Props {
   onChange: (shape: ShapeType) => void;
   shapeSize: number;
   onSizeChange: (size: number) => void;
+  shapeOffsetX: number;
+  shapeOffsetY: number;
+  onOffsetChange: (x: number, y: number) => void;
 }
 
 const SHAPES: { value: ShapeType; labelEn: string; labelSv: string; icon: React.ReactNode }[] = [
@@ -52,9 +55,11 @@ const SHAPES: { value: ShapeType; labelEn: string; labelSv: string; icon: React.
   },
 ];
 
-export function ShapeSelector({ value, onChange, shapeSize, onSizeChange }: Props) {
+export function ShapeSelector({ value, onChange, shapeSize, onSizeChange, shapeOffsetX, shapeOffsetY, onOffsetChange }: Props) {
   const { lang } = useLang();
   const pct = ((shapeSize - 10) / (100 - 10)) * 100;
+  const STEP = 5;
+  const clamp = (v: number) => Math.max(-50, Math.min(50, v));
 
   return (
     <div className="space-y-4">
@@ -98,6 +103,41 @@ export function ShapeSelector({ value, onChange, shapeSize, onSizeChange }: Prop
             <span>10%</span>
             <span>100%</span>
           </div>
+        </div>
+
+        {/* Move controls */}
+        <div className="space-y-1.5">
+          <span className="text-xs font-semibold text-white">{lang === 'sv' ? 'Flytta' : 'Move'}</span>
+          <div className="flex flex-col items-center gap-1">
+            {/* Up */}
+            <button onClick={() => onOffsetChange(shapeOffsetX, clamp(shapeOffsetY - STEP))}
+              className="w-8 h-8 rounded-lg border border-white/10 text-white/50 hover:text-white hover:border-white/30 flex items-center justify-center transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7"/></svg>
+            </button>
+            <div className="flex items-center gap-1">
+              {/* Left */}
+              <button onClick={() => onOffsetChange(clamp(shapeOffsetX - STEP), shapeOffsetY)}
+                className="w-8 h-8 rounded-lg border border-white/10 text-white/50 hover:text-white hover:border-white/30 flex items-center justify-center transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
+              </button>
+              {/* Center reset */}
+              <button onClick={() => onOffsetChange(0, 0)}
+                className="w-8 h-8 rounded-lg border border-white/10 text-white/30 hover:text-white hover:border-white/30 flex items-center justify-center transition-colors text-xs font-bold">
+                ○
+              </button>
+              {/* Right */}
+              <button onClick={() => onOffsetChange(clamp(shapeOffsetX + STEP), shapeOffsetY)}
+                className="w-8 h-8 rounded-lg border border-white/10 text-white/50 hover:text-white hover:border-white/30 flex items-center justify-center transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+            {/* Down */}
+            <button onClick={() => onOffsetChange(shapeOffsetX, clamp(shapeOffsetY + STEP))}
+              className="w-8 h-8 rounded-lg border border-white/10 text-white/50 hover:text-white hover:border-white/30 flex items-center justify-center transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
+            </button>
+          </div>
+          <p className="text-xs text-white/20 text-center">{shapeOffsetX > 0 ? '+' : ''}{shapeOffsetX}% / {shapeOffsetY > 0 ? '+' : ''}{shapeOffsetY}%</p>
         </div>
       )}
     </div>

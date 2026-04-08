@@ -4,6 +4,7 @@ import { ParameterPanel } from './components/ParameterPanel.tsx';
 import { CanvasPreview } from './components/CanvasPreview.tsx';
 import { DownloadButton } from './components/DownloadButton.tsx';
 import { PrintPlanningTab } from './components/PrintPlanning/PrintPlanningTab.tsx';
+import { WordpressPrintPlanningTab } from './components/PrintPlanning/WordpressPrintPlanningTab.tsx';
 import { useContour } from './hooks/useContour.ts';
 import type { ContourParams } from './types/contour.ts';
 import { LangContext } from './lib/LangContext.ts';
@@ -19,6 +20,8 @@ const DEFAULT_PARAMS: ContourParams = {
   cutMode: 'kiss',
   shapeType: 'contour',
   shapeSize: 90,
+  shapeOffsetX: 0,
+  shapeOffsetY: 0,
 };
 
 type Tab = 'contour' | 'print-planning';
@@ -76,27 +79,25 @@ export default function App() {
               {lang === 'en' ? 'SV' : 'EN'}
             </button>
 
-            {/* Tab switcher — hidden in wordpress mode */}
-            {!IS_WORDPRESS && (
-              <nav className="flex gap-1 bg-white/5 p-1 rounded-lg border border-white/10">
-                {([
-                  { id: 'contour',        label: t.tabContour },
-                  { id: 'print-planning', label: t.tabPrint   },
-                ] as { id: Tab; label: string }[]).map(tb => (
-                  <button
-                    key={tb.id}
-                    onClick={() => setTab(tb.id)}
-                    className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-widest transition-all ${
-                      tab === tb.id
-                        ? 'bg-nim-yellow text-nim-black shadow'
-                        : 'text-white/40 hover:text-white/70'
-                    }`}
-                  >
-                    {tb.label}
-                  </button>
-                ))}
-              </nav>
-            )}
+            {/* Tab switcher */}
+            <nav className="flex gap-1 bg-white/5 p-1 rounded-lg border border-white/10">
+              {([
+                { id: 'contour',        label: t.tabContour },
+                { id: 'print-planning', label: t.tabPrint   },
+              ] as { id: Tab; label: string }[]).map(tb => (
+                <button
+                  key={tb.id}
+                  onClick={() => setTab(tb.id)}
+                  className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-widest transition-all ${
+                    tab === tb.id
+                      ? 'bg-nim-yellow text-nim-black shadow'
+                      : 'text-white/40 hover:text-white/70'
+                  }`}
+                >
+                  {tb.label}
+                </button>
+              ))}
+            </nav>
           </div>
         </div>
       </header>
@@ -142,6 +143,9 @@ export default function App() {
                     onChange={shape => setParams(p => ({ ...p, shapeType: shape }))}
                     shapeSize={params.shapeSize}
                     onSizeChange={size => setParams(p => ({ ...p, shapeSize: size }))}
+                    shapeOffsetX={params.shapeOffsetX}
+                    shapeOffsetY={params.shapeOffsetY}
+                    onOffsetChange={(x, y) => setParams(p => ({ ...p, shapeOffsetX: x, shapeOffsetY: y }))}
                   />
                 </div>
               </div>
@@ -205,7 +209,7 @@ export default function App() {
           </div>
         )}
 
-        {tab === 'print-planning' && <PrintPlanningTab />}
+        {tab === 'print-planning' && (IS_WORDPRESS ? <WordpressPrintPlanningTab /> : <PrintPlanningTab />)}
       </main>
 
       {/* ── Footer — hidden in wordpress mode ── */}
