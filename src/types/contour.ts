@@ -1,3 +1,5 @@
+export type ShapeType = 'contour' | 'circle' | 'square' | 'triangle';
+
 export interface ContourParams {
   threshold: number;
   kissOffset: number;
@@ -5,6 +7,7 @@ export interface ContourParams {
   smoothing: number;
   enclose: boolean;
   cutMode: 'kiss' | 'perf' | 'both';
+  shapeType: ShapeType;
 }
 
 export interface ContourPreviewResponse {
