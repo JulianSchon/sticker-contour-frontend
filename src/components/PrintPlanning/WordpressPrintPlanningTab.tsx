@@ -6,7 +6,6 @@ import { exportPrintLayout, generatePdfBlob } from '../../lib/api.ts';
 import { LayoutCanvas } from './LayoutCanvas.tsx';
 import { ImageUpload } from '../ImageUpload.tsx';
 import { ShapeSelector } from '../ShapeSelector.tsx';
-import { ParameterPanel } from '../ParameterPanel.tsx';
 import { CanvasPreview } from '../CanvasPreview.tsx';
 import { useContour } from '../../hooks/useContour.ts';
 import { renderPdfFirstPage } from '../../lib/pdfPreview.ts';
@@ -202,20 +201,10 @@ export function WordpressPrintPlanningTab() {
           </div>
         </div>
 
-        {/* Parameters */}
-        <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
-          <div className="px-5 pt-5 pb-2">
-            <StepLabel n="03" label={lang === 'sv' ? 'Skärparametrar' : 'Cut Parameters'} />
-          </div>
-          <div className="px-5 pb-5">
-            <ParameterPanel params={params} onChange={setParams} />
-          </div>
-        </div>
-
         {/* Preview + Add to Sheet */}
         <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
           <div className="px-5 pt-5 pb-2">
-            <StepLabel n="04" label={lang === 'sv' ? 'Förhandsvisning & lägg till' : 'Preview & Add'} />
+            <StepLabel n="03" label={lang === 'sv' ? 'Förhandsvisning & lägg till' : 'Preview & Add'} />
           </div>
           <div className="px-5 pb-5 flex flex-col gap-4">
 
