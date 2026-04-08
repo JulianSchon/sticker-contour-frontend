@@ -5,6 +5,7 @@ interface Props {
   params: ContourParams;
   onChange: (params: ContourParams) => void;
   onKissArkClick?: () => void;
+  hideCutMode?: boolean;
 }
 
 interface SliderProps {
@@ -47,7 +48,7 @@ function Slider({ label, value, min, max, step, unit = '', onChange }: SliderPro
 }
 
 
-export function ParameterPanel({ params, onChange, onKissArkClick }: Props) {
+export function ParameterPanel({ params, onChange, onKissArkClick, hideCutMode = false }: Props) {
   const { t, lang } = useLang();
   const set = <K extends keyof ContourParams>(key: K, value: ContourParams[K]) =>
     onChange({ ...params, [key]: value });
@@ -79,7 +80,7 @@ export function ParameterPanel({ params, onChange, onKissArkClick }: Props) {
       />
 
       {/* Cut mode */}
-      <div className="space-y-2">
+      {!hideCutMode && <div className="space-y-2">
         <span className="text-xs font-semibold text-white">{t.cutMode}</span>
         <div className="grid grid-cols-3 gap-2">
           {CUT_MODES.map(mode => {
@@ -112,7 +113,7 @@ export function ParameterPanel({ params, onChange, onKissArkClick }: Props) {
             );
           })}
         </div>
-      </div>
+      </div>}
 
       {/* Kiss offset */}
       {showKiss && (

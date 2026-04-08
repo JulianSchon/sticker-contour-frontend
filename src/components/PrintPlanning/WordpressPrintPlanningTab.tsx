@@ -241,7 +241,7 @@ export function WordpressPrintPlanningTab({
           {paramsOpen && (
             <div className="px-5 pb-5 border-t border-white/10">
               <div className="pt-4">
-                <ParameterPanel params={params} onChange={setParams} />
+                <ParameterPanel params={params} onChange={setParams} hideCutMode />
               </div>
             </div>
           )}
