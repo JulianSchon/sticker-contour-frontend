@@ -102,9 +102,9 @@ export const translations = {
     perfCutOffset: 'Perf cut-förskjutning',
     enclose: 'Omslut',
     outerContourOnly: 'endast ytterkontur',
-    solidLine: 'Heldragen linje',
-    dashedLine: 'Streckad linje',
-    solidDashed: 'Hel + streckad',
+    solidLine: 'Kiss Cut Ark',
+    dashedLine: 'Utskuret',
+    solidDashed: 'Kiss och Utskuret',
 
     // DownloadButton
     downloadPdf: 'Ladda ner PDF',

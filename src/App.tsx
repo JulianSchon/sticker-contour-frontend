@@ -210,7 +210,7 @@ function StepLabel({ n, label }: { n: string; label: string }) {
       <span className="w-5 h-5 rounded-md bg-nim-yellow flex items-center justify-center text-nim-black text-xs font-black leading-none shrink-0">
         {n}
       </span>
-      <span className="text-xs font-bold uppercase tracking-widest text-white/50">{label}</span>
+      <span className="text-xs font-bold uppercase tracking-widest text-white">{label}</span>
     </div>
   );
 }
