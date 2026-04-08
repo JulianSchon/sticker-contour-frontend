@@ -130,25 +130,23 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Shape selector — WP mode only */}
-              {IS_WORDPRESS && (
-                <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
-                  <div className="px-5 pt-5 pb-2">
-                    <StepLabel n="02" label={lang === 'sv' ? 'Välj form' : 'Cut Shape'} />
-                  </div>
-                  <div className="px-5 pb-5">
-                    <ShapeSelector
-                      value={params.shapeType}
-                      onChange={shape => setParams(p => ({ ...p, shapeType: shape }))}
-                    />
-                  </div>
+              {/* Shape selector */}
+              <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
+                <div className="px-5 pt-5 pb-2">
+                  <StepLabel n="02" label={lang === 'sv' ? 'Välj form' : 'Cut Shape'} />
                 </div>
-              )}
+                <div className="px-5 pb-5">
+                  <ShapeSelector
+                    value={params.shapeType}
+                    onChange={shape => setParams(p => ({ ...p, shapeType: shape }))}
+                  />
+                </div>
+              </div>
 
               {/* Parameters */}
               <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
                 <div className="px-5 pt-5 pb-2">
-                  <StepLabel n={IS_WORDPRESS ? '03' : '02'} label={t.step02} />
+                  <StepLabel n="03" label={t.step02} />
                 </div>
                 <div className="px-5 pb-5">
                   <ParameterPanel params={params} onChange={setParams} />
@@ -158,7 +156,7 @@ export default function App() {
               {/* Download / Save */}
               <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
                 <div className="px-5 pt-5 pb-2">
-                  <StepLabel n={IS_WORDPRESS ? '04' : '03'} label={IS_WORDPRESS ? t.step03wp : t.step03} />
+                  <StepLabel n="04" label={IS_WORDPRESS ? t.step03wp : t.step03} />
                 </div>
                 <div className="px-5 pb-5">
                   <DownloadButton file={file} params={params} widthCm={stickerWidthCm} heightCm={stickerHeightCm} />
