@@ -6,12 +6,12 @@ export default {
     extend: {
       colors: {
         nim: {
-          yellow:  '#FFE600',
-          yellowHover: '#F5DC00',
-          black:   '#111111',
-          dark:    '#1a1a1a',
-          darker:  '#0d0d0d',
-          white:   '#ffffff',
+          yellow:      '#ffed00',
+          yellowHover: '#f0e000',
+          black:       '#000000',
+          dark:        '#111111',
+          darker:      '#0a0a0a',
+          white:       '#ffffff',
         },
       },
       fontFamily: {
