@@ -6,6 +6,10 @@ interface Props {
   onChange: (params: ContourParams) => void;
   onKissArkClick?: () => void;
   hideCutMode?: boolean;
+  hideThreshold?: boolean;
+  hideSmoothing?: boolean;
+  hideOffsets?: boolean;
+  hideEnclose?: boolean;
 }
 
 interface SliderProps {
@@ -48,7 +52,7 @@ function Slider({ label, value, min, max, step, unit = '', onChange }: SliderPro
 }
 
 
-export function ParameterPanel({ params, onChange, onKissArkClick, hideCutMode = false }: Props) {
+export function ParameterPanel({ params, onChange, onKissArkClick, hideCutMode = false, hideThreshold = false, hideSmoothing = false, hideOffsets = false, hideEnclose = false }: Props) {
   const { t, lang } = useLang();
   const set = <K extends keyof ContourParams>(key: K, value: ContourParams[K]) =>
     onChange({ ...params, [key]: value });
@@ -65,19 +69,19 @@ export function ParameterPanel({ params, onChange, onKissArkClick, hideCutMode =
   return (
     <div className="space-y-6">
 
-      <Slider
+      {!hideThreshold && <Slider
         label={t.thresholdSensitivity}
         value={params.threshold}
         min={1} max={255} step={1}
         onChange={v => set('threshold', v)}
-      />
+      />}
 
-      <Slider
+      {!hideSmoothing && <Slider
         label={t.smoothingLevel}
         value={params.smoothing}
         min={0} max={4} step={1}
         onChange={v => set('smoothing', v)}
-      />
+      />}
 
       {/* Cut mode */}
       {!hideCutMode && <div className="space-y-2">
@@ -116,7 +120,7 @@ export function ParameterPanel({ params, onChange, onKissArkClick, hideCutMode =
       </div>}
 
       {/* Kiss offset */}
-      {showKiss && (
+      {showKiss && !hideOffsets && (
         <div className="pl-3 border-l-2 border-pink-500/60 space-y-2">
           <div className="flex items-center gap-2">
             <span className="inline-block w-5 h-0.5 bg-pink-500" />
@@ -132,7 +136,7 @@ export function ParameterPanel({ params, onChange, onKissArkClick, hideCutMode =
       )}
 
       {/* Perf offset */}
-      {showPerf && (
+      {showPerf && !hideOffsets && (
         <div className="pl-3 border-l-2 border-orange-500/60 space-y-2">
           <div className="flex items-center gap-2">
             <span className="inline-block w-5 border-t-2 border-dashed border-orange-500" />
@@ -148,7 +152,7 @@ export function ParameterPanel({ params, onChange, onKissArkClick, hideCutMode =
       )}
 
       {/* Enclose toggle */}
-      <button
+      {!hideEnclose && <button
         onClick={() => set('enclose', !params.enclose)}
         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border-2 transition-all ${
           params.enclose
@@ -169,7 +173,7 @@ export function ParameterPanel({ params, onChange, onKissArkClick, hideCutMode =
           {t.enclose}
         </span>
         <span className="ml-auto text-xs text-white/25">{t.outerContourOnly}</span>
-      </button>
+      </button>}
     </div>
   );
 }

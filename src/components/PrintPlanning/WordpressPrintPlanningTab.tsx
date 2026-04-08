@@ -241,7 +241,7 @@ export function WordpressPrintPlanningTab({
           {paramsOpen && (
             <div className="px-5 pb-5 border-t border-white/10">
               <div className="pt-4">
-                <ParameterPanel params={params} onChange={setParams} hideCutMode />
+                <ParameterPanel params={params} onChange={setParams} hideCutMode hideOffsets hideEnclose />
               </div>
             </div>
           )}
@@ -252,10 +252,19 @@ export function WordpressPrintPlanningTab({
           <div className="px-5 pt-5 pb-2">
             <StepLabel n="03" label={lang === 'sv' ? 'Förhandsvisning & lägg till' : 'Preview & Add'} />
           </div>
-          <div className="px-5 pb-5 flex flex-col gap-4">
+          <div className="px-5 pb-5 flex flex-col gap-3">
+
+            {/* Kiss offset + enclose — always visible */}
+            <ParameterPanel
+              params={params}
+              onChange={setParams}
+              hideCutMode
+              hideThreshold
+              hideSmoothing
+            />
 
             {/* Mini preview */}
-            <div className="rounded-xl overflow-hidden border border-white/10" style={{ minHeight: 220 }}>
+            <div className="rounded-xl overflow-hidden border border-white/10" style={{ minHeight: 180 }}>
               <CanvasPreview
                 imageDataUrl={imageDataUrl}
                 contour={contour ?? null}
