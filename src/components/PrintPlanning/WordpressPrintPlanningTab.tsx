@@ -7,6 +7,7 @@ import { LayoutCanvas } from './LayoutCanvas.tsx';
 import { ImageUpload } from '../ImageUpload.tsx';
 import { ShapeSelector } from '../ShapeSelector.tsx';
 import { CanvasPreview } from '../CanvasPreview.tsx';
+import { ParameterPanel } from '../ParameterPanel.tsx';
 import { useContour } from '../../hooks/useContour.ts';
 import { renderPdfFirstPage } from '../../lib/pdfPreview.ts';
 import { useLang } from '../../lib/LangContext.ts';
@@ -57,6 +58,7 @@ export function WordpressPrintPlanningTab() {
   const [stickerWidthCm, setStickerWidthCm] = useState<number | null>(null);
   const [stickerHeightCm, setStickerHeightCm] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [paramsOpen, setParamsOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
 
@@ -199,6 +201,36 @@ export function WordpressPrintPlanningTab() {
               onOffsetChange={(x, y) => setParams(p => ({ ...p, shapeOffsetX: x, shapeOffsetY: y }))}
             />
           </div>
+        </div>
+
+        {/* Cut Parameters — collapsible */}
+        <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
+          <button
+            onClick={() => setParamsOpen(o => !o)}
+            className="w-full flex items-center justify-between px-5 py-4 text-left"
+          >
+            <div className="flex items-center gap-2">
+              <span className="w-5 h-5 rounded-md bg-white/10 flex items-center justify-center text-white/40 text-xs font-black leading-none shrink-0">
+                ✂
+              </span>
+              <span className="text-xs font-bold uppercase tracking-widest text-white/50">
+                {lang === 'sv' ? 'Skärparametrar' : 'Cut Parameters'}
+              </span>
+            </div>
+            <svg
+              className={`w-4 h-4 text-white/30 transition-transform ${paramsOpen ? 'rotate-180' : ''}`}
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {paramsOpen && (
+            <div className="px-5 pb-5 border-t border-white/10">
+              <div className="pt-4">
+                <ParameterPanel params={params} onChange={setParams} />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Preview + Add to Sheet */}
