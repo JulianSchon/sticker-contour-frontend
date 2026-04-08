@@ -10,7 +10,7 @@
 
   /* Nimstick section label style */
   .nim-label {
-    @apply text-xs font-bold tracking-widest uppercase text-white/40;
+    @apply text-xs font-bold tracking-widest uppercase text-white;
   }
 
   /* Yellow CTA button */
