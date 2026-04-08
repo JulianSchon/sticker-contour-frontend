@@ -171,39 +171,6 @@ export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
   return (
     <div className="space-y-2">
 
-      {/* Size inputs */}
-      <div className="grid grid-cols-2 gap-2">
-        {(['width', 'height'] as const).map((axis) => (
-          <div key={axis}>
-            <label className="text-xs font-semibold text-white/60 block mb-1 capitalize">{axis === 'width' ? t.width : t.height}</label>
-            <div className="relative">
-              <input
-                type="number"
-                min="1"
-                max="200"
-                step="1"
-                value={axis === 'width' ? widthInput : heightInput}
-                onChange={axis === 'width' ? handleWidth : handleHeight}
-                placeholder="e.g. 10"
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-nim-yellow/50 pr-8"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/30">cm</span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* DPI indicator */}
-      {dpiDisplay !== null && (
-        <p className={`text-xs font-bold ${
-          resolutionStatus === 'ok'    ? 'text-green-400'
-          : resolutionStatus === 'low' ? 'text-yellow-400'
-          : 'text-red-400'
-        }`}>
-          {t.effectiveResolution}: {dpiDisplay} DPI
-        </p>
-      )}
-
       {/* Drop zone */}
       <div
         {...getRootProps()}
@@ -242,6 +209,39 @@ export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
           </>
         )}
       </div>
+
+      {/* Size inputs */}
+      <div className="grid grid-cols-2 gap-2">
+        {(['width', 'height'] as const).map((axis) => (
+          <div key={axis}>
+            <label className="text-xs font-semibold text-white block mb-1">{axis === 'width' ? t.width : t.height}</label>
+            <div className="relative">
+              <input
+                type="number"
+                min="1"
+                max="200"
+                step="1"
+                value={axis === 'width' ? widthInput : heightInput}
+                onChange={axis === 'width' ? handleWidth : handleHeight}
+                placeholder="e.g. 10"
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-nim-yellow/50 pr-8"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/30">cm</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* DPI indicator */}
+      {dpiDisplay !== null && (
+        <p className={`text-xs font-bold ${
+          resolutionStatus === 'ok'    ? 'text-green-400'
+          : resolutionStatus === 'low' ? 'text-yellow-400'
+          : 'text-red-400'
+        }`}>
+          {t.effectiveResolution}: {dpiDisplay} DPI
+        </p>
+      )}
 
       {/* Resolution feedback */}
       {(resolutionStatus === 'blocked' || resolutionStatus === 'low') && imageDimensions && (

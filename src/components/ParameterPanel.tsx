@@ -22,7 +22,7 @@ function Slider({ label, value, min, max, step, unit = '', onChange }: SliderPro
     <div className="space-y-2">
       {label && (
         <div className="flex justify-between items-baseline">
-          <span className="text-xs font-semibold text-white/60">{label}</span>
+          <span className="text-xs font-semibold text-white">{label}</span>
           <span className="text-xs font-bold text-nim-yellow tabular-nums">{value}{unit}</span>
         </div>
       )}
@@ -79,7 +79,7 @@ export function ParameterPanel({ params, onChange }: Props) {
 
       {/* Cut mode */}
       <div className="space-y-2">
-        <span className="text-xs font-semibold text-white/60">{t.cutMode}</span>
+        <span className="text-xs font-semibold text-white">{t.cutMode}</span>
         <div className="grid grid-cols-3 gap-2">
           {CUT_MODES.map(mode => (
             <button
