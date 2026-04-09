@@ -10,6 +10,7 @@ import type { ContourParams } from './types/contour.ts';
 import { LangContext } from './lib/LangContext.ts';
 import { translations, type Lang } from './lib/i18n.ts';
 import { ShapeSelector } from './components/ShapeSelector.tsx';
+import { MaterialFinishPicker, type Material, type Finish } from './components/MaterialFinishPicker.tsx';
 
 const DEFAULT_PARAMS: ContourParams = {
   threshold: 128,
@@ -37,6 +38,8 @@ export default function App() {
   const [params, setParams] = useState<ContourParams>(DEFAULT_PARAMS);
   const [stickerWidthCm, setStickerWidthCm] = useState<number | null>(null);
   const [stickerHeightCm, setStickerHeightCm] = useState<number | null>(null);
+  const [material, setMaterial] = useState<Material>('vinyl');
+  const [finish, setFinish] = useState<Finish>('glossy');
   const [lang, setLang] = useState<Lang>('sv');
   const t = translations[lang];
 
@@ -227,9 +230,18 @@ export default function App() {
                 </div>
               </div>
               <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
-                <div className="px-5 pt-5 pb-2"><StepLabel n="04" label={t.step03wp} /></div>
+                <div className="px-5 pt-5 pb-2"><StepLabel n="04" label={t.stepMaterial} /></div>
                 <div className="px-5 pb-5">
-                  <DownloadButton file={file} params={params} widthCm={stickerWidthCm} heightCm={stickerHeightCm} />
+                  <MaterialFinishPicker
+                    material={material} finish={finish}
+                    onMaterialChange={setMaterial} onFinishChange={setFinish}
+                  />
+                </div>
+              </div>
+              <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
+                <div className="px-5 pt-5 pb-2"><StepLabel n="05" label={t.step03wp} /></div>
+                <div className="px-5 pb-5">
+                  <DownloadButton file={file} params={params} widthCm={stickerWidthCm} heightCm={stickerHeightCm} material={material} finish={finish} />
                 </div>
               </div>
             </div>

@@ -13,6 +13,16 @@ export const translations = {
     modeSheet: 'Kiss Cut Sheet',
     modeSheetDesc: 'Fill an A4 or A5 sheet with multiple stickers for efficient production.',
 
+    // Material & Finish
+    stepMaterial: 'Material & Finish',
+    material: 'Material',
+    finish: 'Finish',
+    matVinyl: 'Vinyl Standard',
+    matLaminerad: 'Premium Laminated',
+    matReflex: 'Reflex',
+    finGlossy: 'Glossy',
+    finMatte: 'Matte',
+
     // Steps
     step01: 'Upload Image',
     step02: 'Adjust Parameters',
@@ -78,6 +88,16 @@ export const translations = {
     modeSingleDesc: 'Designa ett klistermärke med anpassad skärväg och spara det i varukorgen.',
     modeSheet: 'Kiss Cut Ark',
     modeSheetDesc: 'Fyll ett A4- eller A5-ark med flera klistermärken för effektiv produktion.',
+
+    // Material & Finish
+    stepMaterial: 'Material & Finish',
+    material: 'Material',
+    finish: 'Finish',
+    matVinyl: 'Vinyl Standard',
+    matLaminerad: 'Premium Laminerad',
+    matReflex: 'Reflex',
+    finGlossy: 'Glossy',
+    finMatte: 'Matte',
 
     // Steps
     step01: 'Ladda upp bild',

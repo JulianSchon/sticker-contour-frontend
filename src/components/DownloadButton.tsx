@@ -9,11 +9,13 @@ interface Props {
   disabled?: boolean;
   widthCm?: number | null;
   heightCm?: number | null;
+  material?: string;
+  finish?: string;
 }
 
 const IS_WORDPRESS = import.meta.env.VITE_MODE === 'wordpress';
 
-export function DownloadButton({ file, params, disabled, widthCm, heightCm }: Props) {
+export function DownloadButton({ file, params, disabled, widthCm, heightCm, material, finish }: Props) {
   const { t } = useLang();
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +37,7 @@ export function DownloadButton({ file, params, disabled, widthCm, heightCm }: Pr
       if (IS_WORDPRESS) {
         const pdfBlob = await generatePdfBlob(file, params);
         window.parent.postMessage(
-          { type: 'nimstick_save_design', pdf: pdfBlob, image: file, filename: buildFilename(), width: widthCm, height: heightCm, cutMode: params.cutMode },
+          { type: 'nimstick_save_design', pdf: pdfBlob, image: file, filename: buildFilename(), width: widthCm, height: heightCm, cutMode: params.cutMode, material, finish },
           '*'
         );
       } else {
