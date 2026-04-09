@@ -8,9 +8,13 @@ import { ImageUpload } from '../ImageUpload.tsx';
 import { ShapeSelector } from '../ShapeSelector.tsx';
 import { CanvasPreview } from '../CanvasPreview.tsx';
 import { ParameterPanel } from '../ParameterPanel.tsx';
+import { MaterialFinishPicker, MATERIALS } from '../MaterialFinishPicker.tsx';
+import type { Material, Finish } from '../MaterialFinishPicker.tsx';
 import { useContour } from '../../hooks/useContour.ts';
 import { renderPdfFirstPage } from '../../lib/pdfPreview.ts';
 import { useLang } from '../../lib/LangContext.ts';
+
+const SHEET_MATERIALS = MATERIALS.filter(m => m.value !== 'reflex') as ReadonlyArray<typeof MATERIALS[number]>;
 
 const IS_WORDPRESS = import.meta.env.VITE_MODE === 'wordpress';
 
@@ -72,6 +76,8 @@ export function WordpressPrintPlanningTab() {
   const [copies, setCopies] = useState<PackedCopy[]>([]);
   const [totalLengthMm, setTotalLengthMm] = useState(0);
   const [utilizationPct, setUtilizationPct] = useState(0);
+  const [material, setMaterial] = useState<Material>('vinyl');
+  const [finish, setFinish] = useState<Finish>('glossy');
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [exportSuccess, setExportSuccess] = useState(false);
@@ -162,7 +168,7 @@ export function WordpressPrintPlanningTab() {
         const widthCm  = Math.ceil(page.widthMm / 10);
         const heightCm = Math.ceil(page.heightMm / 10);
         window.parent.postMessage(
-          { type: 'nimstick_save_design', pdf: pdfBlob, image: imageFile, filename, width: widthCm, height: heightCm, cutMode: 'kiss' },
+          { type: 'nimstick_save_design', pdf: pdfBlob, image: imageFile, filename, width: widthCm, height: heightCm, cutMode: 'kiss', material, finish },
           '*'
         );
       } else {
@@ -373,6 +379,20 @@ export function WordpressPrintPlanningTab() {
             regmarkType="none"
             onCopiesChange={setCopies}
             pageLengthMm={page.heightMm}
+          />
+        </div>
+
+        {/* Material & Finish */}
+        <div className="bg-nim-darker rounded-2xl border border-white/10 px-5 py-4">
+          <div className="mb-3">
+            <StepLabel n="04" label={lang === 'sv' ? 'Material & finish' : 'Material & Finish'} />
+          </div>
+          <MaterialFinishPicker
+            material={material}
+            finish={finish}
+            onMaterialChange={setMaterial}
+            onFinishChange={setFinish}
+            allowedMaterials={SHEET_MATERIALS}
           />
         </div>
 

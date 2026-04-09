@@ -19,10 +19,13 @@ interface Props {
   finish: Finish;
   onMaterialChange: (v: Material) => void;
   onFinishChange: (v: Finish) => void;
+  /** Restrict which materials are shown. Defaults to all MATERIALS. */
+  allowedMaterials?: ReadonlyArray<typeof MATERIALS[number]>;
 }
 
-export function MaterialFinishPicker({ material, finish, onMaterialChange, onFinishChange }: Props) {
+export function MaterialFinishPicker({ material, finish, onMaterialChange, onFinishChange, allowedMaterials }: Props) {
   const { t } = useLang();
+  const visibleMaterials = allowedMaterials ?? MATERIALS;
 
   return (
     <div className="space-y-4">
@@ -30,7 +33,7 @@ export function MaterialFinishPicker({ material, finish, onMaterialChange, onFin
       <div className="space-y-2">
         <span className="text-xs font-semibold text-white">{t.material}</span>
         <div className="flex flex-col gap-1.5">
-          {MATERIALS.map(m => (
+          {visibleMaterials.map(m => (
             <button
               key={m.value}
               onClick={() => onMaterialChange(m.value)}
