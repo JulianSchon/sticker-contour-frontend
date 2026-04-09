@@ -173,8 +173,8 @@ export function WordpressPrintPlanningTab({
         const pdfBlob = await exportPrintLayoutBlob(files.map(f => f.file), layout);
         // Use the first sticker's source image as the "image" field, or a blank PNG if none
         const imageFile = file ?? new File([new Uint8Array(0)], 'sheet.png', { type: 'image/png' });
-        const widthCm  = page.widthMm / 10;
-        const heightCm = page.heightMm / 10;
+        const widthCm  = Math.ceil(page.widthMm / 10);
+        const heightCm = Math.ceil(page.heightMm / 10);
         window.parent.postMessage(
           { type: 'nimstick_save_design', pdf: pdfBlob, image: imageFile, filename, width: widthCm, height: heightCm, cutMode: 'kiss' },
           '*'
