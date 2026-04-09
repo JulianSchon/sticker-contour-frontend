@@ -111,11 +111,10 @@ export async function fetchPdfDimensions(
   return res.json();
 }
 
-export async function exportPrintLayout(
+export async function exportPrintLayoutBlob(
   files: File[],
   layout: { foilWidthMm: number; totalLengthMm: number; copies: ExportCopy[]; regmarkType: RegmarkType },
-  filename = 'print-foil.pdf'
-): Promise<void> {
+): Promise<Blob> {
   const fd = new FormData();
   files.forEach(f => fd.append('files', f, f.name));
   fd.append('layout', JSON.stringify(layout));
@@ -124,7 +123,15 @@ export async function exportPrintLayout(
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error((err as { error?: string }).error ?? 'Export failed');
   }
-  const blob = await res.blob();
+  return res.blob();
+}
+
+export async function exportPrintLayout(
+  files: File[],
+  layout: { foilWidthMm: number; totalLengthMm: number; copies: ExportCopy[]; regmarkType: RegmarkType },
+  filename = 'print-foil.pdf'
+): Promise<void> {
+  const blob = await exportPrintLayoutBlob(files, layout);
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;

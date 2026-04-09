@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import type { PlannedFile, PackedCopy, ExportCopy } from '../../types/printPlanning.ts';
 import type { ContourParams } from '../../types/contour.ts';
 import { packItems } from '../../lib/packer.ts';
-import { exportPrintLayout, generatePdfBlob } from '../../lib/api.ts';
+import { exportPrintLayout, exportPrintLayoutBlob, generatePdfBlob } from '../../lib/api.ts';
 import { LayoutCanvas } from './LayoutCanvas.tsx';
 import { ImageUpload } from '../ImageUpload.tsx';
 import { ShapeSelector } from '../ShapeSelector.tsx';
@@ -11,6 +11,8 @@ import { ParameterPanel } from '../ParameterPanel.tsx';
 import { useContour } from '../../hooks/useContour.ts';
 import { renderPdfFirstPage } from '../../lib/pdfPreview.ts';
 import { useLang } from '../../lib/LangContext.ts';
+
+const IS_WORDPRESS = import.meta.env.VITE_MODE === 'wordpress';
 
 const FILE_COLORS = [
   '#FFE600', '#ef4444', '#10b981', '#3b82f6',
@@ -164,11 +166,23 @@ export function WordpressPrintPlanningTab({
         heightMm: c.h,
         rotated: c.rotated,
       }));
-      await exportPrintLayout(
-        files.map(f => f.file),
-        { foilWidthMm: page.widthMm, totalLengthMm: page.heightMm, copies: exportCopies, regmarkType: 'none' },
-        `sheet-${pageSize.toUpperCase()}.pdf`
-      );
+      const layout = { foilWidthMm: page.widthMm, totalLengthMm: page.heightMm, copies: exportCopies, regmarkType: 'none' as const };
+      const filename = `Kiss-Cut-Ark-${page.label}.pdf`;
+
+      if (IS_WORDPRESS) {
+        const pdfBlob = await exportPrintLayoutBlob(files.map(f => f.file), layout);
+        // Use the first sticker's source image as the "image" field, or a blank PNG if none
+        const imageFile = file ?? new File([new Uint8Array(0)], 'sheet.png', { type: 'image/png' });
+        const widthCm  = page.widthMm / 10;
+        const heightCm = page.heightMm / 10;
+        window.parent.postMessage(
+          { type: 'nimstick_save_design', pdf: pdfBlob, image: imageFile, filename, width: widthCm, height: heightCm, cutMode: 'kiss' },
+          '*'
+        );
+      } else {
+        await exportPrintLayout(files.map(f => f.file), layout, filename);
+      }
+
       setExportSuccess(true);
       setTimeout(() => setExportSuccess(false), 3000);
     } catch (err) {
@@ -361,46 +375,7 @@ export function WordpressPrintPlanningTab({
             </div>
           )}
 
-          <div className="flex-1" />
-
-          {/* Save Sheet */}
-          <button
-            onClick={handleExport}
-            disabled={copies.length === 0 || isExporting}
-            className={`nim-btn-white ${exportSuccess ? '!bg-green-500 !text-white' : ''}`}
-          >
-            {isExporting ? (
-              <>
-                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                </svg>
-                {lang === 'sv' ? 'Sparar…' : 'Saving…'}
-              </>
-            ) : exportSuccess ? (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-                {lang === 'sv' ? 'Nedladdad!' : 'Downloaded!'}
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                {lang === 'sv' ? 'Spara ark' : 'Save Sheet'}
-              </>
-            )}
-          </button>
         </div>
-
-        {exportError && (
-          <p className="text-xs text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">
-            {exportError}
-          </p>
-        )}
 
         {/* Canvas */}
         <div className="rounded-2xl overflow-hidden border border-white/10" style={{ height: 520 }}>
@@ -414,6 +389,43 @@ export function WordpressPrintPlanningTab({
             pageLengthMm={page.heightMm}
           />
         </div>
+
+        {/* Save Sheet button */}
+        {exportError && (
+          <p className="text-xs text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">
+            {exportError}
+          </p>
+        )}
+        <button
+          onClick={handleExport}
+          disabled={copies.length === 0 || isExporting}
+          className={`nim-btn-yellow w-full ${exportSuccess ? '!bg-green-500 !text-white' : ''}`}
+        >
+          {isExporting ? (
+            <>
+              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+              {lang === 'sv' ? 'Sparar…' : 'Saving…'}
+            </>
+          ) : exportSuccess ? (
+            <>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+              {lang === 'sv' ? 'Sparat!' : 'Saved!'}
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              {lang === 'sv' ? 'Spara ark' : 'Save Sheet'}
+            </>
+          )}
+        </button>
 
         {/* Sticker list */}
         {files.length > 0 && (
