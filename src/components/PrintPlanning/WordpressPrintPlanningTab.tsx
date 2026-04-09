@@ -50,29 +50,15 @@ function StepLabel({ n, label }: { n: string; label: string }) {
   );
 }
 
-interface Props {
-  initialFile?: File | null;
-  initialImageDataUrl?: string | null;
-  initialParams?: ContourParams | null;
-  initialWidthCm?: number | null;
-  initialHeightCm?: number | null;
-}
-
-export function WordpressPrintPlanningTab({
-  initialFile = null,
-  initialImageDataUrl = null,
-  initialParams = null,
-  initialWidthCm = null,
-  initialHeightCm = null,
-}: Props = {}) {
+export function WordpressPrintPlanningTab() {
   const { lang } = useLang();
 
   // ── Left: sticker configurator ──────────────────────────────────────────────
-  const [file, setFile] = useState<File | null>(initialFile);
-  const [imageDataUrl, setImageDataUrl] = useState<string | null>(initialImageDataUrl);
-  const [params, setParams] = useState<ContourParams>(initialParams ?? DEFAULT_PARAMS);
-  const [stickerWidthCm, setStickerWidthCm] = useState<number | null>(initialWidthCm);
-  const [stickerHeightCm, setStickerHeightCm] = useState<number | null>(initialHeightCm);
+  const [file, setFile] = useState<File | null>(null);
+  const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
+  const [params, setParams] = useState<ContourParams>(DEFAULT_PARAMS);
+  const [stickerWidthCm, setStickerWidthCm] = useState<number | null>(null);
+  const [stickerHeightCm, setStickerHeightCm] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [paramsOpen, setParamsOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);

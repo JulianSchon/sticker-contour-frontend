@@ -7,6 +7,11 @@ export const translations = {
     taglinePrint: 'Print with OPOS Regmarks',
     tabContour: 'Contour Generator',
     tabPrint: 'Sheet',
+    modeSelectTitle: 'What do you want to create?',
+    modeSingle: 'Single Sticker',
+    modeSingleDesc: 'Design a single sticker with a custom cut path and save it to your cart.',
+    modeSheet: 'Kiss Cut Sheet',
+    modeSheetDesc: 'Fill an A4 or A5 sheet with multiple stickers for efficient production.',
 
     // Steps
     step01: 'Upload Image',
@@ -68,6 +73,11 @@ export const translations = {
     taglinePrint: 'Utskriftsplanering med OPOS-märken',
     tabContour: 'Kontur-generator',
     tabPrint: 'Ark',
+    modeSelectTitle: 'Vad vill du skapa?',
+    modeSingle: 'Enstaka klistermärke',
+    modeSingleDesc: 'Designa ett klistermärke med anpassad skärväg och spara det i varukorgen.',
+    modeSheet: 'Kiss Cut Ark',
+    modeSheetDesc: 'Fyll ett A4- eller A5-ark med flera klistermärken för effektiv produktion.',
 
     // Steps
     step01: 'Ladda upp bild',
