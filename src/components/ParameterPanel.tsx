@@ -129,7 +129,7 @@ export function ParameterPanel({ params, onChange, onKissArkClick, hideCutMode =
           <Slider
             label=""
             value={params.kissOffset}
-            min={-15} max={50} step={1} unit=" px"
+            min={-2} max={6} step={0.5} unit=" mm"
             onChange={v => set('kissOffset', v)}
           />
         </div>
@@ -145,7 +145,7 @@ export function ParameterPanel({ params, onChange, onKissArkClick, hideCutMode =
           <Slider
             label=""
             value={params.perfOffset}
-            min={-15} max={50} step={1} unit=" px"
+            min={-2} max={6} step={0.5} unit=" mm"
             onChange={v => set('perfOffset', v)}
           />
         </div>

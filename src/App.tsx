@@ -13,10 +13,10 @@ import { ShapeSelector } from './components/ShapeSelector.tsx';
 
 const DEFAULT_PARAMS: ContourParams = {
   threshold: 128,
-  kissOffset: 50,
-  perfOffset: 50,
+  kissOffset: 3,
+  perfOffset: 3,
   smoothing: 4,
-  enclose: false,
+  enclose: true,
   cutMode: 'perf',
   shapeType: 'contour',
   shapeSize: 90,

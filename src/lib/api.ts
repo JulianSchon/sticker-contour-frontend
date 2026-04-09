@@ -8,12 +8,14 @@ function buildBase(): string {
 }
 const BASE = buildBase();
 
+const MM_TO_PX = 300 / 25.4; // offsets stored in mm, backend expects px at 300 DPI
+
 function buildFormData(file: File, params: ContourParams): FormData {
   const fd = new FormData();
   fd.append('image', file);
   fd.append('threshold', String(params.threshold));
-  fd.append('kissOffset', String(params.kissOffset));
-  fd.append('perfOffset', String(params.perfOffset));
+  fd.append('kissOffset', String(Math.round(params.kissOffset * MM_TO_PX)));
+  fd.append('perfOffset', String(Math.round(params.perfOffset * MM_TO_PX)));
   fd.append('smoothing', String(params.smoothing));
   fd.append('cutMode', params.cutMode);
   fd.append('enclose', String(params.enclose));

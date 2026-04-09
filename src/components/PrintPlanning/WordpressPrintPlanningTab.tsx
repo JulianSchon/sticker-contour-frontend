@@ -21,10 +21,10 @@ const FILE_COLORS = [
 
 const DEFAULT_PARAMS: ContourParams = {
   threshold: 128,
-  kissOffset: 50,
-  perfOffset: 50,
+  kissOffset: 3,
+  perfOffset: 3,
   smoothing: 4,
-  enclose: false,
+  enclose: true,
   cutMode: 'kiss',
   shapeType: 'contour',
   shapeSize: 90,
