@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ParameterPanel } from './components/ParameterPanel.tsx';
 import { CanvasPreview } from './components/CanvasPreview.tsx';
 import { DownloadButton } from './components/DownloadButton.tsx';
@@ -7,7 +7,7 @@ import { WordpressPrintPlanningTab } from './components/PrintPlanning/WordpressP
 import { DesignEditor, type DesignEditorHandle } from './components/Editor/DesignEditor.tsx';
 import { useContour } from './hooks/useContour.ts';
 import type { ContourParams } from './types/contour.ts';
-import { LangContext } from './lib/LangContext.ts';
+import { LangContext, type Theme } from './lib/LangContext.ts';
 import { translations, type Lang } from './lib/i18n.ts';
 import { MaterialFinishPicker, type Material, type Finish } from './components/MaterialFinishPicker.tsx';
 
@@ -40,7 +40,16 @@ export default function App() {
   const [material, setMaterial] = useState<Material>('vinyl');
   const [finish, setFinish] = useState<Finish>('glossy');
   const [lang, setLang] = useState<Lang>('sv');
+  const [theme, setTheme] = useState<Theme>(() => {
+    const saved = typeof localStorage !== 'undefined' ? localStorage.getItem('cutz-theme') : null;
+    return saved === 'light' ? 'light' : 'dark';
+  });
   const t = translations[lang];
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    try { localStorage.setItem('cutz-theme', theme); } catch { /* ignore */ }
+  }, [theme]);
 
   const { data: contour, isLoading, error } = useContour(file, params);
 
@@ -156,7 +165,7 @@ export default function App() {
   const designActive = IS_WORDPRESS ? wpMode === 'design' : tab === 'design';
 
   return (
-    <LangContext.Provider value={{ lang, t, setLang }}>
+    <LangContext.Provider value={{ lang, t, setLang, theme, setTheme }}>
     <div className="min-h-screen bg-nim-black flex flex-col">
 
       {/* ── Header ── */}
@@ -220,6 +229,27 @@ export default function App() {
                 </span>
               </div>
             )}
+
+            {/* Theme toggle — Obi-Wan (light) vs Vader (dark) */}
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              title={theme === 'dark' ? 'Light side (Obi-Wan)' : 'Dark side (Vader)'}
+              aria-label="Toggle theme"
+              className="w-9 h-9 rounded-lg border border-white/10 text-white/50 hover:text-white/80 hover:border-white/20 transition-all flex items-center justify-center"
+            >
+              {theme === 'dark' ? (
+                /* show sun → switch to light */
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="4" />
+                  <path strokeLinecap="round" strokeWidth={2} d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" />
+                </svg>
+              ) : (
+                /* show moon → switch to dark */
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                </svg>
+              )}
+            </button>
 
             {/* Language toggle — far right */}
             <button

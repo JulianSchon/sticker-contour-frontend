@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Theme tokens ──────────────────────────────────────────────────────────
+   --w drives every `white`-based utility (text/border/bg + opacity + hover).
+   Dark (Vader) = white; Light (Obi-Wan) = near-black. */
+:root { --w: 255 255 255; }
+[data-theme='light'] { --w: 24 24 27; }
+
+/* Surface backgrounds (no hover variants on these, so a plain override is safe).
+   text-nim-black is intentionally NOT touched so yellow buttons keep black text. */
+[data-theme='light'] body { background-color: #f3f4f6; color: #18181b; }
+[data-theme='light'] .bg-nim-black   { background-color: #f3f4f6; }
+[data-theme='light'] .bg-nim-darker  { background-color: #ffffff; }
+[data-theme='light'] .bg-nim-dark    { background-color: #f3f4f6; }
+[data-theme='light'] .bg-\[\#0a0a0a\] { background-color: #eceef2; }
+[data-theme='light'] .bg-\[\#0d0d0d\] { background-color: #eceef2; }
+/* Yellow accent text needs more contrast on light surfaces */
+[data-theme='light'] .text-nim-yellow { color: #9a7d00; }
+
 @layer base {
   body {
     background-color: #111111;
@@ -25,7 +42,7 @@
   /* White ghost button */
   .nim-btn-white {
     @apply flex items-center justify-center gap-2 px-5 py-3 rounded-lg
-           bg-white text-nim-black font-bold text-sm uppercase tracking-wide
+           bg-[#ffffff] text-nim-black font-bold text-sm uppercase tracking-wide
            hover:bg-gray-100 active:scale-[0.98] transition-all
            disabled:opacity-40 disabled:cursor-not-allowed;
   }

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { scalePath } from '../lib/pathTransforms.ts';
+import { useLang } from '../lib/LangContext.ts';
 import type { ContourPreviewResponse, ContourParams } from '../types/contour.ts';
 
 interface Props {
@@ -14,12 +15,19 @@ const MAX_TILT = 14; // degrees
 
 // A recessed "well": vignette that darkens toward the edges + a deep inset
 // shadow, so the sticker reads as floating above a deep, carved space.
-const WELL_STYLE: React.CSSProperties = {
-  background: 'radial-gradient(125% 120% at 50% 36%, #232323 0%, #141414 38%, #070707 78%, #030303 100%)',
-  boxShadow: 'inset 0 0 70px 24px rgba(0,0,0,0.8), inset 0 2px 3px rgba(0,0,0,0.7)',
+const WELL_STYLE: Record<'dark' | 'light', React.CSSProperties> = {
+  dark: {
+    background: 'radial-gradient(125% 120% at 50% 36%, #232323 0%, #141414 38%, #070707 78%, #030303 100%)',
+    boxShadow: 'inset 0 0 70px 24px rgba(0,0,0,0.8), inset 0 2px 3px rgba(0,0,0,0.7)',
+  },
+  light: {
+    background: 'radial-gradient(125% 120% at 50% 36%, #fdfdff 0%, #edeef2 52%, #d4d7df 88%, #c7cad3 100%)',
+    boxShadow: 'inset 0 0 60px 22px rgba(0,0,0,0.10), inset 0 2px 3px rgba(0,0,0,0.12)',
+  },
 };
 
 export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Props) {
+  const { theme } = useLang();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
   const [tilting, setTilting] = useState(false);
@@ -119,7 +127,7 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Prop
 
   if (!imageDataUrl) {
     return (
-      <div className="flex items-center justify-center h-full min-h-64" style={WELL_STYLE}>
+      <div className="flex items-center justify-center h-full min-h-64" style={WELL_STYLE[theme]}>
         <p className="text-white/30 text-sm">Upload or design a sticker to see the preview</p>
       </div>
     );
@@ -128,7 +136,7 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Prop
   return (
     <div
       className="relative w-full h-full flex items-center justify-center p-8 overflow-hidden"
-      style={{ perspective: '1000px', ...WELL_STYLE }}
+      style={{ perspective: '1000px', ...WELL_STYLE[theme] }}
       onPointerMove={handlePointerMove}
       onPointerLeave={resetTilt}
     >
@@ -137,7 +145,7 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Prop
         className="max-w-full"
         style={{
           transform: `rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) scale(${tilting ? 1.03 : 1})`,
-          filter: `drop-shadow(${-tilt.ry * 0.7}px ${18 - tilt.rx * 0.7}px 26px rgba(0,0,0,0.6))`,
+          filter: `drop-shadow(${-tilt.ry * 0.7}px ${18 - tilt.rx * 0.7}px 26px rgba(0,0,0,${theme === 'light' ? 0.3 : 0.6}))`,
           transition: tilting ? 'filter 0.08s linear' : 'transform 0.5s ease, filter 0.5s ease',
           transformStyle: 'preserve-3d',
           willChange: 'transform, filter',

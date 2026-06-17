@@ -1,6 +1,13 @@
 import { useEffect, useRef } from 'react';
+import { useLang } from '../../lib/LangContext.ts';
 
 export const RULER = 22; // px gutter for the rulers
+
+interface RulerColors { bg: string; tick: string; label: string; }
+const RULER_COLORS: Record<'dark' | 'light', RulerColors> = {
+  dark:  { bg: '#141414', tick: 'rgba(255,255,255,0.28)', label: 'rgba(255,255,255,0.5)' },
+  light: { bg: '#ffffff', tick: 'rgba(0,0,0,0.30)',       label: 'rgba(0,0,0,0.55)' },
+};
 
 interface Props {
   canvasElRef: React.RefObject<HTMLCanvasElement>;
@@ -13,14 +20,16 @@ interface Props {
 /** Renders the Fabric design canvas with cm rulers (0.5 cm ticks) along the
  *  top and left edges. Cut-contour refinement happens on the contour page. */
 export function EditorCanvas({ canvasElRef, displayWidth, displayHeight, widthCm, heightCm }: Props) {
+  const { theme } = useLang();
   const topRef = useRef<HTMLCanvasElement>(null);
   const leftRef = useRef<HTMLCanvasElement>(null);
   const pxPerCm = widthCm > 0 ? displayWidth / widthCm : 0;
 
   useEffect(() => {
-    drawRuler(topRef.current, 'h', displayWidth, widthCm, pxPerCm);
-    drawRuler(leftRef.current, 'v', displayHeight, heightCm, pxPerCm);
-  }, [displayWidth, displayHeight, widthCm, heightCm, pxPerCm]);
+    const colors = RULER_COLORS[theme];
+    drawRuler(topRef.current, 'h', displayWidth, widthCm, pxPerCm, colors);
+    drawRuler(leftRef.current, 'v', displayHeight, heightCm, pxPerCm, colors);
+  }, [displayWidth, displayHeight, widthCm, heightCm, pxPerCm, theme]);
 
   return (
     <div className="relative" style={{ width: displayWidth + RULER, height: displayHeight + RULER }}>
@@ -47,6 +56,7 @@ function drawRuler(
   lengthPx: number,
   cm: number,
   pxPerCm: number,
+  colors: RulerColors,
 ) {
   if (!cv || pxPerCm <= 0) return;
   const w = orient === 'h' ? lengthPx : RULER;
@@ -56,10 +66,10 @@ function drawRuler(
   const ctx = cv.getContext('2d');
   if (!ctx) return;
 
-  ctx.fillStyle = '#141414';
+  ctx.fillStyle = colors.bg;
   ctx.fillRect(0, 0, w, h);
-  ctx.strokeStyle = 'rgba(255,255,255,0.28)';
-  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.strokeStyle = colors.tick;
+  ctx.fillStyle = colors.label;
   ctx.font = '9px system-ui, sans-serif';
   ctx.lineWidth = 1;
 
