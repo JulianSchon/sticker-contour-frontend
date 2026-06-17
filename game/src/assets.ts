@@ -8,4 +8,11 @@ export function loadAssets(k: KAPLAYCtx): void {
   k.loadSprite("stickan-run", "sprites/stickan-run.png");
   k.loadSprite("stickan-jump", "sprites/stickan-jump.png");
   k.loadSprite("stickan-think", "sprites/stickan-think.png");
+  // CC0-style placeholder sfx in game/public/sfx (served at /sfx/*).
+  k.loadSound("jump", "sfx/jump.wav");
+  k.loadSound("throw", "sfx/throw.wav");
+  k.loadSound("stomp", "sfx/stomp.wav");
+  k.loadSound("coin", "sfx/coin.wav");
+  k.loadSound("hurt", "sfx/hurt.wav");
+  k.loadSound("peel", "sfx/peel.wav");
 }
