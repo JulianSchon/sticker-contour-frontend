@@ -12,6 +12,13 @@ interface Props {
 const CANVAS_MAX = 600;
 const MAX_TILT = 14; // degrees
 
+// A recessed "well": vignette that darkens toward the edges + a deep inset
+// shadow, so the sticker reads as floating above a deep, carved space.
+const WELL_STYLE: React.CSSProperties = {
+  background: 'radial-gradient(125% 120% at 50% 36%, #232323 0%, #141414 38%, #070707 78%, #030303 100%)',
+  boxShadow: 'inset 0 0 70px 24px rgba(0,0,0,0.8), inset 0 2px 3px rgba(0,0,0,0.7)',
+};
+
 export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
@@ -112,7 +119,7 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Prop
 
   if (!imageDataUrl) {
     return (
-      <div className="flex items-center justify-center h-full min-h-64 bg-[#0d0d0d]">
+      <div className="flex items-center justify-center h-full min-h-64" style={WELL_STYLE}>
         <p className="text-white/30 text-sm">Upload or design a sticker to see the preview</p>
       </div>
     );
@@ -120,8 +127,8 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Prop
 
   return (
     <div
-      className="relative w-full h-full flex items-center justify-center bg-[#0d0d0d] p-6"
-      style={{ perspective: '1000px' }}
+      className="relative w-full h-full flex items-center justify-center p-8 overflow-hidden"
+      style={{ perspective: '1000px', ...WELL_STYLE }}
       onPointerMove={handlePointerMove}
       onPointerLeave={resetTilt}
     >
