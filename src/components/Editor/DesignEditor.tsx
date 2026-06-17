@@ -6,7 +6,7 @@ import { ToolRail } from './ToolRail.tsx';
 import { LayersPanel } from './LayersPanel.tsx';
 import { UploadPanel } from './panels/UploadPanel.tsx';
 import { TextPanel } from './panels/TextPanel.tsx';
-import { BackgroundPanel } from './panels/BackgroundPanel.tsx';
+import { ShapePanel } from './panels/ShapePanel.tsx';
 import { flattenCanvas } from '../../lib/flatten.ts';
 import { exportDimensions } from '../../lib/printSize.ts';
 import { useLang } from '../../lib/LangContext.ts';
@@ -71,7 +71,12 @@ export function DesignEditor({ onComplete }: Props) {
               onColorChange={color => applyToSelectedText(it => it.set('fill', color))}
             />
           )}
-          {tool === 'background' && <BackgroundPanel onColor={c => editor.setBackgroundColor(c)} />}
+          {tool === 'shape' && (
+            <ShapePanel
+              onAddShape={(kind, color) => editor.addShape(kind, color)}
+              onColorChange={color => editor.setFillOnSelected(color)}
+            />
+          )}
           {(tool === 'templates' || tool === 'elements') && (
             <p className="text-xs text-white/30">—</p>
           )}

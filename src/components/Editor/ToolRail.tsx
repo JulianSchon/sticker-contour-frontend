@@ -6,7 +6,7 @@ interface Props {
   onChange: (tool: EditorTool) => void;
 }
 
-const ENABLED: EditorTool[] = ['uploads', 'text', 'background'];
+const ENABLED: EditorTool[] = ['uploads', 'text', 'shape'];
 
 export function ToolRail({ active, onChange }: Props) {
   const { t } = useLang();
@@ -15,7 +15,7 @@ export function ToolRail({ active, onChange }: Props) {
     { tool: 'uploads', label: t.edToolUploads },
     { tool: 'text', label: t.edToolText },
     { tool: 'elements', label: t.edToolElements },
-    { tool: 'background', label: t.edToolBackground },
+    { tool: 'shape', label: t.edToolShape },
   ];
   return (
     <div className="w-20 bg-nim-darker border-r border-white/10 flex flex-col items-center gap-1 py-3">

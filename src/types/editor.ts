@@ -1,6 +1,10 @@
 import type { ShapeType } from './contour.ts';
 
-export type EditorTool = 'templates' | 'uploads' | 'text' | 'elements' | 'background';
+export type EditorTool = 'templates' | 'uploads' | 'text' | 'elements' | 'shape';
+
+/** Standard shapes the user can drop onto the canvas as a sticker body.
+ *  An opaque shape gives the contour page a single, predictable cut outline. */
+export type ShapeKind = 'rectangle' | 'roundedRect' | 'circle' | 'ellipse' | 'triangle';
 
 export interface ArtboardSize {
   wCm: number;

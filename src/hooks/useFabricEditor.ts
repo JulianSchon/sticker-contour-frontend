@@ -1,12 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Canvas, FabricImage, IText } from 'fabric';
+import { Canvas, FabricImage, IText, Rect, Circle, Ellipse, Triangle } from 'fabric';
+import type { FabricObject } from 'fabric';
 import { DEFAULT_FONT } from '../lib/editorFonts.ts';
+import type { ShapeKind } from '../types/editor.ts';
 
 export interface FabricLayer {
   id: string;
-  kind: 'image' | 'text' | 'background';
+  kind: 'image' | 'text' | 'shape';
   label: string;
 }
+
+const SHAPE_LABELS: Record<ShapeKind, string> = {
+  rectangle: 'Rectangle',
+  roundedRect: 'Rounded rectangle',
+  circle: 'Circle',
+  ellipse: 'Ellipse',
+  triangle: 'Triangle',
+};
 
 interface UseFabricEditor {
   canvasElRef: React.RefObject<HTMLCanvasElement>;
@@ -15,7 +25,8 @@ interface UseFabricEditor {
   selectedId: string | null;
   addText: (value: string) => void;
   addImageFromFile: (file: File) => Promise<void>;
-  setBackgroundColor: (color: string) => void;
+  addShape: (kind: ShapeKind, color: string) => void;
+  setFillOnSelected: (color: string) => void;
   deleteSelected: () => void;
   bringForward: () => void;
   sendBackward: () => void;
@@ -110,9 +121,35 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
     rebuildLayers(canvas);
   }, [canvas, rebuildLayers]);
 
-  const setBackgroundColor = useCallback((color: string) => {
+  const addShape = useCallback((kind: ShapeKind, color: string) => {
     if (!canvas) return;
-    canvas.backgroundColor = color;
+    const cw = canvas.getWidth();
+    const ch = canvas.getHeight();
+    const s = Math.min(cw, ch) * 0.6;
+    const common = { left: cw / 2, top: ch / 2, originX: 'center' as const, originY: 'center' as const, fill: color };
+
+    let shape: FabricObject;
+    switch (kind) {
+      case 'rectangle':   shape = new Rect({ ...common, width: s * 1.4, height: s }); break;
+      case 'roundedRect': shape = new Rect({ ...common, width: s * 1.4, height: s, rx: s * 0.15, ry: s * 0.15 }); break;
+      case 'circle':      shape = new Circle({ ...common, radius: s / 2 }); break;
+      case 'ellipse':     shape = new Ellipse({ ...common, rx: s * 0.7, ry: s / 2 }); break;
+      case 'triangle':    shape = new Triangle({ ...common, width: s, height: s }); break;
+    }
+    (shape as unknown as { _layer: FabricLayer })._layer = { id: nextId(), kind: 'shape', label: SHAPE_LABELS[kind] };
+    canvas.add(shape);
+    canvas.sendObjectToBack(shape); // shape acts as a body behind the design
+    canvas.setActiveObject(shape);
+    canvas.renderAll();
+    rebuildLayers(canvas);
+  }, [canvas, rebuildLayers]);
+
+  /** Set the fill of the currently-selected object (shape or text). */
+  const setFillOnSelected = useCallback((color: string) => {
+    if (!canvas) return;
+    const active = canvas.getActiveObject();
+    if (!active) return;
+    active.set('fill', color);
     canvas.renderAll();
   }, [canvas]);
 
@@ -150,7 +187,7 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
 
   return {
     canvasElRef, canvas, layers, selectedId,
-    addText, addImageFromFile, setBackgroundColor,
+    addText, addImageFromFile, addShape, setFillOnSelected,
     deleteSelected, bringForward, sendBackward, selectLayer,
   };
 }
