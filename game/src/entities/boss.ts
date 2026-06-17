@@ -8,6 +8,7 @@ type BossObj = GameObj & {
   dir: number;
   charging: boolean;
   cooldown: number;
+  invuln: number;
 };
 
 /**
@@ -27,10 +28,11 @@ export function makeBoss(k: KAPLAYCtx, at: SpawnAt, onDefeat: () => void): GameO
     k.z(8),
     "enemy",
     "boss",
-    { hp: BOSS.hits, dir: -1, charging: false, cooldown: 1.5 },
+    { hp: BOSS.hits, dir: -1, charging: false, cooldown: 1.5, invuln: 0 },
   ]) as unknown as BossObj;
 
   boss.onUpdate(() => {
+    boss.invuln = Math.max(0, boss.invuln - k.dt());
     const dt = k.dt();
     if (boss.charging) {
       boss.move(boss.dir * BOSS.chargeSpeed, 0);
@@ -49,6 +51,8 @@ export function makeBoss(k: KAPLAYCtx, at: SpawnAt, onDefeat: () => void): GameO
   });
 
   boss.onCollide("projectile", () => {
+    if (boss.invuln > 0) return;
+    boss.invuln = 0.4;
     boss.hp -= 1;
     k.shake(6);
     if (boss.hp <= 0) {

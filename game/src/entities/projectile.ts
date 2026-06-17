@@ -31,6 +31,7 @@ export function makeProjectile(k: KAPLAYCtx, opts: ProjectileOpts): GameObj {
 
   proj.onCollide("enemy", () => k.destroy(proj));
   proj.onCollide("wall", () => k.destroy(proj));
+  proj.onCollide("hazard", () => k.destroy(proj));
 
   return proj;
 }

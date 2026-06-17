@@ -30,6 +30,7 @@ export function makeMopJanitor(k: KAPLAYCtx, at: SpawnAt): GameObj {
 
   e.onUpdate(() => {
     e.move(e.dir * ENEMY.janitorSpeed, 0);
+    reverseAtLedge(k, e, 24);
   });
 
   e.onCollide("wall", () => { e.dir *= -1; });
@@ -69,7 +70,7 @@ export function makeBroomGranny(k: KAPLAYCtx, at: SpawnAt): GameObj {
         k.rect(reach, 50),
         k.color(180, 80, 160),
         k.opacity(0.5),
-        k.pos(hbX, e.pos.y - 30),
+        k.pos(hbX, e.pos.y - 10),
         k.anchor("left"),
         k.area(),
         k.lifespan(0.4, { fade: 0.2 }),
@@ -77,6 +78,7 @@ export function makeBroomGranny(k: KAPLAYCtx, at: SpawnAt): GameObj {
         "hazard",
       ]);
     }
+    reverseAtLedge(k, e, 26);
   });
 
   e.onCollide("wall", () => { e.dir *= -1; });
@@ -87,6 +89,16 @@ export function makeBroomGranny(k: KAPLAYCtx, at: SpawnAt): GameObj {
   });
 
   return e;
+}
+
+/**
+ * Reverse direction at platform edges: probe just ahead of the feet and cast a
+ * short ray downward. If nothing is hit (a gap/pit ahead), turn around.
+ */
+function reverseAtLedge(k: KAPLAYCtx, e: EnemyObj, halfWidth: number): void {
+  const origin = k.vec2(e.pos.x + e.dir * (halfWidth + 6), e.pos.y - 4);
+  const hit = k.raycast(origin, k.vec2(0, 28));
+  if (!hit) e.dir *= -1;
 }
 
 /** Shared defeat burst + cleanup. */
