@@ -5,6 +5,7 @@ import { CanvasPreview } from './components/CanvasPreview.tsx';
 import { DownloadButton } from './components/DownloadButton.tsx';
 import { PrintPlanningTab } from './components/PrintPlanning/PrintPlanningTab.tsx';
 import { WordpressPrintPlanningTab } from './components/PrintPlanning/WordpressPrintPlanningTab.tsx';
+import { DesignEditor } from './components/Editor/DesignEditor.tsx';
 import { useContour } from './hooks/useContour.ts';
 import type { ContourParams } from './types/contour.ts';
 import { LangContext } from './lib/LangContext.ts';
@@ -25,8 +26,8 @@ const DEFAULT_PARAMS: ContourParams = {
   shapeOffsetY: 0,
 };
 
-type Tab = 'contour' | 'print-planning';
-type WpMode = null | 'single' | 'sheet';
+type Tab = 'contour' | 'print-planning' | 'design';
+type WpMode = null | 'single' | 'sheet' | 'design';
 
 const IS_WORDPRESS = import.meta.env.VITE_MODE === 'wordpress';
 
@@ -52,8 +53,8 @@ export default function App() {
 
   // ── Header tagline ──────────────────────────────────────────────────────────
   const headerTagline = IS_WORDPRESS
-    ? (wpMode === 'single' ? t.taglineContour : wpMode === 'sheet' ? t.taglinePrint : 'CUTZ')
-    : (tab === 'print-planning' ? t.taglinePrint : t.taglineContour);
+    ? (wpMode === 'single' ? t.taglineContour : wpMode === 'sheet' ? t.taglinePrint : wpMode === 'design' ? t.modeDesign : 'CUTZ')
+    : (tab === 'print-planning' ? t.taglinePrint : tab === 'design' ? t.modeDesign : t.taglineContour);
 
   return (
     <LangContext.Provider value={{ lang, t, setLang }}>
@@ -103,6 +104,7 @@ export default function App() {
                 {([
                   { id: 'contour',        label: t.tabContour },
                   { id: 'print-planning', label: t.tabPrint   },
+                  { id: 'design',         label: t.tabDesign  },
                 ] as { id: Tab; label: string }[]).map(tb => (
                   <button
                     key={tb.id}
@@ -123,7 +125,7 @@ export default function App() {
             {IS_WORDPRESS && wpMode !== null && (
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-nim-yellow/10 border border-nim-yellow/30">
                 <span className="text-xs font-bold uppercase tracking-widest text-nim-yellow">
-                  {wpMode === 'single' ? t.modeSingle : t.modeSheet}
+                  {wpMode === 'single' ? t.modeSingle : wpMode === 'sheet' ? t.modeSheet : t.modeDesign}
                 </span>
               </div>
             )}
@@ -140,7 +142,7 @@ export default function App() {
             <div className="text-center">
               <h1 className="text-2xl font-black text-white uppercase tracking-widest">{t.modeSelectTitle}</h1>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-2xl">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 w-full max-w-3xl">
               {/* Single sticker */}
               <button
                 onClick={() => setWpMode('single')}
@@ -180,6 +182,28 @@ export default function App() {
                 </div>
                 <div className="w-full flex justify-end">
                   <svg className="w-5 h-5 text-white/20 group-hover:text-pink-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </button>
+
+              {/* Design your own */}
+              <button
+                onClick={() => setWpMode('design')}
+                className="group flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-white/10 bg-nim-darker hover:border-nim-yellow hover:bg-nim-yellow/5 transition-all text-left"
+              >
+                <div className="w-16 h-16 rounded-xl bg-nim-yellow/10 border border-nim-yellow/20 flex items-center justify-center group-hover:bg-nim-yellow/20 transition-colors">
+                  <svg className="w-8 h-8 text-nim-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </div>
+                <div className="w-full">
+                  <p className="text-base font-black text-white uppercase tracking-wider group-hover:text-nim-yellow transition-colors">{t.modeDesign}</p>
+                  <p className="text-xs text-white/40 mt-1 leading-relaxed">{t.modeDesignDesc}</p>
+                </div>
+                <div className="w-full flex justify-end">
+                  <svg className="w-5 h-5 text-white/20 group-hover:text-nim-yellow transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
@@ -278,6 +302,9 @@ export default function App() {
           <WordpressPrintPlanningTab />
         )}
 
+        {/* ── WordPress: design-your-own mode ── */}
+        {IS_WORDPRESS && wpMode === 'design' && <DesignEditor />}
+
         {/* ── Non-WordPress: original tab layout ── */}
         {!IS_WORDPRESS && tab === 'contour' && (
           <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6">
@@ -357,6 +384,8 @@ export default function App() {
         )}
 
         {!IS_WORDPRESS && tab === 'print-planning' && <PrintPlanningTab />}
+
+        {!IS_WORDPRESS && tab === 'design' && <DesignEditor />}
 
       </main>
 
