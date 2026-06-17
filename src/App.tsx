@@ -230,25 +230,18 @@ export default function App() {
               </div>
             )}
 
-            {/* Theme toggle — Obi-Wan (light) vs Vader (dark) */}
+            {/* Theme toggle — Luke (light side) vs Vader (dark side) */}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              title={theme === 'dark' ? 'Light side (Obi-Wan)' : 'Dark side (Vader)'}
+              title={theme === 'dark' ? 'Switch to the light side (Luke)' : 'Switch to the dark side (Vader)'}
               aria-label="Toggle theme"
-              className="w-9 h-9 rounded-lg border border-white/10 text-white/50 hover:text-white/80 hover:border-white/20 transition-all flex items-center justify-center"
+              className="w-9 h-9 rounded-lg border border-white/10 hover:border-white/30 transition-all flex items-center justify-center overflow-hidden"
             >
-              {theme === 'dark' ? (
-                /* show sun → switch to light */
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="4" />
-                  <path strokeLinecap="round" strokeWidth={2} d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" />
-                </svg>
-              ) : (
-                /* show moon → switch to dark */
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-                </svg>
-              )}
+              <img
+                src={theme === 'dark' ? '/luke-skywalker.svg' : '/darth-vader.svg'}
+                alt={theme === 'dark' ? 'Luke Skywalker' : 'Darth Vader'}
+                className="h-7 w-auto"
+              />
             </button>
 
             {/* Language toggle — far right */}
