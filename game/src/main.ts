@@ -1,17 +1,18 @@
-import kaplay from "kaplay";
+import { initEngine } from "./engine";
+import { loadAssets } from "./assets";
+import { createInputState } from "./systems/input";
+import { wireInput } from "./systems/inputWiring";
+import { registerScenes } from "./scenes";
 
 const root = document.getElementById("nimstick-game-root");
 if (!root) throw new Error("nimstick-game-root element not found");
 
-const k = kaplay({
-  width: 1280,
-  height: 720,
-  letterbox: true,
-  global: false,
-  touchToMouse: false,
-  pixelDensity: Math.min(window.devicePixelRatio, 2),
-  background: [135, 183, 255],
-  root,
-});
+const k = initEngine(root);
+loadAssets(k);
 
-k.add([k.text("Stickan's Sticker Run"), k.pos(k.center()), k.anchor("center")]);
+const input = createInputState();
+wireInput(k, input);
+
+registerScenes(k, input);
+
+k.go("title");
