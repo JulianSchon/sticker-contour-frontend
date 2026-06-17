@@ -26,4 +26,10 @@ test('design is default, build a design and hand off to the cut dialog', async (
   await expect(page.getByRole('button', { name: /fortsätt till skärval|continue to cut setup/i })).toBeVisible();
   // The "HELLO" text layer persisted in the Layers panel.
   await expect(page.getByRole('button', { name: 'HELLO' })).toBeVisible();
+
+  // Navigating via the Contour-generator tab (not just "Continue") also flattens
+  // the current design and lands on the cut dialog.
+  await page.getByRole('button', { name: /contour generator|kontur/i }).first().click();
+  await expect(page.getByRole('button', { name: /fortsätt till skärval|continue to cut setup/i })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /ladda ner pdf|download pdf/i }).first()).toBeVisible();
 });

@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ParameterPanel } from './components/ParameterPanel.tsx';
 import { CanvasPreview } from './components/CanvasPreview.tsx';
 import { DownloadButton } from './components/DownloadButton.tsx';
 import { PrintPlanningTab } from './components/PrintPlanning/PrintPlanningTab.tsx';
 import { WordpressPrintPlanningTab } from './components/PrintPlanning/WordpressPrintPlanningTab.tsx';
-import { DesignEditor } from './components/Editor/DesignEditor.tsx';
+import { DesignEditor, type DesignEditorHandle } from './components/Editor/DesignEditor.tsx';
 import { useContour } from './hooks/useContour.ts';
 import type { ContourParams } from './types/contour.ts';
 import { LangContext } from './lib/LangContext.ts';
@@ -54,7 +54,17 @@ export default function App() {
     else setTab('contour');
   };
 
+  const designRef = useRef<DesignEditorHandle>(null);
+
   const goToDesign = () => { if (IS_WORDPRESS) setWpMode('design'); else setTab('design'); };
+
+  // Entering the cut view (via the tab/button, not just "Continue") should also
+  // flatten the current design so the cut generator shows the latest version.
+  const goToCut = async () => {
+    const result = await designRef.current?.flatten();
+    if (result) handleDesignComplete(result.file, result.dataUrl, result.widthCm, result.heightCm);
+    else if (IS_WORDPRESS) setWpMode('single'); else setTab('contour');
+  };
 
   // ── Header tagline ──────────────────────────────────────────────────────────
   const headerTagline = IS_WORDPRESS
@@ -189,7 +199,7 @@ export default function App() {
                 ] as { id: Tab; label: string }[]).map(tb => (
                   <button
                     key={tb.id}
-                    onClick={() => setTab(tb.id)}
+                    onClick={() => tb.id === 'contour' ? void goToCut() : setTab(tb.id)}
                     className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-widest transition-all ${
                       tab === tb.id
                         ? 'bg-nim-yellow text-nim-black shadow'
@@ -228,7 +238,7 @@ export default function App() {
         {/* Design editor — always mounted (hidden when inactive) so the design
             persists when you go to the cut dialog and back to keep editing. */}
         <div className={designActive ? '' : 'hidden'}>
-          <DesignEditor onComplete={handleDesignComplete} />
+          <DesignEditor ref={designRef} onComplete={handleDesignComplete} />
         </div>
 
         {/* ── WordPress: mode selection landing (reached via back arrow) ── */}

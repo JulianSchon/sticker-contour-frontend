@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { useFabricEditor } from '../../hooks/useFabricEditor.ts';
 import { EditorCanvas } from './EditorCanvas.tsx';
 import { EditorToolbar } from './EditorToolbar.tsx';
@@ -20,7 +20,19 @@ interface Props {
   onComplete: (file: File, dataUrl: string, widthCm: number, heightCm: number) => void;
 }
 
-export function DesignEditor({ onComplete }: Props) {
+export interface FlattenedDesign {
+  file: File;
+  dataUrl: string;
+  widthCm: number;
+  heightCm: number;
+}
+
+export interface DesignEditorHandle {
+  /** Flatten the current design, or null if the canvas is empty. */
+  flatten: () => Promise<FlattenedDesign | null>;
+}
+
+export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function DesignEditor({ onComplete }, ref) {
   const { t } = useLang();
   const [size, setSize] = useState<ArtboardSize>(DEFAULT_ARTBOARD);
   const [tool, setTool] = useState<EditorTool>('uploads');
@@ -88,13 +100,21 @@ export function DesignEditor({ onComplete }: Props) {
     return () => window.removeEventListener('keydown', onKey);
   }, [canvas, undo, redo, deleteSelected, duplicateSelected, selectedId]);
 
+  const flatten = useCallback(async (): Promise<FlattenedDesign | null> => {
+    if (!editor.canvas || editor.layers.length === 0) return null;
+    const { widthPx } = exportDimensions(size.wCm, size.hCm);
+    const { file, dataUrl } = await flattenCanvas(editor.canvas, displayWidth, widthPx);
+    return { file, dataUrl, widthCm: size.wCm, heightCm: size.hCm };
+  }, [editor.canvas, editor.layers.length, size, displayWidth]);
+
+  // Expose flatten() so navigating into the cut tab can refresh from the design.
+  useImperativeHandle(ref, () => ({ flatten }), [flatten]);
+
   const handleContinue = async () => {
-    if (!editor.canvas || editor.layers.length === 0) return;
     setIsFlattening(true);
     try {
-      const { widthPx } = exportDimensions(size.wCm, size.hCm);
-      const { file, dataUrl } = await flattenCanvas(editor.canvas, displayWidth, widthPx);
-      onComplete(file, dataUrl, size.wCm, size.hCm);
+      const result = await flatten();
+      if (result) onComplete(result.file, result.dataUrl, result.widthCm, result.heightCm);
     } finally {
       setIsFlattening(false);
     }
@@ -173,4 +193,4 @@ export function DesignEditor({ onComplete }: Props) {
       </div>
     </div>
   );
-}
+});
