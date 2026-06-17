@@ -11,7 +11,6 @@ import { flattenCanvas } from '../../lib/flatten.ts';
 import { exportDimensions } from '../../lib/printSize.ts';
 import { useLang } from '../../lib/LangContext.ts';
 import { DEFAULT_ARTBOARD, type ArtboardSize, type EditorTool } from '../../types/editor.ts';
-import type { IText } from 'fabric';
 
 const MIN_DISPLAY = 280;
 const FRAME_PAD = 48; // p-6 on the frame container (24px each side)
@@ -50,14 +49,41 @@ export function DesignEditor({ onComplete }: Props) {
   const displayHeight = useMemo(() => Math.round(displayWidth * aspect), [displayWidth, aspect]);
 
   const editor = useFabricEditor(displayWidth, displayHeight);
+  const { canvas, undo, redo, deleteSelected, duplicateSelected, selectedId } = editor;
 
-  const applyToSelectedText = (mutate: (it: IText) => void) => {
-    const active = editor.canvas?.getActiveObject() as unknown as IText | undefined;
-    if (active && active.type === 'i-text') {
-      mutate(active);
-      editor.canvas?.renderAll();
-    }
-  };
+  // Keyboard shortcuts: undo/redo, delete, duplicate, arrow-nudge.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const typing = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+      const active = canvas?.getActiveObject() as unknown as { isEditing?: boolean } | undefined;
+      if (typing || active?.isEditing) return;
+
+      const mod = e.ctrlKey || e.metaKey;
+      if (mod && e.key.toLowerCase() === 'z') { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
+      if (mod && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); return; }
+      if (mod && e.key.toLowerCase() === 'd') { e.preventDefault(); void duplicateSelected(); return; }
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (selectedId) { e.preventDefault(); deleteSelected(); }
+        return;
+      }
+      if (canvas && selectedId && e.key.startsWith('Arrow')) {
+        const obj = canvas.getActiveObject();
+        if (!obj) return;
+        e.preventDefault();
+        const step = e.shiftKey ? 10 : 1;
+        if (e.key === 'ArrowLeft') obj.set('left', (obj.left ?? 0) - step);
+        if (e.key === 'ArrowRight') obj.set('left', (obj.left ?? 0) + step);
+        if (e.key === 'ArrowUp') obj.set('top', (obj.top ?? 0) - step);
+        if (e.key === 'ArrowDown') obj.set('top', (obj.top ?? 0) + step);
+        obj.setCoords();
+        canvas.fire('object:modified', { target: obj });
+        canvas.renderAll();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [canvas, undo, redo, deleteSelected, duplicateSelected, selectedId]);
 
   const handleContinue = async () => {
     if (!editor.canvas || editor.layers.length === 0) return;
@@ -72,27 +98,34 @@ export function DesignEditor({ onComplete }: Props) {
   };
 
   const canContinue = editor.canvas !== null && editor.layers.length > 0 && !isFlattening;
+  const isEmpty = editor.layers.length === 0;
 
   return (
     <div className="flex flex-col rounded-2xl overflow-hidden border border-white/10 bg-nim-black">
-      <EditorToolbar size={size} onSizeChange={setSize} />
+      <EditorToolbar
+        size={size}
+        onSizeChange={setSize}
+        canUndo={editor.canUndo}
+        canRedo={editor.canRedo}
+        onUndo={editor.undo}
+        onRedo={editor.redo}
+      />
       <div className="flex">
         <ToolRail active={tool} onChange={setTool} />
 
-        <div className="w-56 bg-nim-black border-r border-white/10 p-3">
+        <div className="w-52 bg-nim-black border-r border-white/10 p-3">
           {tool === 'uploads' && <UploadPanel onImage={f => void editor.addImageFromFile(f)} />}
           {tool === 'text' && (
             <TextPanel
-              hasSelection={editor.selectedId !== null}
               onAddText={editor.addText}
-              onFontChange={family => applyToSelectedText(it => it.set('fontFamily', family))}
-              onColorChange={color => applyToSelectedText(it => it.set('fill', color))}
+              selected={editor.selected}
+              onUpdate={editor.updateSelected}
             />
           )}
           {tool === 'shape' && (
             <ShapePanel
               onAddShape={(kind, color) => editor.addShape(kind, color)}
-              onColorChange={color => editor.setFillOnSelected(color)}
+              onColorChange={color => editor.updateSelected({ fill: color })}
             />
           )}
           {(tool === 'templates' || tool === 'elements') && (
@@ -102,22 +135,30 @@ export function DesignEditor({ onComplete }: Props) {
 
         <div
           ref={frameRef}
-          className="flex-1 flex items-center justify-center bg-[#0a0a0a] p-6 h-[70vh] min-h-[420px] overflow-hidden"
+          className="relative flex-1 flex items-center justify-center bg-[#0a0a0a] p-6 h-[70vh] min-h-[420px] overflow-hidden"
         >
           <EditorCanvas
             canvasElRef={editor.canvasElRef}
             displayWidth={displayWidth}
             displayHeight={displayHeight}
           />
+          {isEmpty && (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <p className="text-sm text-white/25 text-center max-w-xs px-6">{t.edEmptyCanvas}</p>
+            </div>
+          )}
         </div>
 
         <LayersPanel
           layers={editor.layers}
           selectedId={editor.selectedId}
+          selected={editor.selected}
           onSelect={editor.selectLayer}
           onDelete={() => { editor.deleteSelected(); }}
+          onDuplicate={() => { void editor.duplicateSelected(); }}
           onForward={() => { editor.bringForward(); }}
           onBackward={() => { editor.sendBackward(); }}
+          onUpdate={editor.updateSelected}
         />
       </div>
 

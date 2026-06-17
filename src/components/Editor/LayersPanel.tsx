@@ -1,16 +1,19 @@
-import type { FabricLayer } from '../../hooks/useFabricEditor.ts';
+import type { FabricLayer, SelectedProps } from '../../hooks/useFabricEditor.ts';
 import { useLang } from '../../lib/LangContext.ts';
 
 interface Props {
   layers: FabricLayer[];
   selectedId: string | null;
+  selected: SelectedProps | null;
   onSelect: (id: string) => void;
   onDelete: () => void;
+  onDuplicate: () => void;
   onForward: () => void;
   onBackward: () => void;
+  onUpdate: (patch: Record<string, unknown>) => void;
 }
 
-export function LayersPanel({ layers, selectedId, onSelect, onDelete, onForward, onBackward }: Props) {
+export function LayersPanel({ layers, selectedId, selected, onSelect, onDelete, onDuplicate, onForward, onBackward, onUpdate }: Props) {
   const { t } = useLang();
   return (
     <div className="w-48 bg-nim-darker border-l border-white/10 p-3 flex flex-col gap-2">
@@ -28,6 +31,26 @@ export function LayersPanel({ layers, selectedId, onSelect, onDelete, onForward,
           </button>
         ))}
       </div>
+
+      {/* Selected-object properties */}
+      {selected && (
+        <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] uppercase tracking-widest text-white/40">{t.edOpacity}</span>
+            <span className="text-xs text-nim-yellow tabular-nums">{Math.round(selected.opacity * 100)}%</span>
+          </div>
+          <input
+            type="range" min={0.1} max={1} step={0.05}
+            value={selected.opacity}
+            onChange={e => onUpdate({ opacity: Number(e.target.value) })}
+            className="w-full"
+          />
+          <button onClick={onDuplicate} title={t.edDuplicate} className="py-1.5 rounded-lg border border-white/10 text-white/60 text-xs hover:text-white hover:border-white/30">
+            ⧉ {t.edDuplicate}
+          </button>
+        </div>
+      )}
+
       <div className="flex gap-1">
         <button onClick={onBackward} title={t.edTipBackward} aria-label={t.edTipBackward} className="flex-1 py-1.5 rounded-lg border border-white/10 text-white/50 text-xs">↓</button>
         <button onClick={onForward} title={t.edTipForward} aria-label={t.edTipForward} className="flex-1 py-1.5 rounded-lg border border-white/10 text-white/50 text-xs">↑</button>
