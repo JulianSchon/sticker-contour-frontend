@@ -8,12 +8,14 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "kaplay": "^3001.0.19"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.0",
     "jsdom": "^25.0.1",
     "typescript": "^5.3.3",
     "vite": "^5.0.11",
