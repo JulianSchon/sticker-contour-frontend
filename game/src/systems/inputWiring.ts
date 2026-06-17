@@ -34,6 +34,14 @@ export function wireInput(k: KAPLAYCtx, state: InputState): void {
   const zones = touchZones();
   const activeTouches = new Map<number, string>();
 
+  const hitZone = (x: number, y: number): string => {
+    if (inZone(zones.left, x, y)) return "left";
+    if (inZone(zones.right, x, y)) return "right";
+    if (inZone(zones.jump, x, y)) return "jump";
+    if (inZone(zones.throw, x, y)) return "throw";
+    return "";
+  };
+
   const recomputeAxis = () => {
     const buttons = new Set(activeTouches.values());
     let axis = 0;
@@ -43,6 +51,9 @@ export function wireInput(k: KAPLAYCtx, state: InputState): void {
   };
 
   // Keyboard held axis — only when touch isn't driving the axis.
+  // NOTE: this global onUpdate is registered in main.ts BEFORE any scene/entity
+  // is created, so it runs before entity onUpdate handlers each frame. Keep that
+  // ordering: wireInput() must be called before registerScenes().
   k.onUpdate(() => {
     if (activeTouches.size > 0) return;
     let axis = 0;
@@ -55,12 +66,20 @@ export function wireInput(k: KAPLAYCtx, state: InputState): void {
   k.onKeyPress(["x", "j", "shift"], () => press(state, "throw"));
 
   k.onTouchStart((pos, t) => {
-    let hit = "";
-    if (inZone(zones.left, pos.x, pos.y)) hit = "left";
-    else if (inZone(zones.right, pos.x, pos.y)) hit = "right";
-    else if (inZone(zones.jump, pos.x, pos.y)) { press(state, "jump"); hit = "jump"; }
-    else if (inZone(zones.throw, pos.x, pos.y)) { press(state, "throw"); hit = "throw"; }
-    if (hit) activeTouches.set(t.identifier, hit);
+    const zone = hitZone(pos.x, pos.y);
+    if (zone === "jump") press(state, "jump");
+    else if (zone === "throw") press(state, "throw");
+    if (zone) activeTouches.set(t.identifier, zone);
+    recomputeAxis();
+  });
+
+  // Dragging a finger between the left/right zones updates the axis live.
+  // Jump/throw are NOT re-triggered on move (edge-trigger on start only).
+  k.onTouchMove((pos, t) => {
+    if (!activeTouches.has(t.identifier)) return;
+    const zone = hitZone(pos.x, pos.y);
+    if (zone === "left" || zone === "right") activeTouches.set(t.identifier, zone);
+    else activeTouches.delete(t.identifier);
     recomputeAxis();
   });
 

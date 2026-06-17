@@ -5,6 +5,7 @@ import { GAME_WIDTH, GAME_HEIGHT } from "./config";
 let ctx: KAPLAYCtx | null = null;
 
 export function initEngine(root: HTMLElement): KAPLAYCtx {
+  if (ctx) throw new Error("initEngine() called more than once");
   ctx = kaplay({
     width: GAME_WIDTH,
     height: GAME_HEIGHT,

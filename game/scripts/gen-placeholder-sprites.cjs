@@ -56,10 +56,16 @@ function encodePNG(px) {
   return Buffer.concat([sig, chunk("IHDR", ihdr), chunk("IDAT", idat), chunk("IEND", Buffer.alloc(0))]);
 }
 
+const force = process.argv.includes("--force");
 const dir = path.join("public", "sprites");
 fs.mkdirSync(dir, { recursive: true });
 const png = encodePNG(makePixels());
 for (const n of ["stickan-wave", "stickan-run", "stickan-jump", "stickan-think"]) {
-  fs.writeFileSync(path.join(dir, n + ".png"), png);
+  const file = path.join(dir, n + ".png");
+  if (fs.existsSync(file) && !force) {
+    console.log("skip (exists): " + file + "  (use --force to overwrite)");
+    continue;
+  }
+  fs.writeFileSync(file, png);
+  console.log("wrote " + file);
 }
-console.log("wrote 4 placeholder sprites to " + dir);
