@@ -6,7 +6,7 @@ export const RULER = 22; // px gutter for the rulers
 interface RulerColors { bg: string; tick: string; label: string; }
 const RULER_COLORS: Record<'dark' | 'light', RulerColors> = {
   dark:  { bg: '#141414', tick: 'rgba(255,255,255,0.28)', label: 'rgba(255,255,255,0.5)' },
-  light: { bg: '#ffffff', tick: 'rgba(0,0,0,0.30)',       label: 'rgba(0,0,0,0.55)' },
+  light: { bg: '#f3f4f6', tick: 'rgba(0,0,0,0.42)',       label: 'rgba(0,0,0,0.68)' },
 };
 
 interface Props {
