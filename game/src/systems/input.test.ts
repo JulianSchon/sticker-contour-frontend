@@ -15,6 +15,11 @@ describe("input state", () => {
     setAxis(s, 5);
     expect(s.moveX).toBe(1);
   });
+  it("stores a fractional axis value unchanged within range", () => {
+    const s = createInputState();
+    setAxis(s, 0.7);
+    expect(s.moveX).toBe(0.7);
+  });
   it("queues and consumes a jump press once", () => {
     const s = createInputState();
     press(s, "jump");

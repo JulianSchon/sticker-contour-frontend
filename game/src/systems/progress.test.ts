@@ -31,4 +31,10 @@ describe("run progress", () => {
     expect(run.levelId).toBe(2);
     expect(run.hearts).toBe(3);
   });
+  it("loseHeart stays at 0 when already at 0", () => {
+    const run = createRun();
+    loseHeart(run); loseHeart(run); loseHeart(run);
+    loseHeart(run);
+    expect(run.hearts).toBe(0);
+  });
 });

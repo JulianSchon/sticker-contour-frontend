@@ -3,8 +3,6 @@ import { ALL_STICKER_IDS } from "../data/stickers";
 
 export const STORAGE_KEY = "nimstick.album.v1";
 
-const EMPTY: AlbumState = { unlocked: [] };
-
 export function getAlbum(): AlbumState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -17,7 +15,7 @@ export function getAlbum(): AlbumState {
       : [];
     return { unlocked };
   } catch {
-    return { ...EMPTY };
+    return { unlocked: [] };
   }
 }
 

@@ -29,4 +29,8 @@ describe("album save", () => {
     localStorage.setItem(STORAGE_KEY, "{not json");
     expect(getAlbum().unlocked).toEqual([]);
   });
+  it("returns empty when stored JSON lacks an unlocked array", () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({}));
+    expect(getAlbum().unlocked).toEqual([]);
+  });
 });

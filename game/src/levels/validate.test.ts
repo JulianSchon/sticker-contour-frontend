@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { LEVELS } from "./index";
+import { LEVELS, getLevel } from "./index";
 import { validateLevel, LEGAL_TILES } from "./validate";
 
 describe("level data", () => {
@@ -13,6 +13,9 @@ describe("level data", () => {
   });
   it("only the last level is a boss level", () => {
     expect(LEVELS.filter((l) => l.isBoss).map((l) => l.id)).toEqual([4]);
+  });
+  it("getLevel throws for an unknown id", () => {
+    expect(() => getLevel(99)).toThrow("No level with id 99");
   });
 });
 
