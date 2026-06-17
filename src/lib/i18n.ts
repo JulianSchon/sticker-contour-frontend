@@ -68,6 +68,7 @@ export const translations = {
     cutEmptyTitle: 'No design yet',
     cutEmptyHint: 'Create your sticker in the Design tab, then continue here to set up the cut.',
     cutGoToDesign: 'Go to Design',
+    cutEditDesign: 'Edit design',
 
     // Steps
     step01: 'Upload Image',
@@ -190,6 +191,7 @@ export const translations = {
     cutEmptyTitle: 'Ingen design än',
     cutEmptyHint: 'Skapa din dekal i Design-fliken, fortsätt sedan hit för att ställa in skäret.',
     cutGoToDesign: 'Gå till Design',
+    cutEditDesign: 'Redigera design',
 
     // Steps
     step01: 'Ladda upp bild',

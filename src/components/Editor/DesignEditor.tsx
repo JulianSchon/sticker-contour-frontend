@@ -34,6 +34,9 @@ export function DesignEditor({ onComplete }: Props) {
     const el = frameRef.current;
     if (!el) return;
     const ro = new ResizeObserver(() => {
+      // Ignore measurements while the editor is hidden (clientWidth 0), so the
+      // canvas doesn't collapse/rescale when we switch to the cut dialog.
+      if (el.clientWidth === 0) return;
       setFrameBox({ w: el.clientWidth, h: el.clientHeight });
     });
     ro.observe(el);

@@ -100,7 +100,17 @@ export default function App() {
       onGoToDesign={goToDesign}
     />
   ) : (
-    <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6">
+    <div className="space-y-4">
+      <button
+        onClick={goToDesign}
+        className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-white/50 hover:text-white transition-colors"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+        {t.cutEditDesign}
+      </button>
+      <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6">
       <div className="flex flex-col gap-4">
         <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
           <div className="px-5 pt-5 pb-2"><StepLabel n="01" label={t.step02} /></div>
@@ -129,8 +139,11 @@ export default function App() {
         </div>
       </div>
       {previewColumn}
+      </div>
     </div>
   );
+
+  const designActive = IS_WORDPRESS ? wpMode === 'design' : tab === 'design';
 
   return (
     <LangContext.Provider value={{ lang, t, setLang }}>
@@ -212,6 +225,12 @@ export default function App() {
       {/* ── Main ── */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8">
 
+        {/* Design editor — always mounted (hidden when inactive) so the design
+            persists when you go to the cut dialog and back to keep editing. */}
+        <div className={designActive ? '' : 'hidden'}>
+          <DesignEditor onComplete={handleDesignComplete} />
+        </div>
+
         {/* ── WordPress: mode selection landing (reached via back arrow) ── */}
         {IS_WORDPRESS && wpMode === null && (
           <div className="flex flex-col items-center justify-center min-h-[60vh] gap-8">
@@ -266,9 +285,6 @@ export default function App() {
           </div>
         )}
 
-        {/* ── WordPress: design (default) ── */}
-        {IS_WORDPRESS && wpMode === 'design' && <DesignEditor onComplete={handleDesignComplete} />}
-
         {/* ── WordPress: cut dialog (post-design) ── */}
         {IS_WORDPRESS && wpMode === 'single' && cutDialog}
 
@@ -277,9 +293,7 @@ export default function App() {
           <WordpressPrintPlanningTab />
         )}
 
-        {/* ── Non-WordPress: tabs ── */}
-        {!IS_WORDPRESS && tab === 'design' && <DesignEditor onComplete={handleDesignComplete} />}
-
+        {/* ── Non-WordPress: tabs (design editor is the always-mounted block above) ── */}
         {!IS_WORDPRESS && tab === 'contour' && cutDialog}
 
         {!IS_WORDPRESS && tab === 'print-planning' && <PrintPlanningTab />}

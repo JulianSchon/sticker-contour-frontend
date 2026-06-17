@@ -20,4 +20,10 @@ test('design is default, build a design and hand off to the cut dialog', async (
   await expect(page.getByRole('button', { name: /fortsätt till skärval|continue to cut setup/i })).toHaveCount(0);
   const cta = page.getByRole('button', { name: /ladda ner pdf|download pdf|spara design|save design/i });
   await expect(cta.first()).toBeVisible();
+
+  // Go back to edit the design — the editor and the work should still be there.
+  await page.getByRole('button', { name: /redigera design|edit design/i }).click();
+  await expect(page.getByRole('button', { name: /fortsätt till skärval|continue to cut setup/i })).toBeVisible();
+  // The "HELLO" text layer persisted in the Layers panel.
+  await expect(page.getByRole('button', { name: 'HELLO' })).toBeVisible();
 });
