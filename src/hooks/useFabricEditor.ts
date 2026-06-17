@@ -261,8 +261,14 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
 
   const applyTemplate = useCallback((template: Template) => {
     if (!canvas) return;
+    // Suppress per-object add/remove history while swapping in the template,
+    // then record one atomic snapshot so undo reverts the whole apply at once.
+    isRestoringRef.current = true;
     applyTemplateToCanvas(canvas, template);
-  }, [canvas]);
+    isRestoringRef.current = false;
+    rebuildLayers(canvas);
+    pushHistory(canvas);
+  }, [canvas, rebuildLayers, pushHistory]);
 
   const addShape = useCallback((kind: ShapeKind, color: string) => {
     if (!canvas) return;
