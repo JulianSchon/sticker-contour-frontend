@@ -41,6 +41,7 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
   const [canvas, setCanvas] = useState<Canvas | null>(null);
   const [layers, setLayers] = useState<FabricLayer[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const prevDimsRef = useRef({ w: displayWidth, h: displayHeight });
 
   useEffect(() => {
     if (!canvasElRef.current) return;
@@ -55,8 +56,25 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Responsive resize: when the display size changes, scale every object by the
+  // same factor so the design keeps its position/proportions relative to the
+  // artboard (zoom stays 1, so export math is unchanged).
   useEffect(() => {
     if (!canvas) return;
+    const prev = prevDimsRef.current;
+    if (prev.w !== displayWidth && prev.w > 0) {
+      const r = displayWidth / prev.w;
+      for (const o of canvas.getObjects()) {
+        o.set({
+          left: (o.left ?? 0) * r,
+          top: (o.top ?? 0) * r,
+          scaleX: (o.scaleX ?? 1) * r,
+          scaleY: (o.scaleY ?? 1) * r,
+        });
+        o.setCoords();
+      }
+    }
+    prevDimsRef.current = { w: displayWidth, h: displayHeight };
     canvas.setDimensions({ width: displayWidth, height: displayHeight });
     canvas.renderAll();
   }, [canvas, displayWidth, displayHeight]);

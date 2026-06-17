@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFabricEditor } from '../../hooks/useFabricEditor.ts';
 import { EditorCanvas } from './EditorCanvas.tsx';
 import { EditorToolbar } from './EditorToolbar.tsx';
@@ -13,7 +13,8 @@ import { useLang } from '../../lib/LangContext.ts';
 import { DEFAULT_ARTBOARD, type ArtboardSize, type EditorTool } from '../../types/editor.ts';
 import type { IText } from 'fabric';
 
-const DISPLAY_WIDTH = 520;
+const MIN_DISPLAY = 280;
+const FRAME_PAD = 48; // p-6 on the frame container (24px each side)
 
 interface Props {
   /** Hand the flattened design off to the contour page for cut refinement. */
@@ -26,12 +27,29 @@ export function DesignEditor({ onComplete }: Props) {
   const [tool, setTool] = useState<EditorTool>('uploads');
   const [isFlattening, setIsFlattening] = useState(false);
 
-  const displayHeight = useMemo(
-    () => Math.round(DISPLAY_WIDTH * (size.hCm / size.wCm)),
-    [size],
-  );
+  // Measure the available frame area and size the canvas to fill it, growing
+  // with the window while preserving the artboard aspect ratio.
+  const frameRef = useRef<HTMLDivElement>(null);
+  const [frameBox, setFrameBox] = useState({ w: 600, h: 600 });
+  useEffect(() => {
+    const el = frameRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      setFrameBox({ w: el.clientWidth, h: el.clientHeight });
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
-  const editor = useFabricEditor(DISPLAY_WIDTH, displayHeight);
+  const aspect = size.hCm / size.wCm;
+  const displayWidth = useMemo(() => {
+    const availW = frameBox.w - FRAME_PAD;
+    const availH = frameBox.h - FRAME_PAD;
+    return Math.max(MIN_DISPLAY, Math.floor(Math.min(availW, availH / aspect)));
+  }, [frameBox, aspect]);
+  const displayHeight = useMemo(() => Math.round(displayWidth * aspect), [displayWidth, aspect]);
+
+  const editor = useFabricEditor(displayWidth, displayHeight);
 
   const applyToSelectedText = (mutate: (it: IText) => void) => {
     const active = editor.canvas?.getActiveObject() as unknown as IText | undefined;
@@ -46,7 +64,7 @@ export function DesignEditor({ onComplete }: Props) {
     setIsFlattening(true);
     try {
       const { widthPx } = exportDimensions(size.wCm, size.hCm);
-      const { file, dataUrl } = await flattenCanvas(editor.canvas, DISPLAY_WIDTH, widthPx);
+      const { file, dataUrl } = await flattenCanvas(editor.canvas, displayWidth, widthPx);
       onComplete(file, dataUrl, size.wCm, size.hCm);
     } finally {
       setIsFlattening(false);
@@ -82,10 +100,13 @@ export function DesignEditor({ onComplete }: Props) {
           )}
         </div>
 
-        <div className="flex-1 flex items-center justify-center bg-[#0a0a0a] p-6">
+        <div
+          ref={frameRef}
+          className="flex-1 flex items-center justify-center bg-[#0a0a0a] p-6 h-[70vh] min-h-[420px] overflow-hidden"
+        >
           <EditorCanvas
             canvasElRef={editor.canvasElRef}
-            displayWidth={DISPLAY_WIDTH}
+            displayWidth={displayWidth}
             displayHeight={displayHeight}
           />
         </div>
