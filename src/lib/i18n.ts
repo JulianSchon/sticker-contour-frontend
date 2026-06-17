@@ -53,6 +53,9 @@ export const translations = {
     edTipForward: 'Bring layer forward',
     edTipBackward: 'Send layer backward',
     edTipDelete: 'Delete selected',
+    cutEmptyTitle: 'No design yet',
+    cutEmptyHint: 'Create your sticker in the Design tab, then continue here to set up the cut.',
+    cutGoToDesign: 'Go to Design',
 
     // Steps
     step01: 'Upload Image',
@@ -160,6 +163,9 @@ export const translations = {
     edTipForward: 'Flytta lager framåt',
     edTipBackward: 'Flytta lager bakåt',
     edTipDelete: 'Ta bort markerat',
+    cutEmptyTitle: 'Ingen design än',
+    cutEmptyHint: 'Skapa din dekal i Design-fliken, fortsätt sedan hit för att ställa in skäret.',
+    cutGoToDesign: 'Gå till Design',
 
     // Steps
     step01: 'Ladda upp bild',
