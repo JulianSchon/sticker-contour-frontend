@@ -166,14 +166,6 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Language toggle */}
-            <button
-              onClick={() => setLang(lang === 'en' ? 'sv' : 'en')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 text-xs font-bold text-white/40 hover:text-white/70 hover:border-white/20 transition-all uppercase tracking-widest"
-            >
-              {lang === 'en' ? 'SV' : 'EN'}
-            </button>
-
             {/* Tab switcher — non-WP only. Design first + default. */}
             {!IS_WORDPRESS && (
               <nav className="flex gap-1 bg-white/5 p-1 rounded-lg border border-white/10">
@@ -205,6 +197,14 @@ export default function App() {
                 </span>
               </div>
             )}
+
+            {/* Language toggle — far right */}
+            <button
+              onClick={() => setLang(lang === 'en' ? 'sv' : 'en')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 text-xs font-bold text-white/40 hover:text-white/70 hover:border-white/20 transition-all uppercase tracking-widest"
+            >
+              {lang === 'en' ? 'SV' : 'EN'}
+            </button>
           </div>
         </div>
       </header>
