@@ -7,6 +7,9 @@ import { LayersPanel } from './LayersPanel.tsx';
 import { UploadPanel } from './panels/UploadPanel.tsx';
 import { TextPanel } from './panels/TextPanel.tsx';
 import { ShapePanel } from './panels/ShapePanel.tsx';
+import { TemplatesPanel } from './panels/TemplatesPanel.tsx';
+import { ElementsPanel } from './panels/ElementsPanel.tsx';
+import { useContentLibrary } from '../../hooks/useContentLibrary.ts';
 import { flattenCanvas } from '../../lib/flatten.ts';
 import { exportDimensions } from '../../lib/printSize.ts';
 import { useLang } from '../../lib/LangContext.ts';
@@ -64,6 +67,7 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
   const displayHeight = useMemo(() => Math.round(displayWidth * aspect), [displayWidth, aspect]);
 
   const editor = useFabricEditor(displayWidth, displayHeight);
+  const { library, isLoading: libLoading } = useContentLibrary();
   const { canvas, undo, redo, deleteSelected, duplicateSelected, selectedId } = editor;
 
   // Keyboard shortcuts: undo/redo, delete, duplicate, arrow-nudge.
@@ -153,8 +157,19 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
                 onColorChange={color => editor.updateSelected({ fill: color })}
               />
             )}
-            {(tool === 'templates' || tool === 'elements') && (
-              <p className="text-xs text-white/30">—</p>
+            {tool === 'templates' && (
+              <TemplatesPanel
+                templates={library.templates}
+                isLoading={libLoading}
+                onApply={editor.applyTemplate}
+              />
+            )}
+            {tool === 'elements' && (
+              <ElementsPanel
+                clipart={library.clipart}
+                isLoading={libLoading}
+                onAdd={item => void editor.addImageFromUrl(item.url, item.name)}
+              />
             )}
           </div>
 

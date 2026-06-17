@@ -6,7 +6,7 @@ interface Props {
   onChange: (tool: EditorTool) => void;
 }
 
-const ENABLED: EditorTool[] = ['uploads', 'text', 'shape'];
+const ENABLED: EditorTool[] = ['templates', 'uploads', 'text', 'elements', 'shape'];
 
 export function ToolRail({ active, onChange }: Props) {
   const { t } = useLang();
