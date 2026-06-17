@@ -1,6 +1,6 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { useFabricEditor } from '../../hooks/useFabricEditor.ts';
-import { EditorCanvas } from './EditorCanvas.tsx';
+import { EditorCanvas, RULER } from './EditorCanvas.tsx';
 import { EditorToolbar } from './EditorToolbar.tsx';
 import { ToolRail } from './ToolRail.tsx';
 import { LayersPanel } from './LayersPanel.tsx';
@@ -57,8 +57,8 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
 
   const aspect = size.hCm / size.wCm;
   const displayWidth = useMemo(() => {
-    const availW = frameBox.w - FRAME_PAD;
-    const availH = frameBox.h - FRAME_PAD;
+    const availW = frameBox.w - FRAME_PAD - RULER;
+    const availH = frameBox.h - FRAME_PAD - RULER;
     return Math.max(MIN_DISPLAY, Math.floor(Math.min(availW, availH / aspect)));
   }, [frameBox, aspect]);
   const displayHeight = useMemo(() => Math.round(displayWidth * aspect), [displayWidth, aspect]);
@@ -179,6 +179,8 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
             canvasElRef={editor.canvasElRef}
             displayWidth={displayWidth}
             displayHeight={displayHeight}
+            widthCm={size.wCm}
+            heightCm={size.hCm}
           />
           {isEmpty && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
