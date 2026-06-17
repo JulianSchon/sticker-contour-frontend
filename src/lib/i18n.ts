@@ -44,6 +44,15 @@ export const translations = {
     edContinueHint: 'Next: refine the cut contour and add to cart.',
     edPreparing: 'Preparing…',
     edComingSoon: 'Coming soon',
+    // Tooltips
+    edTipUploads: 'Upload your own image (PNG, JPEG, WEBP)',
+    edTipText: 'Add and style text',
+    edTipShape: 'Add a shape as the sticker body — helps define the cut',
+    edTipTemplates: 'Ready-made templates (coming soon)',
+    edTipElements: 'Clipart & icons (coming soon)',
+    edTipForward: 'Bring layer forward',
+    edTipBackward: 'Send layer backward',
+    edTipDelete: 'Delete selected',
 
     // Steps
     step01: 'Upload Image',
@@ -142,6 +151,15 @@ export const translations = {
     edContinueHint: 'Nästa: finjustera skärkonturen och lägg i varukorgen.',
     edPreparing: 'Förbereder…',
     edComingSoon: 'Kommer snart',
+    // Tooltips
+    edTipUploads: 'Ladda upp din egen bild (PNG, JPEG, WEBP)',
+    edTipText: 'Lägg till och styla text',
+    edTipShape: 'Lägg till en form som dekalkropp — hjälper till att definiera skäret',
+    edTipTemplates: 'Färdiga mallar (kommer snart)',
+    edTipElements: 'Clipart & ikoner (kommer snart)',
+    edTipForward: 'Flytta lager framåt',
+    edTipBackward: 'Flytta lager bakåt',
+    edTipDelete: 'Ta bort markerat',
 
     // Steps
     step01: 'Ladda upp bild',
