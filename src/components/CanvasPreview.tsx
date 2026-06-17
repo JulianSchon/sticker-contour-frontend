@@ -52,7 +52,7 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Prop
       canvas.width = canvasW;
       canvas.height = canvasH;
 
-      drawCheckerboard(ctx, canvasW, canvasH);
+      ctx.clearRect(0, 0, canvasW, canvasH);
 
       const showKiss = params.cutMode === 'kiss' || params.cutMode === 'both';
       const showPerf = (params.cutMode === 'perf' || params.cutMode === 'both') && !!contour?.perfSvgPath;
@@ -142,14 +142,4 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Prop
       )}
     </div>
   );
-}
-
-function drawCheckerboard(ctx: CanvasRenderingContext2D, w: number, h: number) {
-  const size = 12;
-  for (let y = 0; y < h; y += size) {
-    for (let x = 0; x < w; x += size) {
-      ctx.fillStyle = (Math.floor(x / size) + Math.floor(y / size)) % 2 === 0 ? '#1a1a1a' : '#222';
-      ctx.fillRect(x, y, size, size);
-    }
-  }
 }
