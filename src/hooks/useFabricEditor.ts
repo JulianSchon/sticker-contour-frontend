@@ -3,6 +3,8 @@ import { Canvas, FabricImage, IText, Rect, Circle, Ellipse, Triangle } from 'fab
 import type { FabricObject } from 'fabric';
 import { DEFAULT_FONT } from '../lib/editorFonts.ts';
 import type { ShapeKind } from '../types/editor.ts';
+import { applyTemplateToCanvas } from '../lib/templateObjects.ts';
+import type { Template } from '../types/content.ts';
 
 export interface FabricLayer {
   id: string;
@@ -49,6 +51,8 @@ interface UseFabricEditor {
   addText: (value: string) => void;
   addImageFromFile: (file: File) => Promise<void>;
   addShape: (kind: ShapeKind, color: string) => void;
+  addImageFromUrl: (url: string, label: string) => Promise<void>;
+  applyTemplate: (template: Template) => void;
   updateSelected: (patch: Record<string, unknown>) => void;
   duplicateSelected: () => Promise<void>;
   deleteSelected: () => void;
@@ -243,6 +247,23 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
     canvas.renderAll();
   }, [canvas]);
 
+  const addImageFromUrl = useCallback(async (url: string, label: string) => {
+    if (!canvas) return;
+    const img = await FabricImage.fromURL(url, { crossOrigin: 'anonymous' });
+    const target = canvas.getWidth() * 0.4;
+    if (img.width && img.width > 0) img.scaleToWidth(target);
+    img.set({ left: canvas.getWidth() / 2, top: canvas.getHeight() / 2, originX: 'center', originY: 'center' });
+    setLayerOf(img, { id: nextId(), kind: 'image', label });
+    canvas.add(img);
+    canvas.setActiveObject(img);
+    canvas.renderAll();
+  }, [canvas]);
+
+  const applyTemplate = useCallback((template: Template) => {
+    if (!canvas) return;
+    applyTemplateToCanvas(canvas, template);
+  }, [canvas]);
+
   const addShape = useCallback((kind: ShapeKind, color: string) => {
     if (!canvas) return;
     const cw = canvas.getWidth();
@@ -339,7 +360,7 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
 
   return {
     canvasElRef, canvas, layers, selectedId, selected, canUndo, canRedo,
-    addText, addImageFromFile, addShape, updateSelected, duplicateSelected,
+    addText, addImageFromFile, addImageFromUrl, applyTemplate, addShape, updateSelected, duplicateSelected,
     deleteSelected, bringForward, sendBackward, selectLayer, undo, redo,
   };
 }
