@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Canvas, FabricImage, IText, Rect, Circle, Ellipse, Triangle } from 'fabric';
+import { Canvas, FabricImage, IText, Rect, Circle, Ellipse, Triangle, loadSVGFromURL, util } from 'fabric';
 import type { FabricObject } from 'fabric';
 import { DEFAULT_FONT } from '../lib/editorFonts.ts';
 import type { ShapeKind } from '../types/editor.ts';
@@ -249,13 +249,23 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
 
   const addImageFromUrl = useCallback(async (url: string, label: string) => {
     if (!canvas) return;
-    const img = await FabricImage.fromURL(url, { crossOrigin: 'anonymous' });
+    let obj: FabricObject;
+    if (/\.svg(\?|#|$)/i.test(url)) {
+      // SVG clipart: parse to vectors (uses the viewBox), so it has a real size.
+      // Loading an SVG as a raster <img> gives a 0×0 element → invisible.
+      const { objects, options } = await loadSVGFromURL(url);
+      const valid = objects.filter((o): o is FabricObject => o !== null);
+      if (valid.length === 0) return;
+      obj = util.groupSVGElements(valid, options) as FabricObject;
+    } else {
+      obj = await FabricImage.fromURL(url, { crossOrigin: 'anonymous' });
+    }
     const target = canvas.getWidth() * 0.4;
-    if (img.width && img.width > 0) img.scaleToWidth(target);
-    img.set({ left: canvas.getWidth() / 2, top: canvas.getHeight() / 2, originX: 'center', originY: 'center' });
-    setLayerOf(img, { id: nextId(), kind: 'image', label });
-    canvas.add(img);
-    canvas.setActiveObject(img);
+    if (obj.width && obj.width > 0) obj.scaleToWidth(target);
+    obj.set({ left: canvas.getWidth() / 2, top: canvas.getHeight() / 2, originX: 'center', originY: 'center' });
+    setLayerOf(obj, { id: nextId(), kind: 'image', label });
+    canvas.add(obj);
+    canvas.setActiveObject(obj);
     canvas.renderAll();
   }, [canvas]);
 
