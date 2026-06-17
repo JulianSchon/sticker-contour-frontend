@@ -1,5 +1,10 @@
 import { PLAYER } from "../config";
 
+// RunState is the single shared, deliberately-mutable game-run object. The
+// scene layer holds one instance (via getRun/setRun) and these helpers mutate
+// it in place. This is an intentional exception to the general immutability
+// preference, chosen so all scenes observe the same live run without threading
+// return values through every call site.
 export interface RunState {
   levelId: number;
   hearts: number;

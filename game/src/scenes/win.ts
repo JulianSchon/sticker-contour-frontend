@@ -1,4 +1,5 @@
 import type { KAPLAYCtx } from "kaplay";
+import { onAnyProceed } from "./sceneUtils";
 
 export function registerWinScene(k: KAPLAYCtx): void {
   k.scene("win", () => {
@@ -7,8 +8,6 @@ export function registerWinScene(k: KAPLAYCtx): void {
     k.add([k.text("Stickan saved the stickers!", { size: 28 }), k.pos(k.center().x, 280), k.anchor("center")]);
     k.add([k.text("Press A for album · SPACE / tap to play again", { size: 22 }), k.pos(k.center().x, k.height() - 80), k.anchor("center")]);
     k.onKeyPress("a", () => k.go("album"));
-    k.onKeyPress("space", () => k.go("title"));
-    k.onMousePress(() => k.go("title"));
-    k.onTouchStart(() => k.go("title"));
+    onAnyProceed(k, () => k.go("title"));
   });
 }

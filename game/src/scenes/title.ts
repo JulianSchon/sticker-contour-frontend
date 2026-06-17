@@ -1,5 +1,6 @@
 import type { KAPLAYCtx } from "kaplay";
 import { RunState, createRun } from "../systems/progress";
+import { onAnyProceed } from "./sceneUtils";
 
 export function registerTitleScene(k: KAPLAYCtx, setRun: (r: RunState) => void): void {
   k.scene("title", () => {
@@ -10,9 +11,7 @@ export function registerTitleScene(k: KAPLAYCtx, setRun: (r: RunState) => void):
     k.add([k.text("Press A for album", { size: 22 }), k.pos(k.center().x, 530), k.anchor("center")]);
 
     const start = () => { setRun(createRun()); k.go("level"); };
-    k.onKeyPress("space", start);
-    k.onMousePress(start);
-    k.onTouchStart(() => start());
+    onAnyProceed(k, start);
     k.onKeyPress("a", () => k.go("album"));
   });
 }

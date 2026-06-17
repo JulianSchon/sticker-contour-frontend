@@ -42,7 +42,7 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
 
     // Tile objects are children of the level GameObj; use recursive get to find them.
     const at = (o: GameObj) => ({ x: o.pos.x, y: o.pos.y });
-    k.get("spawnmark", { recursive: true }).forEach((o: GameObj) => { respawn = { x: o.pos.x, y: o.pos.y }; });
+    k.get("spawnmark", { recursive: true }).forEach((o: GameObj) => { respawn = { x: o.pos.x, y: o.pos.y - 40 }; });
     k.get("janimark", { recursive: true }).forEach((o: GameObj) => makeMopJanitor(k, at(o)));
     k.get("granmark", { recursive: true }).forEach((o: GameObj) => makeBroomGranny(k, at(o)));
     k.get("coinmark", { recursive: true }).forEach((o: GameObj) => makeStickerCoin(k, at(o)));
@@ -92,6 +92,7 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
         const pb = player as unknown as BodyObj;
         player.pos = k.vec2(respawn.x, respawn.y);
         pb.vel.y = 0;
+        pb.vel.x = 0;
       }
     });
     player.onCollide("coin", (c: GameObj) => {
@@ -105,7 +106,7 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
         c.active = true;
         (cp as unknown as ScaleColorObj).color = k.rgb(255, 212, 0);
       }
-      respawn = { x: cp.pos.x, y: cp.pos.y };
+      respawn = { x: cp.pos.x, y: cp.pos.y - 40 };
     });
     player.onCollide("goal", () => k.go("reward"));
   });

@@ -27,6 +27,9 @@ export interface LevelDef {
   map: Tile[];
   /** Sticker awarded on completion. */
   reward: StickerId;
-  /** True for the final boss level. */
+  /**
+   * Metadata only: marks the final boss level for tooling/tests. At runtime the
+   * boss is spawned from the 'B' tile marker, not from this flag.
+   */
   isBoss?: boolean;
 }

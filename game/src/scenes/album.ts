@@ -1,5 +1,6 @@
 import type { KAPLAYCtx } from "kaplay";
 import { STICKERS } from "../data/stickers";
+import { onAnyProceed } from "./sceneUtils";
 import { isUnlocked, resetAlbum } from "../systems/save";
 
 export function registerAlbumScene(k: KAPLAYCtx): void {
@@ -35,7 +36,6 @@ export function registerAlbumScene(k: KAPLAYCtx): void {
     k.add([k.text("Press B to go back · R to reset · tap to go back", { size: 20 }), k.pos(k.center().x, k.height() - 50), k.anchor("center"), k.color(0, 0, 0)]);
     k.onKeyPress("b", () => k.go("title"));
     k.onKeyPress("r", () => { resetAlbum(); k.go("album"); });
-    k.onMousePress(() => k.go("title"));
-    k.onTouchStart(() => k.go("title"));
+    onAnyProceed(k, () => k.go("title"));
   });
 }

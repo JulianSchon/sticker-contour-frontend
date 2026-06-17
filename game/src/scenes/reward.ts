@@ -1,5 +1,6 @@
 import type { KAPLAYCtx, GameObj, Vec2 } from "kaplay";
 import { RunState, advanceLevel } from "../systems/progress";
+import { onAnyProceed } from "./sceneUtils";
 import { getLevel, LEVELS } from "../levels";
 import { getSticker } from "../data/stickers";
 import { unlock } from "../systems/save";
@@ -41,8 +42,6 @@ export function registerRewardScene(k: KAPLAYCtx, getRun: () => RunState): void 
       advanceLevel(run);
       k.go("level");
     };
-    k.onKeyPress("space", proceed);
-    k.onMousePress(proceed);
-    k.onTouchStart(() => proceed());
+    onAnyProceed(k, proceed);
   });
 }
