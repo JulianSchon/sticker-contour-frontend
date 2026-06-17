@@ -65,13 +65,8 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Prop
         // the sticker edge; with an offset > 0 this shows as a white margin/border.
         const bodySvg = showPerf && contour.perfSvgPath ? contour.perfSvgPath : contour.kissSvgPath;
         const bodyPath = new Path2D(scalePath(bodySvg, scaleX, scaleY, padPx, padPx));
-        ctx.save();
-        ctx.shadowColor = 'rgba(0,0,0,0.18)';
-        ctx.shadowBlur = 12;
-        ctx.shadowOffsetY = 4;
         ctx.fillStyle = '#ffffff';
         ctx.fill(bodyPath);
-        ctx.restore();
 
         // Artwork on top of the white body.
         ctx.drawImage(img, padPx, padPx, Math.round(img.naturalWidth * scale), Math.round(img.naturalHeight * scale));
@@ -95,6 +90,18 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Prop
           ctx.stroke(perfPath);
           ctx.restore();
         }
+
+        // Glossy laminate sheen across the sticker surface (clipped to the body).
+        ctx.save();
+        ctx.clip(bodyPath);
+        const sheen = ctx.createLinearGradient(0, 0, canvasW * 0.7, canvasH);
+        sheen.addColorStop(0, 'rgba(255,255,255,0.30)');
+        sheen.addColorStop(0.22, 'rgba(255,255,255,0.07)');
+        sheen.addColorStop(0.5, 'rgba(255,255,255,0)');
+        sheen.addColorStop(1, 'rgba(0,0,0,0.12)');
+        ctx.fillStyle = sheen;
+        ctx.fillRect(0, 0, canvasW, canvasH);
+        ctx.restore();
       } else {
         // No contour yet — just show the artwork.
         ctx.drawImage(img, padPx, padPx, Math.round(img.naturalWidth * scale), Math.round(img.naturalHeight * scale));
@@ -120,12 +127,13 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Prop
     >
       <canvas
         ref={canvasRef}
-        className="rounded-lg max-w-full"
+        className="max-w-full"
         style={{
-          transform: `rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`,
-          transition: tilting ? 'none' : 'transform 0.45s ease',
+          transform: `rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) scale(${tilting ? 1.03 : 1})`,
+          filter: `drop-shadow(${-tilt.ry * 0.7}px ${18 - tilt.rx * 0.7}px 26px rgba(0,0,0,0.6))`,
+          transition: tilting ? 'filter 0.08s linear' : 'transform 0.5s ease, filter 0.5s ease',
           transformStyle: 'preserve-3d',
-          willChange: 'transform',
+          willChange: 'transform, filter',
         }}
       />
 
