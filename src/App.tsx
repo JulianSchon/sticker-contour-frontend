@@ -51,6 +51,16 @@ export default function App() {
     setImageDataUrl(dataUrl);
   };
 
+  // Editor hands its flattened design off to the existing contour flow for cut refinement.
+  const handleDesignComplete = (f: File, dataUrl: string, widthCm: number, heightCm: number) => {
+    setFile(f);
+    setImageDataUrl(dataUrl);
+    setStickerWidthCm(widthCm);
+    setStickerHeightCm(heightCm);
+    if (IS_WORDPRESS) setWpMode('single');
+    else setTab('contour');
+  };
+
   // ── Header tagline ──────────────────────────────────────────────────────────
   const headerTagline = IS_WORDPRESS
     ? (wpMode === 'single' ? t.taglineContour : wpMode === 'sheet' ? t.taglinePrint : wpMode === 'design' ? t.modeDesign : 'CUTZ')
@@ -303,7 +313,7 @@ export default function App() {
         )}
 
         {/* ── WordPress: design-your-own mode ── */}
-        {IS_WORDPRESS && wpMode === 'design' && <DesignEditor />}
+        {IS_WORDPRESS && wpMode === 'design' && <DesignEditor onComplete={handleDesignComplete} />}
 
         {/* ── Non-WordPress: original tab layout ── */}
         {!IS_WORDPRESS && tab === 'contour' && (
@@ -385,7 +395,7 @@ export default function App() {
 
         {!IS_WORDPRESS && tab === 'print-planning' && <PrintPlanningTab />}
 
-        {!IS_WORDPRESS && tab === 'design' && <DesignEditor />}
+        {!IS_WORDPRESS && tab === 'design' && <DesignEditor onComplete={handleDesignComplete} />}
 
       </main>
 

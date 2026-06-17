@@ -39,10 +39,9 @@ export const translations = {
     edLayers: 'Layers',
     edDelete: 'Delete',
     edSize: 'Size',
-    edCut: 'Cut',
-    edCutDiecut: 'Die-cut',
-    edCutShape: 'Shape',
-    edBorder: 'Border',
+    edContinue: 'Continue to cut setup',
+    edContinueHint: 'Next: refine the cut contour and add to cart.',
+    edPreparing: 'Preparing…',
     edComingSoon: 'Coming soon',
 
     // Steps
@@ -137,10 +136,9 @@ export const translations = {
     edLayers: 'Lager',
     edDelete: 'Ta bort',
     edSize: 'Storlek',
-    edCut: 'Skär',
-    edCutDiecut: 'Konturskuren',
-    edCutShape: 'Form',
-    edBorder: 'Kant',
+    edContinue: 'Fortsätt till skärval',
+    edContinueHint: 'Nästa: finjustera skärkonturen och lägg i varukorgen.',
+    edPreparing: 'Förbereder…',
     edComingSoon: 'Kommer snart',
 
     // Steps

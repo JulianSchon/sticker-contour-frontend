@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Canvas, FabricImage, IText, Rect } from 'fabric';
+import { Canvas, FabricImage, IText } from 'fabric';
 import { DEFAULT_FONT } from '../lib/editorFonts.ts';
-import { bodyRectFromBounds } from '../lib/stickerBody.ts';
 
 export interface FabricLayer {
   id: string;
@@ -21,7 +20,6 @@ interface UseFabricEditor {
   bringForward: () => void;
   sendBackward: () => void;
   selectLayer: (id: string) => void;
-  syncStickerBody: (body: 'white' | 'color' | 'none', color: string, borderPx: number) => void;
 }
 
 let idCounter = 0;
@@ -150,48 +148,9 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
     if (obj) { canvas.setActiveObject(obj); canvas.renderAll(); }
   }, [canvas, findById]);
 
-  /** Insert/refresh a die-cut backing rect at the bottom of the stack.
-   *  Pass body='none' to remove it (used for shape-mode or transparent bodies). */
-  const syncStickerBody = useCallback((
-    body: 'white' | 'color' | 'none',
-    color: string,
-    borderPx: number,
-  ) => {
-    if (!canvas) return;
-    const existing = canvas.getObjects().find(
-      o => (o as unknown as { _layer?: FabricLayer })._layer?.kind === 'background',
-    );
-    if (existing) canvas.remove(existing);
-    if (body === 'none') { canvas.renderAll(); rebuildLayers(canvas); return; }
-
-    const content = canvas.getObjects();
-    if (content.length === 0) { canvas.renderAll(); return; }
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    for (const o of content) {
-      const r = o.getBoundingRect();
-      minX = Math.min(minX, r.left); minY = Math.min(minY, r.top);
-      maxX = Math.max(maxX, r.left + r.width); maxY = Math.max(maxY, r.top + r.height);
-    }
-    const rect = bodyRectFromBounds(
-      { left: minX, top: minY, width: maxX - minX, height: maxY - minY },
-      borderPx,
-    );
-    const fill = body === 'white' ? '#ffffff' : color;
-    const bg = new Rect({
-      left: rect.left, top: rect.top, width: rect.width, height: rect.height,
-      rx: rect.rx, ry: rect.rx, fill, selectable: false, evented: false,
-    });
-    (bg as unknown as { _layer: FabricLayer })._layer = { id: nextId(), kind: 'background', label: 'Sticker body' };
-    canvas.add(bg);
-    canvas.sendObjectToBack(bg);
-    canvas.renderAll();
-    rebuildLayers(canvas);
-  }, [canvas, rebuildLayers]);
-
   return {
     canvasElRef, canvas, layers, selectedId,
     addText, addImageFromFile, setBackgroundColor,
     deleteSelected, bringForward, sendBackward, selectLayer,
-    syncStickerBody,
   };
 }

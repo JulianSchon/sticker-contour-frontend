@@ -1,24 +1,26 @@
 import { test, expect } from '@playwright/test';
 
-test('design tab loads the editor and adds text', async ({ page }) => {
+test('design tab: build a design and hand off to the contour page', async ({ page }) => {
   await page.goto('/');
 
-  // Click the Design tab (t.tabDesign = "Design" in both EN and SV)
+  // Open the Design tab (t.tabDesign = "Design" in both EN and SV)
   await page.getByRole('button', { name: /^Design$/i }).click();
 
-  // Layers panel is visible (t.edLayers = "Lager" in SV, "Layers" in EN)
+  // Layers panel is visible (t.edLayers = "Lager" SV / "Layers" EN)
   await expect(page.getByText(/^(Lager|Layers)$/i).first()).toBeVisible();
 
-  // Click the Text tool in the tool rail (t.edToolText = "Text" in both EN and SV)
+  // Add text via the Text tool (t.edToolText = "Text")
   await page.getByRole('button', { name: /^Text$/i }).first().click();
-
-  // Fill in the text input (placeholder t.edAddText = "Lägg till text" SV / "Add text" EN)
   await page.getByPlaceholder(/lägg till text|add text/i).fill('HELLO');
-
-  // Click the add-text button (label is "+ Lägg till text" or "+ Add text")
   await page.getByRole('button', { name: /lägg till text|add text/i }).click();
 
-  // The Download CTA is present (t.downloadPdf = "Ladda ner PDF" SV / "Download PDF" EN)
+  // Continue to cut setup — flattens the design and hands off to the contour page
+  // (t.edContinue = "Fortsätt till skärval" SV / "Continue to cut setup" EN)
+  await page.getByRole('button', { name: /fortsätt till skärval|continue to cut setup/i }).click();
+
+  // We should now be on the contour flow: the cut-shape selector + download CTA appear.
+  // (Shape labels: "Kontur"/"Contour"; download CTA: "Ladda ner PDF"/"Download PDF".)
+  await expect(page.getByText(/^(Kontur|Contour)$/i).first()).toBeVisible();
   const cta = page.getByRole('button', { name: /ladda ner pdf|download pdf|spara design|save design/i });
   await expect(cta.first()).toBeVisible();
 });

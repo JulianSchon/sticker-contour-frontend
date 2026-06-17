@@ -8,17 +8,24 @@ export function computeExportMultiplier(displayPx: number, targetPx: number): nu
   return targetPx / displayPx;
 }
 
-/** Render the Fabric canvas to a transparent PNG File at the target pixel size.
- *  `displayWidthPx` is the canvas's current on-screen width. */
-export async function flattenCanvasToFile(
+export interface FlattenResult {
+  file: File;
+  dataUrl: string;
+}
+
+/** Render the Fabric canvas to a transparent PNG at the target pixel size and
+ *  return both a File (for upload to the contour pipeline) and its data URL
+ *  (for the contour page's image preview). `displayWidthPx` is the canvas's
+ *  current on-screen width. */
+export async function flattenCanvas(
   canvas: Canvas,
   displayWidthPx: number,
   targetWidthPx: number,
   filename = 'design.png',
-): Promise<File> {
+): Promise<FlattenResult> {
   await ensureFontsLoaded(EDITOR_FONTS.map(f => f.family), 64);
   const multiplier = computeExportMultiplier(displayWidthPx, targetWidthPx);
   const dataUrl = canvas.toDataURL({ format: 'png', multiplier });
   const blob = await (await fetch(dataUrl)).blob();
-  return new File([blob], filename, { type: 'image/png' });
+  return { file: new File([blob], filename, { type: 'image/png' }), dataUrl };
 }
