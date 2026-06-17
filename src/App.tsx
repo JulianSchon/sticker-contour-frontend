@@ -13,8 +13,8 @@ import { MaterialFinishPicker, type Material, type Finish } from './components/M
 
 const DEFAULT_PARAMS: ContourParams = {
   threshold: 128,
-  kissOffset: 3,
-  perfOffset: 3,
+  kissOffset: 0,
+  perfOffset: 0,
   smoothing: 4,
   enclose: true,
   cutMode: 'perf',
