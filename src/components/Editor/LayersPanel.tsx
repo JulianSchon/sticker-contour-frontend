@@ -16,9 +16,9 @@ interface Props {
 export function LayersPanel({ layers, selectedId, selected, onSelect, onDelete, onDuplicate, onForward, onBackward, onUpdate }: Props) {
   const { t } = useLang();
   return (
-    <div className="w-48 bg-nim-darker border-l border-white/10 p-3 flex flex-col gap-2">
+    <div className="shrink-0 bg-nim-darker border-t border-white/10 p-3 flex flex-col gap-2">
       <p className="nim-label">{t.edLayers}</p>
-      <div className="flex-1 flex flex-col gap-1 overflow-y-auto">
+      <div className="flex flex-col gap-1 overflow-y-auto max-h-32">
         {layers.map(l => (
           <button
             key={l.id}

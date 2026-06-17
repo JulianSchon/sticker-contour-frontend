@@ -136,24 +136,39 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
       <div className="flex">
         <ToolRail active={tool} onChange={setTool} />
 
-        <div className="w-52 bg-nim-black border-r border-white/10 p-3">
-          {tool === 'uploads' && <UploadPanel onImage={f => void editor.addImageFromFile(f)} />}
-          {tool === 'text' && (
-            <TextPanel
-              onAddText={editor.addText}
-              selected={editor.selected}
-              onUpdate={editor.updateSelected}
-            />
-          )}
-          {tool === 'shape' && (
-            <ShapePanel
-              onAddShape={(kind, color) => editor.addShape(kind, color)}
-              onColorChange={color => editor.updateSelected({ fill: color })}
-            />
-          )}
-          {(tool === 'templates' || tool === 'elements') && (
-            <p className="text-xs text-white/30">—</p>
-          )}
+        {/* Left column: tool content on top, Layers beneath (frees canvas width) */}
+        <div className="w-56 bg-nim-black border-r border-white/10 flex flex-col overflow-hidden">
+          <div className="p-3 flex-1 overflow-y-auto">
+            {tool === 'uploads' && <UploadPanel onImage={f => void editor.addImageFromFile(f)} />}
+            {tool === 'text' && (
+              <TextPanel
+                onAddText={editor.addText}
+                selected={editor.selected}
+                onUpdate={editor.updateSelected}
+              />
+            )}
+            {tool === 'shape' && (
+              <ShapePanel
+                onAddShape={(kind, color) => editor.addShape(kind, color)}
+                onColorChange={color => editor.updateSelected({ fill: color })}
+              />
+            )}
+            {(tool === 'templates' || tool === 'elements') && (
+              <p className="text-xs text-white/30">—</p>
+            )}
+          </div>
+
+          <LayersPanel
+            layers={editor.layers}
+            selectedId={editor.selectedId}
+            selected={editor.selected}
+            onSelect={editor.selectLayer}
+            onDelete={() => { editor.deleteSelected(); }}
+            onDuplicate={() => { void editor.duplicateSelected(); }}
+            onForward={() => { editor.bringForward(); }}
+            onBackward={() => { editor.sendBackward(); }}
+            onUpdate={editor.updateSelected}
+          />
         </div>
 
         <div
@@ -171,18 +186,6 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
             </div>
           )}
         </div>
-
-        <LayersPanel
-          layers={editor.layers}
-          selectedId={editor.selectedId}
-          selected={editor.selected}
-          onSelect={editor.selectLayer}
-          onDelete={() => { editor.deleteSelected(); }}
-          onDuplicate={() => { void editor.duplicateSelected(); }}
-          onForward={() => { editor.bringForward(); }}
-          onBackward={() => { editor.sendBackward(); }}
-          onUpdate={editor.updateSelected}
-        />
       </div>
 
       <div className="flex items-center justify-end gap-3 p-4 border-t border-white/10">
