@@ -9,10 +9,23 @@ export interface RunState {
   levelId: number;
   hearts: number;
   score: number;
+  ammo: number;
 }
 
 export function createRun(): RunState {
-  return { levelId: 1, hearts: PLAYER.startHearts, score: 0 };
+  return { levelId: 1, hearts: PLAYER.startHearts, score: 0, ammo: PLAYER.ammoMax };
+}
+
+/** Consume one sticker shot; returns false (and shoots nothing) when empty. */
+export function useAmmo(run: RunState): boolean {
+  if (run.ammo <= 0) return false;
+  run.ammo -= 1;
+  return true;
+}
+
+/** Replenish one sticker shot from a pickup, capped at the max. */
+export function addAmmo(run: RunState): void {
+  run.ammo = Math.min(PLAYER.ammoMax, run.ammo + 1);
 }
 
 /** Lose one heart, floored at 0 (idempotent once already at 0). */
@@ -28,9 +41,10 @@ export function addScore(run: RunState, points: number): void {
   run.score += points;
 }
 
-/** Refill hearts to full to retry the current level (keeps levelId and score). */
+/** Refill hearts + ammo to retry the current level (keeps levelId and score). */
 export function resetHearts(run: RunState): void {
   run.hearts = PLAYER.startHearts;
+  run.ammo = PLAYER.ammoMax;
 }
 
 /**
@@ -42,4 +56,5 @@ export function resetHearts(run: RunState): void {
 export function advanceLevel(run: RunState): void {
   run.levelId += 1;
   run.hearts = PLAYER.startHearts;
+  run.ammo = PLAYER.ammoMax;
 }

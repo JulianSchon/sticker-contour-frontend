@@ -1,7 +1,7 @@
 import type { KAPLAYCtx, GameObj, Vec2 } from "kaplay";
 import { TILE_SIZE, ENEMY, GAME_HEIGHT, GRAVITY } from "../config";
 import { InputState } from "../systems/input";
-import { RunState, loseHeart, addScore, isGameOver } from "../systems/progress";
+import { RunState, loseHeart, addScore, isGameOver, addAmmo } from "../systems/progress";
 import { getLevel } from "../levels";
 import { makePlayer } from "../entities/player";
 import { makeMopJanitor, makeBroomGranny, defeatEnemy } from "../entities/enemies";
@@ -61,7 +61,7 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
       makeBoss(k, at(o), () => k.wait(0.6, () => k.go("reward"))),
     );
 
-    const player = makePlayer(k, input, respawn).obj;
+    const player = makePlayer(k, input, respawn, run).obj;
     k.setCamScale(1);
     player.onUpdate(() => k.setCamPos(player.pos.x, camY));
 
@@ -134,6 +134,7 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
     player.onCollide("coin", (c: GameObj) => {
       k.destroy(c);
       addScore(run, 50);
+      addAmmo(run); // pickups replenish a sticker shot
       play("coin");
     });
     player.onCollide("checkpoint", (cp: GameObj) => {

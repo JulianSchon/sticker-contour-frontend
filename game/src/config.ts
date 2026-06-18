@@ -11,6 +11,7 @@ export const PLAYER = {
   coyoteTime: 0.1,     // seconds after leaving ground you can still jump
   throwCooldown: 0.35, // seconds between throws
   startHearts: 3,
+  ammoMax: 3,          // sticker shots; pickups replenish, capped here
   groundAccel: 40,     // approach-rate of vx toward target on normal ground (high = snappy)
   slipAccel: 3.5,      // approach-rate of vx toward target on ice/puddle (low = slippery)
 };

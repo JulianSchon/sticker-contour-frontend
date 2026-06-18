@@ -1,6 +1,7 @@
 import type { GameObj, KAPLAYCtx } from "kaplay";
 import { PLAYER, PROJECTILE } from "../config";
 import { InputState, consumePress } from "../systems/input";
+import { RunState, useAmmo } from "../systems/progress";
 import { makeProjectile } from "./projectile";
 
 type PlayerObj = GameObj & {
@@ -23,6 +24,7 @@ export function makePlayer(
   k: KAPLAYCtx,
   input: InputState,
   spawn: { x: number; y: number },
+  run: RunState,
 ): PlayerHandle {
   const player = k.add([
     k.sprite("stickan", { anim: "idle" }),
@@ -71,7 +73,7 @@ export function makePlayer(
     }
 
     player.throwTimer = Math.max(0, player.throwTimer - dt);
-    if (consumePress(input, "throw") && player.throwTimer === 0) {
+    if (consumePress(input, "throw") && player.throwTimer === 0 && useAmmo(run)) {
       player.throwTimer = PLAYER.throwCooldown;
       makeProjectile(k, {
         x: player.pos.x + player.facing * 30,

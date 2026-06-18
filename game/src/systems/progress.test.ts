@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createRun, loseHeart, addScore, isGameOver, advanceLevel, resetHearts } from "./progress";
+import { createRun, loseHeart, addScore, isGameOver, advanceLevel, resetHearts, useAmmo, addAmmo } from "./progress";
 
 describe("run progress", () => {
   it("starts on level 1 with full hearts and zero score", () => {
@@ -37,13 +37,31 @@ describe("run progress", () => {
     loseHeart(run);
     expect(run.hearts).toBe(0);
   });
-  it("resetHearts refills hearts without changing level or score", () => {
+  it("resetHearts refills hearts + ammo without changing level or score", () => {
     const run = createRun();
-    run.levelId = 3; run.score = 250;
+    run.levelId = 3; run.score = 250; run.ammo = 0;
     loseHeart(run); loseHeart(run); loseHeart(run);
     resetHearts(run);
     expect(run.hearts).toBe(3);
+    expect(run.ammo).toBe(3);
     expect(run.levelId).toBe(3);
     expect(run.score).toBe(250);
+  });
+  it("starts with full ammo and consumes it down to empty", () => {
+    const run = createRun();
+    expect(run.ammo).toBe(3);
+    expect(useAmmo(run)).toBe(true);
+    expect(useAmmo(run)).toBe(true);
+    expect(useAmmo(run)).toBe(true);
+    expect(run.ammo).toBe(0);
+    expect(useAmmo(run)).toBe(false); // empty: no shot
+  });
+  it("addAmmo replenishes but is capped at the max", () => {
+    const run = createRun();
+    run.ammo = 0;
+    addAmmo(run);
+    expect(run.ammo).toBe(1);
+    addAmmo(run); addAmmo(run); addAmmo(run); // try to overfill
+    expect(run.ammo).toBe(3);
   });
 });

@@ -21,8 +21,17 @@ export function addHud(k: KAPLAYCtx, run: RunState): void {
     k.z(100),
   ]) as GameObj<TextComp>;
 
+  // Ammo (sticker shots) below the hearts.
+  const ammo = k.add([
+    k.text("", { size: 24 }),
+    k.pos(24, 60),
+    k.fixed(),
+    k.z(100),
+  ]) as GameObj<TextComp>;
+
   hearts.onUpdate(() => { hearts.text = "♥".repeat(run.hearts); });
   score.onUpdate(() => { score.text = `Score: ${run.score}`; });
+  ammo.onUpdate(() => { ammo.text = `Stickers: ${"◆".repeat(run.ammo) || "—"}`; });
 
   // Mute toggle (clickable on all devices).
   const mute = k.add([
