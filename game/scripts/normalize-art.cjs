@@ -23,7 +23,7 @@ const CHARS = {
     targetRun: 150,
     anims: [
       { name: "idle", file: "stickan-idle.png", frames: 3 },
-      { name: "run", file: "stickan-run.png", frames: 6, order: [4, 1, 0, 2, 5, 3] }, // reorder into a natural gait cycle
+      { name: "run", file: "stickan-run.png" }, // new pre-ordered walk strip; frames auto-detected
       { name: "jump", file: "stickan-jump.png", frames: 2 },
       { name: "throw", file: "stickan-throw.png", frames: 3, flip: true }, // drawn throwing right; flip to match left-facing run/idle
       { name: "hurt", file: "stickan-hurt.png", frames: 1 },

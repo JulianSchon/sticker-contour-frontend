@@ -1,10 +1,10 @@
 {
   "stickan": {
     "sliceX": 6,
-    "sliceY": 3,
+    "sliceY": 5,
     "cellW": 229,
-    "cellH": 190,
-    "frameCount": 16,
+    "cellH": 213,
+    "frameCount": 28,
     "anims": {
       "idle": {
         "from": 0,
@@ -12,19 +12,19 @@
       },
       "run": {
         "from": 4,
-        "to": 9
+        "to": 21
       },
       "jump": {
-        "from": 10,
-        "to": 11
+        "from": 22,
+        "to": 23
       },
       "throw": {
-        "from": 12,
-        "to": 14
+        "from": 24,
+        "to": 26
       },
       "hurt": {
-        "from": 15,
-        "to": 15
+        "from": 27,
+        "to": 27
       }
     }
   },
