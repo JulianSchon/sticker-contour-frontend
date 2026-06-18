@@ -5,8 +5,8 @@ export const GAME_HEIGHT = 720;
 export const TILE_SIZE = 64;
 
 export const PLAYER = {
-  speed: 320,          // horizontal run speed (px/s)
-  jumpForce: 820,      // initial jump impulse
+  speed: 340,          // horizontal run speed (px/s)
+  jumpForce: 900,      // initial jump impulse
   maxFallSpeed: 1200,
   coyoteTime: 0.1,     // seconds after leaving ground you can still jump
   throwCooldown: 0.35, // seconds between throws
