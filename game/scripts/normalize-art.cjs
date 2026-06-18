@@ -23,7 +23,7 @@ const CHARS = {
     targetRun: 150,
     anims: [
       { name: "idle", file: "stickan-idle.png", frames: 3 },
-      { name: "run", file: "stickan-run.png", frames: 6 },
+      { name: "run", file: "stickan-run.png", frames: 6, order: [4, 5, 1, 0, 2, 3] }, // reorder into a natural gait cycle
       { name: "jump", file: "stickan-jump.png", frames: 2 },
       { name: "throw", file: "stickan-throw.png", frames: 3, flip: true }, // drawn throwing right; flip to match left-facing run/idle
       { name: "hurt", file: "stickan-hurt.png", frames: 1 },
@@ -146,9 +146,12 @@ async function buildChar(name, def) {
   const frames = [];
   const counts = [];
   for (const a of def.anims) {
-    const fr = await splitTrim(a);
+    let fr = await splitTrim(a);
     if (a.flip) {
       for (const f of fr) f.data = await sharp(f.data).flop().png().toBuffer();
+    }
+    if (a.order && a.order.length === fr.length) {
+      fr = a.order.map((i) => fr[i]);
     }
     counts.push({ name: a.name, n: fr.length });
     fr.forEach((f) => frames.push(f));
