@@ -34,7 +34,9 @@ export function makePlayer(
     k.opacity(1),
     k.z(10),
     "player",
-    { facing: 1, coyote: 0, throwTimer: 0, invuln: 0, currentAnim: "idle", vx: 0, slip: 0 },
+    // currentAnim starts empty so the state machine's first tick explicitly
+    // play()s an anim (otherwise the sprite cycles through ALL sheet frames).
+    { facing: 1, coyote: 0, throwTimer: 0, invuln: 0, currentAnim: "", vx: 0, slip: 0 },
   ]) as unknown as PlayerObj;
 
   const playAnim = (name: string) => {
@@ -43,6 +45,7 @@ export function makePlayer(
       player.currentAnim = name;
     }
   };
+  playAnim("idle");
 
   player.onUpdate(() => {
     const dt = k.dt();

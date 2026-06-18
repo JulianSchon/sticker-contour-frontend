@@ -28,6 +28,7 @@ export function makeMopJanitor(k: KAPLAYCtx, at: SpawnAt): GameObj {
     "janitor",
     { dir: -1, hp: 1, puddleTimer: ENEMY.janitorPuddleInterval },
   ]) as unknown as EnemyObj;
+  e.play("run"); // explicitly play, else the sheet cycles all frames
 
   e.onUpdate(() => {
     e.move(e.dir * ENEMY.janitorSpeed, 0);
@@ -64,6 +65,7 @@ export function makeBroomGranny(k: KAPLAYCtx, at: SpawnAt): GameObj {
     "granny",
     { dir: -1, hp: 2, swipeTimer: ENEMY.grannySwipeInterval },
   ]) as unknown as EnemyObj;
+  e.play("run"); // explicitly play, else the sheet cycles all frames
 
   e.onUpdate(() => {
     e.move(e.dir * ENEMY.grannySpeed, 0);

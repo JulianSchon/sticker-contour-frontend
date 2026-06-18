@@ -32,7 +32,7 @@ export function makeBoss(k: KAPLAYCtx, at: SpawnAt, onDefeat: () => void): GameO
     { hp: BOSS.hits, dir: -1, charging: false, cooldown: 1.5, invuln: 0 },
   ]) as unknown as BossObj;
 
-  let currentAnim = "idle";
+  let currentAnim = ""; // empty so the first playAnim() actually triggers play()
   const playAnim = (name: string) => {
     if (currentAnim !== name) {
       boss.play(name);
