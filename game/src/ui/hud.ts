@@ -1,5 +1,5 @@
 import type { KAPLAYCtx, GameObj, TextComp, AreaComp } from "kaplay";
-import { GAME_WIDTH } from "../config";
+import { GAME_WIDTH, PLAYER } from "../config";
 import { RunState } from "../systems/progress";
 import { touchZones } from "../systems/inputWiring";
 import { isMuted, toggleMute } from "../systems/audio";
@@ -21,17 +21,24 @@ export function addHud(k: KAPLAYCtx, run: RunState): void {
     k.z(100),
   ]) as GameObj<TextComp>;
 
-  // Ammo (sticker shots) below the hearts.
-  const ammo = k.add([
-    k.text("", { size: 24 }),
-    k.pos(24, 60),
-    k.fixed(),
-    k.z(100),
-  ]) as GameObj<TextComp>;
+  // Ammo (sticker shots) below the hearts: a row of s5 sticker icons that dim
+  // when spent.
+  k.add([k.text("Stickers:", { size: 24 }), k.pos(24, 60), k.fixed(), k.z(100)]);
+  for (let i = 0; i < PLAYER.ammoMax; i++) {
+    const icon = k.add([
+      k.sprite("stickericon"),
+      k.pos(176 + i * 42, 74),
+      k.anchor("center"),
+      k.scale(0.34),
+      k.opacity(1),
+      k.fixed(),
+      k.z(100),
+    ]) as GameObj<{ opacity: number }>;
+    icon.onUpdate(() => { icon.opacity = i < run.ammo ? 1 : 0.22; });
+  }
 
   hearts.onUpdate(() => { hearts.text = "♥".repeat(run.hearts); });
   score.onUpdate(() => { score.text = `Score: ${run.score}`; });
-  ammo.onUpdate(() => { ammo.text = `Stickers: ${"◆".repeat(run.ammo) || "—"}`; });
 
   // Mute toggle (clickable on all devices).
   const mute = k.add([

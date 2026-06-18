@@ -279,6 +279,14 @@ async function buildProp(name, file, target, fixedFrames) {
   console.log("throwsticker", JSON.stringify(manifest.throwsticker));
   manifest.spincoin = await buildProp("spincoin", "spinsticker.png", 90, 10);
   console.log("spincoin", JSON.stringify(manifest.spincoin));
+
+  // Single sticker icon for the ammo/sticker counter (s5 = skateboarding Stickan).
+  {
+    const keyed = await keyOutWhiteBg(fs.readFileSync(path.join(IN, "stickers", "s5throw.png")));
+    const icon = await sharp(keyed).trim().resize(96, 96, { fit: "inside" }).png().toBuffer();
+    fs.writeFileSync(path.join(OUT, "stickericon.png"), icon);
+    console.log("stickericon written");
+  }
   fs.writeFileSync(path.join(OUT, "art-manifest.json"), JSON.stringify(manifest, null, 2));
   console.log("done");
 })();
