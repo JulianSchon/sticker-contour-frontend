@@ -1,7 +1,7 @@
 import type { KAPLAYCtx, GameObj, TextComp, AreaComp } from "kaplay";
 import { GAME_WIDTH, PLAYER } from "../config";
 import { RunState } from "../systems/progress";
-import { touchZones } from "../systems/inputWiring";
+import { touchUI } from "../systems/inputWiring";
 import { isMuted, toggleMute } from "../systems/audio";
 
 /** Draws hearts + score (fixed to screen) and, on touch devices, button overlays. */
@@ -52,30 +52,29 @@ export function addHud(k: KAPLAYCtx, run: RunState): void {
 
   mute.onClick(() => { toggleMute(); mute.text = isMuted() ? "Muted" : "Sound"; });
 
-  // Touch button overlays only when the device reports touch support.
+  // Touch controls: virtual joystick (left/right) + jump/throw buttons.
   if (k.isTouchscreen()) {
-    const z = touchZones();
-    const drawBtn = (rect: [number, number, number, number], label: string) => {
-      k.add([
-        k.rect(rect[2], rect[3], { radius: 16 }),
-        k.pos(rect[0], rect[1]),
-        k.color(0, 0, 0),
-        k.opacity(0.25),
-        k.fixed(),
-        k.z(99),
-      ]);
-      k.add([
-        k.text(label, { size: 40 }),
-        k.pos(rect[0] + rect[2] / 2, rect[1] + rect[3] / 2),
-        k.anchor("center"),
-        k.opacity(0.7),
-        k.fixed(),
-        k.z(100),
-      ]);
-    };
-    drawBtn(z.left, "←");
-    drawBtn(z.right, "→");
-    drawBtn(z.jump, "↑");
-    drawBtn(z.throw, "●");
+    const J = touchUI.joy;
+    k.add([k.circle(J.r), k.pos(J.x, J.y), k.anchor("center"), k.color(0, 0, 0), k.opacity(0.2), k.fixed(), k.z(98)]);
+    const knob = k.add([
+      k.circle(48),
+      k.pos(J.x, J.y),
+      k.anchor("center"),
+      k.color(255, 255, 255),
+      k.opacity(0.55),
+      k.outline(4, k.rgb(0, 0, 0)),
+      k.fixed(),
+      k.z(99),
+    ]);
+    knob.onUpdate(() => { knob.pos = k.vec2(touchUI.knob.x, touchUI.knob.y); });
+
+    const btn = (x: number, y: number, r: number) =>
+      k.add([k.circle(r), k.pos(x, y), k.anchor("center"), k.color(0, 0, 0), k.opacity(0.25), k.fixed(), k.z(98)]);
+    const jb = touchUI.jump;
+    btn(jb.x, jb.y, jb.r);
+    k.add([k.text("JUMP", { size: 26 }), k.pos(jb.x, jb.y), k.anchor("center"), k.opacity(0.85), k.fixed(), k.z(99)]);
+    const sb = touchUI.shoot;
+    btn(sb.x, sb.y, sb.r);
+    k.add([k.sprite("stickericon"), k.pos(sb.x, sb.y), k.anchor("center"), k.scale(0.42), k.fixed(), k.z(99)]);
   }
 }

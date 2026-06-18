@@ -25,6 +25,10 @@ export function initEngine(root: HTMLElement): KAPLAYCtx {
   const canvas = root.querySelector("canvas") as HTMLCanvasElement | null;
   if (canvas) {
     canvas.style.outline = "none";
+    // Stop the browser from treating touches as page scroll/zoom so the
+    // on-screen controls actually reach the game (critical on mobile / in WP).
+    canvas.style.touchAction = "none";
+    canvas.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
     canvas.addEventListener("pointerdown", () => canvas.focus());
     canvas.focus();
   }
