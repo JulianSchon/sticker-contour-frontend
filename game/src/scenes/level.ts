@@ -21,6 +21,14 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
     const def = getLevel(run.levelId);
     k.setGravity(GRAVITY);
 
+    // Fixed full-screen city backdrop (screen-space, behind everything).
+    k.add([k.sprite("bg-city"), k.pos(0, 0), k.fixed(), k.z(-100)]);
+
+    // Levels are short; keep the camera Y fixed so the ground sits near the
+    // bottom of the viewport with sky above. Only X follows the player.
+    const bottomY = def.map.length * TILE_SIZE;
+    const camY = bottomY - GAME_HEIGHT / 2;
+
     let respawn = { x: 100, y: 100 };
 
     k.addLevel(def.map, {
@@ -54,12 +62,12 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
 
     const player = makePlayer(k, input, respawn).obj;
     k.setCamScale(1);
-    player.onUpdate(() => k.setCamPos(player.pos.x, GAME_HEIGHT / 2));
+    player.onUpdate(() => k.setCamPos(player.pos.x, camY));
 
     addHud(k, run);
 
     // Anything that falls below this Y has left the level entirely.
-    const killY = def.map.length * TILE_SIZE + 300;
+    const killY = bottomY + 140;
 
     const hurtPlayer = () => {
       // player.invuln is a custom field typed on PlayerObj internally.

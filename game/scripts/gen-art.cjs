@@ -195,6 +195,67 @@ function stickanJump() {
   `);
 }
 
+// ---- Background ------------------------------------------------------------
+function bgCity() {
+  const cloud = (x, y, s) => `
+    <g fill="#FFFFFF" opacity="0.92">
+      <ellipse cx="${x}" cy="${y}" rx="${46 * s}" ry="${28 * s}"/>
+      <ellipse cx="${x + 40 * s}" cy="${y + 6 * s}" rx="${34 * s}" ry="${22 * s}"/>
+      <ellipse cx="${x - 38 * s}" cy="${y + 8 * s}" rx="${30 * s}" ry="${20 * s}"/>
+      <rect x="${x - 64 * s}" y="${y + 6 * s}" width="${128 * s}" height="${22 * s}" rx="${11 * s}"/>
+    </g>`;
+
+  // a building with simple window grid
+  const bldg = (x, w, h, fill, win) => {
+    let windows = "";
+    const cols = Math.max(1, Math.floor(w / 26));
+    const rows = Math.max(1, Math.floor(h / 34));
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if ((r + c) % 3 === 0) continue; // some dark windows
+        windows += `<rect x="${x + 10 + c * 26}" y="${720 - h + 16 + r * 34}" width="12" height="16" rx="2" fill="${win}" opacity="0.85"/>`;
+      }
+    }
+    return `<rect x="${x}" y="${720 - h}" width="${w}" height="${h}" fill="${fill}"/>${windows}`;
+  };
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#5E9BE6"/>
+        <stop offset="0.7" stop-color="#9CC8F5"/>
+        <stop offset="1" stop-color="#CFE7FF"/>
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="1280" height="720" fill="url(#sky)"/>
+    <circle cx="1060" cy="150" r="110" fill="#FFEFA8" opacity="0.35"/>
+    <circle cx="1060" cy="150" r="66" fill="#FFE07A"/>
+    ${cloud(230, 150, 1.1)}
+    ${cloud(560, 100, 0.8)}
+    ${cloud(880, 200, 1.0)}
+    <!-- far skyline (hazy) -->
+    <g opacity="0.6">
+      ${bldg(60, 90, 200, "#9DBBDD", "#EAF3FF")}
+      ${bldg(180, 70, 150, "#9DBBDD", "#EAF3FF")}
+      ${bldg(420, 110, 240, "#9DBBDD", "#EAF3FF")}
+      ${bldg(700, 80, 180, "#9DBBDD", "#EAF3FF")}
+      ${bldg(980, 120, 230, "#9DBBDD", "#EAF3FF")}
+      ${bldg(1180, 80, 160, "#9DBBDD", "#EAF3FF")}
+    </g>
+    <!-- near skyline -->
+    ${bldg(0, 130, 280, "#5E7CA8", "#FFE07A")}
+    ${bldg(150, 100, 200, "#52709C", "#FFE07A")}
+    ${bldg(290, 140, 320, "#5E7CA8", "#FFE07A")}
+    ${bldg(470, 90, 230, "#52709C", "#FFE07A")}
+    ${bldg(600, 150, 300, "#5E7CA8", "#FFE07A")}
+    ${bldg(800, 110, 250, "#52709C", "#FFE07A")}
+    ${bldg(960, 140, 330, "#5E7CA8", "#FFE07A")}
+    ${bldg(1140, 160, 270, "#52709C", "#FFE07A")}
+    <!-- haze/ground band behind platforms -->
+    <rect x="0" y="628" width="1280" height="92" fill="#3F4F70"/>
+  </svg>`;
+}
+
 // ---- Render ----------------------------------------------------------------
 const ASSETS = [
   { name: "stickan-wave", svg: stickanIdle(), width: 256 },
@@ -203,6 +264,7 @@ const ASSETS = [
   { name: "janitor", svg: janitor(), width: 180 },
   { name: "granny", svg: granny(), width: 180 },
   { name: "boss", svg: boss(), width: 260 },
+  { name: "bg-city", svg: bgCity(), width: 1280 },
 ];
 
 const force = process.argv.includes("--force");

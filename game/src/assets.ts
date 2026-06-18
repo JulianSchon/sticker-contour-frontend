@@ -20,6 +20,7 @@ export function loadAssets(k: KAPLAYCtx): void {
   k.loadSprite("janitor", BASE + "sprites/janitor.png");
   k.loadSprite("granny", BASE + "sprites/granny.png");
   k.loadSprite("boss", BASE + "sprites/boss.png");
+  k.loadSprite("bg-city", BASE + "sprites/bg-city.png");
 
   k.loadSound("jump", BASE + "sfx/jump.wav");
   k.loadSound("throw", BASE + "sfx/throw.wav");
