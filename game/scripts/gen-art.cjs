@@ -353,13 +353,9 @@ function bgCity() {
 }
 
 // ---- Render ----------------------------------------------------------------
+// Characters now come from hand-drawn art via scripts/normalize-art.cjs.
+// gen-art only produces the environment: background + platform tiles.
 const ASSETS = [
-  { name: "stickan-wave", svg: stickanIdle(), width: 256 },
-  { name: "stickan-run", svg: stickanRun(), width: 256 },
-  { name: "stickan-jump", svg: stickanJump(), width: 256 },
-  { name: "janitor", svg: janitor(), width: 180 },
-  { name: "granny", svg: granny(), width: 180 },
-  { name: "boss", svg: boss(), width: 260 },
   { name: "bg-city", svg: bgCity(), width: 1280 },
 ];
 

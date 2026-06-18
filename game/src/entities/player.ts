@@ -8,7 +8,7 @@ type PlayerObj = GameObj & {
   coyote: number;
   throwTimer: number;
   invuln: number;
-  currentSprite: string;
+  currentAnim: string;
   vx: number;
   slip: number;
 };
@@ -17,34 +17,37 @@ export interface PlayerHandle {
   obj: PlayerObj;
 }
 
+const PLAYER_SCALE = 0.62;
+
 export function makePlayer(
   k: KAPLAYCtx,
   input: InputState,
   spawn: { x: number; y: number },
 ): PlayerHandle {
   const player = k.add([
-    k.sprite("stickan-idle"),
+    k.sprite("stickan", { anim: "idle" }),
     k.pos(spawn.x, spawn.y),
-    k.anchor("center"),
-    k.area({ scale: 0.8 }),
+    k.anchor("bot"),
+    k.area({ scale: k.vec2(0.42, 0.7) }),
     k.body({ maxVelocity: PLAYER.maxFallSpeed }),
-    k.scale(0.5),
+    k.scale(PLAYER_SCALE),
     k.opacity(1),
     k.z(10),
     "player",
-    { facing: 1, coyote: 0, throwTimer: 0, invuln: 0, currentSprite: "stickan-idle", vx: 0, slip: 0 },
+    { facing: 1, coyote: 0, throwTimer: 0, invuln: 0, currentAnim: "idle", vx: 0, slip: 0 },
   ]) as unknown as PlayerObj;
 
-  const swapSprite = (name: string) => {
-    if (player.currentSprite !== name) {
-      player.use(k.sprite(name));
-      player.currentSprite = name;
+  const playAnim = (name: string) => {
+    if (player.currentAnim !== name) {
+      player.play(name);
+      player.currentAnim = name;
     }
   };
 
   player.onUpdate(() => {
     const dt = k.dt();
 
+    // Momentum-based horizontal movement (slippery on puddles).
     const targetVX = input.moveX * PLAYER.speed;
     const accel = player.slip > 0 ? PLAYER.slipAccel : PLAYER.groundAccel;
     player.vx += (targetVX - player.vx) * Math.min(1, accel * dt);
@@ -68,18 +71,22 @@ export function makePlayer(
       player.throwTimer = PLAYER.throwCooldown;
       makeProjectile(k, {
         x: player.pos.x + player.facing * 30,
-        y: player.pos.y,
+        y: player.pos.y - 40,
         dir: player.facing,
         speed: PROJECTILE.speed,
       });
     }
 
-    if (!player.isGrounded()) swapSprite("stickan-jump");
-    else if (input.moveX !== 0) swapSprite("stickan-run");
-    else swapSprite("stickan-idle");
-
     player.invuln = Math.max(0, player.invuln - dt);
     player.opacity = player.invuln > 0 ? 0.5 : 1;
+
+    // Animation state machine (priority: hurt > throw > jump > run > idle).
+    let anim = "idle";
+    if (player.invuln > 1.0) anim = "hurt";
+    else if (player.throwTimer > PLAYER.throwCooldown - 0.25) anim = "throw";
+    else if (!player.isGrounded()) anim = "jump";
+    else if (input.moveX !== 0) anim = "run";
+    playAnim(anim);
   });
 
   return { obj: player };

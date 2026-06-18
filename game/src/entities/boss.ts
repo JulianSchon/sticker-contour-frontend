@@ -19,12 +19,12 @@ type BossObj = GameObj & {
  */
 export function makeBoss(k: KAPLAYCtx, at: SpawnAt, onDefeat: () => void): GameObj {
   const boss = k.add([
-    k.sprite("boss"),
-    k.scale(0.42),
+    k.sprite("boss", { anim: "idle" }),
+    k.scale(0.4),
     k.color(255, 255, 255),
     k.pos(at.x, at.y),
     k.anchor("bot"),
-    k.area({ scale: 0.55 }),
+    k.area({ scale: k.vec2(0.6, 0.7) }),
     k.body(),
     k.z(8),
     "enemy",
@@ -32,10 +32,19 @@ export function makeBoss(k: KAPLAYCtx, at: SpawnAt, onDefeat: () => void): GameO
     { hp: BOSS.hits, dir: -1, charging: false, cooldown: 1.5, invuln: 0 },
   ]) as unknown as BossObj;
 
+  let currentAnim = "idle";
+  const playAnim = (name: string) => {
+    if (currentAnim !== name) {
+      boss.play(name);
+      currentAnim = name;
+    }
+  };
+
   boss.onUpdate(() => {
     boss.invuln = Math.max(0, boss.invuln - k.dt());
     const dt = k.dt();
     boss.flipX = boss.dir > 0;
+    playAnim(boss.charging ? "charge" : "idle");
     if (boss.charging) {
       boss.move(boss.dir * BOSS.chargeSpeed, 0);
       if (boss.pos.x < 120 || boss.pos.x > GAME_WIDTH - 120) {

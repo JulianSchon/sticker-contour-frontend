@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
-    "build:wp": "npm run build && node -e \"const fs=require('fs');fs.rmSync('../wordpress-plugin/nimstick-stickan-game/dist',{recursive:true,force:true});fs.cpSync('dist','../wordpress-plugin/nimstick-stickan-game/dist',{recursive:true});console.log('Copied dist to WP plugin')\""
+    "build:wp": "npm run build && node -e \"const fs=require('fs');fs.rmSync('../wordpress-plugin/nimstick-stickan-game/dist',{recursive:true,force:true});fs.cpSync('dist','../wordpress-plugin/nimstick-stickan-game/dist',{recursive:true});console.log('Copied dist to WP plugin')\"",
+    "art": "node scripts/gen-art.cjs --force && node scripts/normalize-art.cjs"
   },
   "dependencies": {
     "kaplay": "^3001.0.19"
@@ -19,6 +20,7 @@
     "@playwright/test": "^1.61.0",
     "@resvg/resvg-js": "^2.6.2",
     "jsdom": "^25.0.1",
+    "sharp": "^0.35.1",
     "typescript": "^5.3.3",
     "vite": "^5.0.11",
     "vitest": "^2.1.9"

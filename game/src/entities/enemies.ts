@@ -17,11 +17,11 @@ type EnemyObj = GameObj & {
 /** A walking janitor: patrols, reverses at walls, dies to stomp or sticker. */
 export function makeMopJanitor(k: KAPLAYCtx, at: SpawnAt): GameObj {
   const e = k.add([
-    k.sprite("janitor"),
-    k.scale(0.34),
+    k.sprite("janitor", { anim: "run" }),
+    k.scale(0.3),
     k.pos(at.x, at.y),
     k.anchor("bot"),
-    k.area({ scale: 0.5 }),
+    k.area({ scale: k.vec2(0.5, 0.7) }),
     k.body(),
     k.z(8),
     "enemy",
@@ -53,11 +53,11 @@ export function makeMopJanitor(k: KAPLAYCtx, at: SpawnAt): GameObj {
  */
 export function makeBroomGranny(k: KAPLAYCtx, at: SpawnAt): GameObj {
   const e = k.add([
-    k.sprite("granny"),
-    k.scale(0.30),
+    k.sprite("granny", { anim: "run" }),
+    k.scale(0.32),
     k.pos(at.x, at.y),
     k.anchor("bot"),
-    k.area({ scale: 0.5 }),
+    k.area({ scale: k.vec2(0.5, 0.7) }),
     k.body(),
     k.z(8),
     "enemy",

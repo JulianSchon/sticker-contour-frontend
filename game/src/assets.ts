@@ -2,8 +2,9 @@ import type { KAPLAYCtx } from "kaplay";
 
 // In WordPress, window.NIMSTICK_GAME_BASE points at the plugin's dist/ folder.
 // In dev/preview it is undefined, so assets resolve relative to the page root.
-// Sprites are authored as SVG and rasterized to PNG by scripts/gen-art.cjs.
-// "stickan-idle" uses the waving pose.
+// Character sheets come from hand-drawn art normalized by scripts/normalize-art.cjs
+// (see art-manifest.json for sliceX/sliceY + frame ranges). Background and ground
+// tiles are SVG-authored by scripts/gen-art.cjs.
 declare global {
   interface Window {
     NIMSTICK_GAME_BASE?: string;
@@ -17,12 +18,41 @@ const BASE =
 export const GROUND_TILE_COUNT = 8;
 
 export function loadAssets(k: KAPLAYCtx): void {
-  k.loadSprite("stickan-idle", BASE + "sprites/stickan-wave.png");
-  k.loadSprite("stickan-run", BASE + "sprites/stickan-run.png");
-  k.loadSprite("stickan-jump", BASE + "sprites/stickan-jump.png");
-  k.loadSprite("janitor", BASE + "sprites/janitor.png");
-  k.loadSprite("granny", BASE + "sprites/granny.png");
-  k.loadSprite("boss", BASE + "sprites/boss.png");
+  k.loadSprite("stickan", BASE + "sprites/stickan.png", {
+    sliceX: 6,
+    sliceY: 3,
+    anims: {
+      idle: { from: 0, to: 2, loop: true, speed: 6 },
+      run: { from: 3, to: 8, loop: true, speed: 14 },
+      jump: { from: 9, to: 10, loop: false, speed: 8 },
+      throw: { from: 11, to: 13, loop: false, speed: 18 },
+      hurt: { from: 14, to: 14 },
+    },
+  });
+  k.loadSprite("janitor", BASE + "sprites/janitor.png", {
+    sliceX: 6,
+    sliceY: 2,
+    anims: {
+      idle: { from: 0, to: 2, loop: true, speed: 5 },
+      run: { from: 3, to: 8, loop: true, speed: 10 },
+    },
+  });
+  k.loadSprite("granny", BASE + "sprites/granny.png", {
+    sliceX: 6,
+    sliceY: 2,
+    anims: {
+      idle: { from: 0, to: 2, loop: true, speed: 5 },
+      run: { from: 3, to: 8, loop: true, speed: 8 },
+    },
+  });
+  k.loadSprite("boss", BASE + "sprites/boss.png", {
+    sliceX: 6,
+    sliceY: 2,
+    anims: {
+      idle: { from: 0, to: 2, loop: true, speed: 5 },
+      charge: { from: 3, to: 8, loop: true, speed: 12 },
+    },
+  });
   k.loadSprite("bg-city", BASE + "sprites/bg-city.png");
   // Metallic sticker platform tiles (variants picked at random per tile).
   for (let i = 0; i < GROUND_TILE_COUNT; i++) {
