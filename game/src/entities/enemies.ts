@@ -98,10 +98,27 @@ export function makeMopJanitor(k: KAPLAYCtx, at: SpawnAt): GameObj {
 }
 
 /**
- * A broom granny: slower, tougher (2 hp). Periodically performs a telegraphed
- * swipe that spawns a short-lived "hazard"-tagged hitbox in front of her, which
- * the level scene's hazard handler turns into player damage.
+ * A broom granny: slower, tougher (2 hp). Periodically hurls a dust ball — a
+ * "hazard"-tagged projectile that flies in her facing direction, which the
+ * level scene's hazard handler turns into player damage.
  */
+function shootDustBall(k: KAPLAYCtx, e: EnemyObj): void {
+  const dir = e.dir;
+  const ball = k.add([
+    k.circle(13),
+    k.color(168, 150, 120),       // dusty tan
+    k.outline(3, k.rgb(70, 55, 40)),
+    k.pos(e.pos.x + dir * 30, e.pos.y - 46),
+    k.anchor("center"),
+    k.area({ scale: 0.8 }),
+    k.offscreen({ destroy: true }),
+    k.lifespan(ENEMY.grannyShotLifetime),
+    k.z(7),
+    "hazard",
+  ]);
+  ball.onUpdate(() => ball.move(dir * ENEMY.grannyShotSpeed, 0));
+}
+
 export function makeBroomGranny(k: KAPLAYCtx, at: SpawnAt): GameObj {
   const e = k.add([
     k.sprite("granny", { anim: "run" }),
@@ -130,19 +147,7 @@ export function makeBroomGranny(k: KAPLAYCtx, at: SpawnAt): GameObj {
     e.swipeTimer = (e.swipeTimer ?? ENEMY.grannySwipeInterval) - k.dt();
     if (e.swipeTimer <= 0) {
       e.swipeTimer = ENEMY.grannySwipeInterval;
-      const reach = ENEMY.grannySwipeReach;
-      const hbX = e.dir > 0 ? e.pos.x + 20 : e.pos.x - reach - 20;
-      k.add([
-        k.rect(reach, 50),
-        k.color(180, 80, 160),
-        k.opacity(0.5),
-        k.pos(hbX, e.pos.y - 10),
-        k.anchor("left"),
-        k.area(),
-        k.lifespan(0.4, { fade: 0.2 }),
-        k.z(7),
-        "hazard",
-      ]);
+      shootDustBall(k, e);
     }
   });
 

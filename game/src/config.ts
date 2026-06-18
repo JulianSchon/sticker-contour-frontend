@@ -26,14 +26,15 @@ export const PROJECTILE = {
 export const ENEMY = {
   janitorSpeed: 70,
   grannySpeed: 45,
-  grannySwipeInterval: 2.4,
-  grannySwipeReach: 90,
+  grannySwipeInterval: 2.4,   // seconds between granny dust-ball shots
+  grannyShotSpeed: 230,       // px/s horizontal speed of the dust ball
+  grannyShotLifetime: 3.5,    // seconds before the dust ball despawns
   stompBounce: 600,
   janitorPuddleInterval: 2.0, // seconds between puddle drops
 };
 
 export const BOSS = {
-  hits: 3,
+  hits: 8,
   chargeSpeed: 520,
   bubbleSpeed: 260,
 };
