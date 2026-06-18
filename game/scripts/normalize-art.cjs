@@ -25,7 +25,7 @@ const CHARS = {
       { name: "idle", file: "stickan-idle.png", frames: 3 },
       { name: "run", file: "stickan-run.png", frames: 6 },
       { name: "jump", file: "stickan-jump.png", frames: 2 },
-      { name: "throw", file: "stickan-throw.png", frames: 3 },
+      { name: "throw", file: "stickan-throw.png", frames: 3, flip: true }, // drawn throwing right; flip to match left-facing run/idle
       { name: "hurt", file: "stickan-hurt.png", frames: 1 },
     ],
   },
@@ -147,6 +147,9 @@ async function buildChar(name, def) {
   const counts = [];
   for (const a of def.anims) {
     const fr = await splitTrim(a);
+    if (a.flip) {
+      for (const f of fr) f.data = await sharp(f.data).flop().png().toBuffer();
+    }
     counts.push({ name: a.name, n: fr.length });
     fr.forEach((f) => frames.push(f));
   }
