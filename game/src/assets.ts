@@ -33,16 +33,16 @@ export function loadAssets(k: KAPLAYCtx): void {
     sliceX: 6,
     sliceY: 2,
     anims: {
-      idle: { from: 0, to: 2, loop: true, speed: 5 },
-      run: { from: 3, to: 8, loop: true, speed: 10 },
+      idle: { from: 0, to: 2, loop: true, speed: 4 },
+      run: { from: 3, to: 8, loop: true, speed: 6 },
     },
   });
   k.loadSprite("granny", BASE + "sprites/granny.png", {
     sliceX: 6,
     sliceY: 2,
     anims: {
-      idle: { from: 0, to: 2, loop: true, speed: 5 },
-      run: { from: 3, to: 8, loop: true, speed: 8 },
+      idle: { from: 0, to: 2, loop: true, speed: 4 },
+      run: { from: 3, to: 8, loop: true, speed: 4 },
     },
   });
   k.loadSprite("boss", BASE + "sprites/boss.png", {
