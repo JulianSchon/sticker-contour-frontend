@@ -23,17 +23,17 @@ const C = {
 // All parts drawn in a 256x256 viewBox, body centered ~ (128,120).
 
 function sunglasses() {
-  // bold black frames with bright cyan lenses + angular highlight
+  // bold black frames with bright cyan lenses + angular highlight (compact)
   const lens = C.cyan, hi = C.cyanHi;
   return `
     <g>
-      <rect x="42" y="100" width="16" height="10" rx="5" fill="${C.outline}"/>
-      <rect x="198" y="100" width="16" height="10" rx="5" fill="${C.outline}"/>
-      <path d="M56 90 H120 Q126 90 126 100 V116 Q126 132 104 132 H74 Q56 132 56 114 V98 Q56 90 62 90 Z" fill="${lens}" stroke="${C.outline}" stroke-width="7" stroke-linejoin="round"/>
-      <path d="M136 90 H194 Q200 90 200 98 V114 Q200 132 178 132 H148 Q130 132 130 116 V100 Q130 90 136 90 Z" fill="${lens}" stroke="${C.outline}" stroke-width="7" stroke-linejoin="round"/>
-      <rect x="118" y="95" width="20" height="13" rx="5" fill="${C.outline}"/>
-      <path d="M66 98 L88 98 L70 126 Z" fill="${hi}" opacity="0.9"/>
-      <path d="M144 98 L166 98 L148 126 Z" fill="${hi}" opacity="0.9"/>
+      <rect x="60" y="106" width="13" height="8" rx="4" fill="${C.outline}"/>
+      <rect x="183" y="106" width="13" height="8" rx="4" fill="${C.outline}"/>
+      <path d="M74 100 H113 Q118 100 118 107 V120 Q118 129 106 129 H85 Q74 129 74 118 V105 Q74 100 79 100 Z" fill="${lens}" stroke="${C.outline}" stroke-width="6" stroke-linejoin="round"/>
+      <path d="M143 100 H181 Q186 100 186 105 V118 Q186 129 174 129 H153 Q142 129 142 120 V107 Q142 100 147 100 Z" fill="${lens}" stroke="${C.outline}" stroke-width="6" stroke-linejoin="round"/>
+      <rect x="114" y="104" width="28" height="9" rx="4" fill="${C.outline}"/>
+      <path d="M82 106 L97 106 L86 123 Z" fill="${hi}" opacity="0.9"/>
+      <path d="M151 106 L166 106 L155 123 Z" fill="${hi}" opacity="0.9"/>
     </g>`;
 }
 
