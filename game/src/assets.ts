@@ -22,11 +22,11 @@ export function loadAssets(k: KAPLAYCtx): void {
     sliceX: 6,
     sliceY: 3,
     anims: {
-      idle: { from: 0, to: 2, loop: true, speed: 6 },
-      run: { from: 3, to: 8, loop: true, speed: 14 },
-      jump: { from: 9, to: 10, loop: false, speed: 8 },
-      throw: { from: 11, to: 13, loop: false, speed: 18 },
-      hurt: { from: 14, to: 14 },
+      idle: { from: 0, to: 3, loop: true, speed: 5 },
+      run: { from: 4, to: 9, loop: true, speed: 14 },
+      jump: { from: 10, to: 11, loop: false, speed: 8 },
+      throw: { from: 12, to: 14, loop: false, speed: 18 },
+      hurt: { from: 15, to: 15 },
     },
   });
   k.loadSprite("janitor", BASE + "sprites/janitor.png", {

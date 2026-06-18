@@ -80,14 +80,40 @@ async function keyOutWhiteBg(pngBuf) {
   return sharp(Buffer.from(data), { raw: { width, height, channels: 4 } }).png().toBuffer();
 }
 
+// Split a strip into frames by detecting blank (near-white/transparent) column
+// gaps between characters — robust to however many frames the file actually has.
 async function splitTrim(anim) {
   const buf = fs.readFileSync(path.join(IN, anim.file));
-  const meta = await sharp(buf).metadata();
-  const fw = Math.round(meta.width / anim.frames);
+  const { data, info } = await sharp(buf).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { width, height } = info;
+  const colHasContent = new Array(width).fill(false);
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      const i = (y * width + x) * 4;
+      // a content pixel = opaque and not near-white
+      if (data[i + 3] > 40 && (data[i] <= 235 || data[i + 1] <= 235 || data[i + 2] <= 235)) {
+        colHasContent[x] = true;
+        break;
+      }
+    }
+  }
+  const runs = [];
+  let start = -1;
+  for (let x = 0; x < width; x++) {
+    if (colHasContent[x]) {
+      if (start < 0) start = x;
+    } else if (start >= 0) {
+      runs.push([start, x - 1]);
+      start = -1;
+    }
+  }
+  if (start >= 0) runs.push([start, width - 1]);
+  const frames = runs.filter((r) => r[1] - r[0] >= 25); // drop noise specks
+
   const out = [];
-  for (let i = 0; i < anim.frames; i++) {
+  for (const [x0, x1] of frames) {
     const region = await sharp(buf)
-      .extract({ left: i * fw, top: 0, width: fw, height: meta.height })
+      .extract({ left: x0, top: 0, width: x1 - x0 + 1, height })
       .png()
       .toBuffer();
     const keyed = await keyOutWhiteBg(region);
@@ -118,10 +144,13 @@ async function headWidth(pngBuf) {
 
 async function buildChar(name, def) {
   const frames = [];
+  const counts = [];
   for (const a of def.anims) {
     const fr = await splitTrim(a);
+    counts.push({ name: a.name, n: fr.length });
     fr.forEach((f) => frames.push(f));
   }
+  console.log("  " + name + " detected frames:", counts.map((c) => `${c.name}:${c.n}`).join("  "));
   // Normalize EACH frame so its head/body width == def.targetRun, keeping the
   // body a consistent size regardless of how the pose was drawn/scaled.
   for (const f of frames) {
@@ -155,9 +184,9 @@ async function buildChar(name, def) {
 
   let idx = 0;
   const ranges = {};
-  for (const a of def.anims) {
-    ranges[a.name] = { from: idx, to: idx + a.frames - 1 };
-    idx += a.frames;
+  for (const c of counts) {
+    ranges[c.name] = { from: idx, to: idx + c.n - 1 };
+    idx += c.n;
   }
   return { sliceX: SLICE_X, sliceY, cellW, cellH, frameCount: frames.length, anims: ranges };
 }
