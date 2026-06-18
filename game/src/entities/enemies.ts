@@ -1,5 +1,6 @@
 import type { GameObj, KAPLAYCtx } from "kaplay";
 import { ENEMY } from "../config";
+import { makePuddle } from "./props";
 
 interface SpawnAt {
   x: number;
@@ -10,6 +11,7 @@ type EnemyObj = GameObj & {
   dir: number;
   hp: number;
   swipeTimer?: number;
+  puddleTimer?: number;
 };
 
 /** A walking janitor: patrols, reverses at walls, dies to stomp or sticker. */
@@ -25,12 +27,17 @@ export function makeMopJanitor(k: KAPLAYCtx, at: SpawnAt): GameObj {
     k.z(8),
     "enemy",
     "janitor",
-    { dir: -1, hp: 1 },
+    { dir: -1, hp: 1, puddleTimer: ENEMY.janitorPuddleInterval },
   ]) as unknown as EnemyObj;
 
   e.onUpdate(() => {
     e.move(e.dir * ENEMY.janitorSpeed, 0);
     reverseAtLedge(k, e, 24);
+    e.puddleTimer = (e.puddleTimer ?? ENEMY.janitorPuddleInterval) - k.dt();
+    if (e.puddleTimer <= 0) {
+      e.puddleTimer = ENEMY.janitorPuddleInterval;
+      makePuddle(k, { x: e.pos.x, y: e.pos.y });
+    }
   });
 
   e.onCollide("wall", () => { e.dir *= -1; });

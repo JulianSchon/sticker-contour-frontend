@@ -9,6 +9,8 @@ type PlayerObj = GameObj & {
   throwTimer: number;
   invuln: number;
   currentSprite: string;
+  vx: number;
+  slip: number;
 };
 
 export interface PlayerHandle {
@@ -30,7 +32,7 @@ export function makePlayer(
     k.opacity(1),
     k.z(10),
     "player",
-    { facing: 1, coyote: 0, throwTimer: 0, invuln: 0, currentSprite: "stickan-idle" },
+    { facing: 1, coyote: 0, throwTimer: 0, invuln: 0, currentSprite: "stickan-idle", vx: 0, slip: 0 },
   ]) as unknown as PlayerObj;
 
   const swapSprite = (name: string) => {
@@ -43,7 +45,11 @@ export function makePlayer(
   player.onUpdate(() => {
     const dt = k.dt();
 
-    player.move(input.moveX * PLAYER.speed, 0);
+    const targetVX = input.moveX * PLAYER.speed;
+    const accel = player.slip > 0 ? PLAYER.slipAccel : PLAYER.groundAccel;
+    player.vx += (targetVX - player.vx) * Math.min(1, accel * dt);
+    player.move(player.vx, 0);
+    player.slip = Math.max(0, player.slip - dt);
     if (input.moveX !== 0) {
       player.facing = input.moveX > 0 ? 1 : -1;
       player.flipX = player.facing < 0;

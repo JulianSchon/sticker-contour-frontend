@@ -11,6 +11,8 @@ export const PLAYER = {
   coyoteTime: 0.1,     // seconds after leaving ground you can still jump
   throwCooldown: 0.35, // seconds between throws
   startHearts: 3,
+  groundAccel: 40,     // approach-rate of vx toward target on normal ground (high = snappy)
+  slipAccel: 3.5,      // approach-rate of vx toward target on ice/puddle (low = slippery)
 };
 
 export const GRAVITY = 2000;
@@ -26,6 +28,7 @@ export const ENEMY = {
   grannySwipeInterval: 2.4,
   grannySwipeReach: 90,
   stompBounce: 600,
+  janitorPuddleInterval: 2.0, // seconds between puddle drops
 };
 
 export const BOSS = {

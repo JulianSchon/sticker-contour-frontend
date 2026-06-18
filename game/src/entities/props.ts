@@ -39,6 +39,21 @@ export function makeCheckpoint(k: KAPLAYCtx, at: SpawnAt): GameObj {
   ]);
 }
 
+/** Slippery puddle left by a mop janitor; fades out. Tagged "puddle". */
+export function makePuddle(k: KAPLAYCtx, at: SpawnAt): GameObj {
+  return k.add([
+    k.rect(40, 12, { radius: 6 }),
+    k.color(80, 140, 220),
+    k.opacity(0.45),
+    k.pos(at.x, at.y),
+    k.anchor("bot"),
+    k.area(),
+    k.z(4),
+    k.lifespan(7, { fade: 1 }),
+    "puddle",
+  ]);
+}
+
 /** Level goal flag; overlap triggers the reward scene. */
 export function makeGoal(k: KAPLAYCtx, at: SpawnAt): GameObj {
   return k.add([

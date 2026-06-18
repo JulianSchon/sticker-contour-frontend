@@ -129,5 +129,8 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
       respawn = { x: cp.pos.x, y: cp.pos.y - 40 };
     });
     player.onCollide("goal", () => k.go("reward"));
+    player.onCollideUpdate("puddle", () => {
+      (player as unknown as { slip: number }).slip = 0.4;
+    });
   });
 }
