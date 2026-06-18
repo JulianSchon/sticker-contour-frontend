@@ -1,47 +1,14 @@
 import type { LevelDef } from "../types";
+import { genLevel } from "./generate";
 
-// Maps are read top-to-bottom; each char is one TILE_SIZE cell.
-// Legend: = ground | wall ^ pit j janitor g granny c checkpoint
+// Legend: = ground ^ pit j janitor g granny c checkpoint
 //         s sticker-coin @ spawn > goal B boss  (space) empty
+// Levels 1-3 are generated (long, stepped-height blocks + enemies); the boss
+// level is a flat hand-made arena so the Head Cleaner can charge across it.
 
-const level1: LevelDef = {
-  id: 1,
-  name: "Sticker Street",
-  reward: "logo",
-  map: [
-    "                              ",
-    "         s              s     ",
-    "  @          j             >  ",
-    "=========  =========  ========",
-    "=========^^=========^^========",
-  ],
-};
-
-const level2: LevelDef = {
-  id: 2,
-  name: "Back Alley",
-  reward: "shades",
-  map: [
-    "                                 ",
-    "         s          s            ",
-    "  @          j  c         g    > ",
-    "========   ========   ===========",
-    "========^^^========^^^===========",
-  ],
-};
-
-const level3: LevelDef = {
-  id: 3,
-  name: "The Mall",
-  reward: "mall",
-  map: [
-    "                                    ",
-    "        s         s          s      ",
-    "  @         g c         j        g> ",
-    "========  ========   ========  =====",
-    "========^^========^^^========^^=====",
-  ],
-};
+const level1 = genLevel({ id: 1, name: "Sticker Street", reward: "logo", seed: 1011, segments: 7, janitorChance: 0.55, grannyChance: 0 });
+const level2 = genLevel({ id: 2, name: "Back Alley", reward: "shades", seed: 2022, segments: 9, janitorChance: 0.45, grannyChance: 0.3 });
+const level3 = genLevel({ id: 3, name: "The Mall", reward: "mall", seed: 3033, segments: 11, janitorChance: 0.4, grannyChance: 0.4 });
 
 const level4: LevelDef = {
   id: 4,
@@ -49,11 +16,14 @@ const level4: LevelDef = {
   reward: "golden",
   isBoss: true,
   map: [
-    "                              ",
-    "                              ",
-    "   @                    B    ",
-    "==============================",
-    "==============================",
+    "                      ",
+    "                      ",
+    "                      ",
+    "                      ",
+    "                      ",
+    "   @            B     ",
+    "======================",
+    "======================",
   ],
 };
 
