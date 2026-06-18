@@ -103,6 +103,7 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
         const dir = Math.sign(player.pos.x - h.pos.x) || 1;
         pb.vel.y = -300;
         player.pos.x += dir * 24;
+        (player as unknown as { vx: number }).vx = 0;
       }
       hurtPlayer();
     });
@@ -113,6 +114,7 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
         player.pos = k.vec2(respawn.x, respawn.y);
         pb.vel.y = 0;
         pb.vel.x = 0;
+        (player as unknown as { vx: number }).vx = 0;
       }
     });
     player.onCollide("coin", (c: GameObj) => {
