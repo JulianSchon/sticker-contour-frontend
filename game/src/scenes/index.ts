@@ -19,5 +19,5 @@ export function registerScenes(k: KAPLAYCtx, input: InputState): void {
   registerRewardScene(k, getRun);
   registerAlbumScene(k);
   registerWinScene(k);
-  registerGameOverScene(k);
+  registerGameOverScene(k, getRun);
 }

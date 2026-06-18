@@ -75,17 +75,37 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
       const pb = player as unknown as BodyObj;
       const falling = pb.vel.y > 0;
       const above = player.pos.y < e.pos.y - 10;
-      if (falling && above && !e.is("boss")) {
-        defeatEnemy(k, e);
-        pb.jump(ENEMY.stompBounce);
-        play("stomp");
-        addScore(run, 100);
+      if (falling && above) {
+        if (e.is("boss")) {
+          const b = e as unknown as GameObj & { charging: boolean; takeHit: () => void };
+          if (!b.charging) {
+            b.takeHit();
+            pb.jump(ENEMY.stompBounce);
+            play("stomp");
+          } else {
+            hurtPlayer();
+          }
+        } else {
+          defeatEnemy(k, e);
+          pb.jump(ENEMY.stompBounce);
+          play("stomp");
+          addScore(run, 100);
+        }
       } else {
         hurtPlayer();
       }
     });
 
-    player.onCollide("hazard", () => hurtPlayer());
+    player.onCollide("hazard", (h: GameObj) => {
+      const p = player as unknown as GameObj & { invuln: number };
+      if (p.invuln <= 0) {
+        const pb = player as unknown as BodyObj;
+        const dir = Math.sign(player.pos.x - h.pos.x) || 1;
+        pb.vel.y = -300;
+        player.pos.x += dir * 24;
+      }
+      hurtPlayer();
+    });
     player.onCollide("pit", () => {
       hurtPlayer();
       if (!isGameOver(run)) {

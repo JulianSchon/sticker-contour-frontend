@@ -19,7 +19,3 @@ export function initEngine(root: HTMLElement): KAPLAYCtx {
   return ctx;
 }
 
-export function k(): KAPLAYCtx {
-  if (!ctx) throw new Error("Engine not initialized; call initEngine() first");
-  return ctx;
-}

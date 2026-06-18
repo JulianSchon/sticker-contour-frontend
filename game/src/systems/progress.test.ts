@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createRun, loseHeart, addScore, isGameOver, advanceLevel } from "./progress";
+import { createRun, loseHeart, addScore, isGameOver, advanceLevel, resetHearts } from "./progress";
 
 describe("run progress", () => {
   it("starts on level 1 with full hearts and zero score", () => {
@@ -36,5 +36,14 @@ describe("run progress", () => {
     loseHeart(run); loseHeart(run); loseHeart(run);
     loseHeart(run);
     expect(run.hearts).toBe(0);
+  });
+  it("resetHearts refills hearts without changing level or score", () => {
+    const run = createRun();
+    run.levelId = 3; run.score = 250;
+    loseHeart(run); loseHeart(run); loseHeart(run);
+    resetHearts(run);
+    expect(run.hearts).toBe(3);
+    expect(run.levelId).toBe(3);
+    expect(run.score).toBe(250);
   });
 });

@@ -9,6 +9,7 @@ type BossObj = GameObj & {
   charging: boolean;
   cooldown: number;
   invuln: number;
+  takeHit: () => void;
 };
 
 /**
@@ -50,7 +51,7 @@ export function makeBoss(k: KAPLAYCtx, at: SpawnAt, onDefeat: () => void): GameO
     }
   });
 
-  boss.onCollide("projectile", () => {
+  const applyHit = () => {
     if (boss.invuln > 0) return;
     boss.invuln = 0.4;
     boss.hp -= 1;
@@ -62,7 +63,13 @@ export function makeBoss(k: KAPLAYCtx, at: SpawnAt, onDefeat: () => void): GameO
       boss.color = k.rgb(200, 60, 60);
       k.wait(0.15, () => { boss.color = k.rgb(40, 40, 50); });
     }
+  };
+
+  boss.onCollide("projectile", () => {
+    applyHit();
   });
+
+  boss.takeHit = applyHit;
 
   return boss;
 }

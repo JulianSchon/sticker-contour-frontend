@@ -28,6 +28,11 @@ export function addScore(run: RunState, points: number): void {
   run.score += points;
 }
 
+/** Refill hearts to full to retry the current level (keeps levelId and score). */
+export function resetHearts(run: RunState): void {
+  run.hearts = PLAYER.startHearts;
+}
+
 /**
  * Advance to the next level and refill hearts.
  * Precondition: only call when a next level exists. The reward scene checks

@@ -17,7 +17,6 @@ export function loadAssets(k: KAPLAYCtx): void {
   k.loadSprite("stickan-idle", BASE + "sprites/stickan-wave.png");
   k.loadSprite("stickan-run", BASE + "sprites/stickan-run.png");
   k.loadSprite("stickan-jump", BASE + "sprites/stickan-jump.png");
-  k.loadSprite("stickan-think", BASE + "sprites/stickan-think.png");
 
   k.loadSound("jump", BASE + "sfx/jump.wav");
   k.loadSound("throw", BASE + "sfx/throw.wav");
