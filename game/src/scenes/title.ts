@@ -5,21 +5,32 @@ import { isMuted, toggleMute } from "../systems/audio";
 
 export function registerTitleScene(k: KAPLAYCtx, setRun: (r: RunState) => void): void {
   k.scene("title", () => {
+    const cx = k.center().x;
     k.add([k.rect(k.width(), k.height()), k.color(135, 183, 255)]);
-    k.add([k.sprite("stickan", { anim: "idle" }), k.pos(k.center().x, 260), k.anchor("center"), k.scale(1.0)]);
-    k.add([k.text("Stickan's Sticker Run", { size: 52 }), k.pos(k.center().x, 90), k.anchor("center")]);
-    k.add([k.text("Press SPACE / tap to play", { size: 26 }), k.pos(k.center().x, 480), k.anchor("center")]);
-    k.add([k.text("Press A for album", { size: 22 }), k.pos(k.center().x, 530), k.anchor("center")]);
+    k.add([k.text("Stickan's Sticker Run", { size: 52 }), k.pos(cx, 70), k.anchor("center")]);
+    k.add([k.sprite("stickan", { anim: "idle" }), k.pos(cx, 210), k.anchor("center"), k.scale(0.95)]);
+    k.add([k.text("Press SPACE / tap to play", { size: 28 }), k.pos(cx, 360), k.anchor("center")]);
+
+    // Controls
+    const line = (txt: string, y: number, size = 22) =>
+      k.add([k.text(txt, { size }), k.pos(cx, y), k.anchor("center"), k.opacity(0.95)]);
+    line("CONTROLS", 430, 24);
+    line("Move:  ← →  or  A  D", 468);
+    line("Jump:  Space  /  W  /  ↑", 500);
+    line("Throw sticker:  X  /  J", 532);
+    if (k.isTouchscreen()) {
+      line("On touch: use the on-screen buttons", 564, 20);
+    }
 
     const muteLabel = k.add([
-      k.text(`Press M: Sound ${isMuted() ? "OFF" : "ON"}`, { size: 22 }),
-      k.pos(k.center().x, 580),
+      k.text(`Press A: Album      Press M: Sound ${isMuted() ? "OFF" : "ON"}`, { size: 22 }),
+      k.pos(cx, 620),
       k.anchor("center"),
     ]) as GameObj<TextComp>;
 
     k.onKeyPress("m", () => {
       toggleMute();
-      muteLabel.text = `Press M: Sound ${isMuted() ? "OFF" : "ON"}`;
+      muteLabel.text = `Press A: Album      Press M: Sound ${isMuted() ? "OFF" : "ON"}`;
     });
 
     const start = () => { setRun(createRun()); k.go("level"); };
