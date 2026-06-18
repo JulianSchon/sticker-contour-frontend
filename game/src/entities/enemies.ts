@@ -14,7 +14,25 @@ type EnemyObj = GameObj & {
   puddleTimer?: number;
   curAnim?: string;
   homeX?: number;
+  phase?: "walk" | "idle";
+  phaseTimer?: number;
 };
+
+// Alternate between walking and pausing so enemies don't pace non-stop.
+// Returns true while in the walk phase. Randomized so multiple enemies desync.
+function tickPhase(e: EnemyObj, dt: number): boolean {
+  e.phaseTimer = (e.phaseTimer ?? 0) - dt;
+  if (e.phaseTimer <= 0) {
+    if (e.phase === "idle") {
+      e.phase = "walk";
+      e.phaseTimer = 1.6 + Math.random() * 1.8;
+    } else {
+      e.phase = "idle";
+      e.phaseTimer = 0.9 + Math.random() * 1.4;
+    }
+  }
+  return e.phase === "walk";
+}
 
 // Patrol within +/- range of the spawn point, reversing only at the bounds and
 // only when heading outward — so direction can never oscillate frame-to-frame
@@ -29,10 +47,10 @@ function patrol(e: EnemyObj, range: number): void {
 // self-healing pattern: if the first play() landed before the sheet loaded
 // (or after a hot-reload), the next frame retries instead of leaving the
 // sprite cycling all frames.
-function ensureRun(e: EnemyObj) {
-  if (e.curAnim !== "run") {
-    e.play("run");
-    e.curAnim = "run";
+function ensureAnim(e: EnemyObj, name: string) {
+  if (e.curAnim !== name) {
+    e.play(name);
+    e.curAnim = name;
   }
 }
 
@@ -48,14 +66,18 @@ export function makeMopJanitor(k: KAPLAYCtx, at: SpawnAt): GameObj {
     k.z(8),
     "enemy",
     "janitor",
-    { dir: -1, hp: 1, puddleTimer: ENEMY.janitorPuddleInterval, homeX: at.x },
+    { dir: -1, hp: 1, puddleTimer: ENEMY.janitorPuddleInterval, homeX: at.x, phase: "walk", phaseTimer: 0.5 + Math.random() * 2 },
   ]) as unknown as EnemyObj;
 
   e.onUpdate(() => {
-    ensureRun(e);
-    e.move(e.dir * ENEMY.janitorSpeed, 0);
-    e.flipX = e.dir > 0;
-    patrol(e, 110);
+    if (tickPhase(e, k.dt())) {
+      ensureAnim(e, "run");
+      e.move(e.dir * ENEMY.janitorSpeed, 0);
+      e.flipX = e.dir > 0;
+      patrol(e, 110);
+    } else {
+      ensureAnim(e, "idle");
+    }
     e.puddleTimer = (e.puddleTimer ?? ENEMY.janitorPuddleInterval) - k.dt();
     if (e.puddleTimer <= 0) {
       e.puddleTimer = ENEMY.janitorPuddleInterval;
@@ -85,13 +107,18 @@ export function makeBroomGranny(k: KAPLAYCtx, at: SpawnAt): GameObj {
     k.z(8),
     "enemy",
     "granny",
-    { dir: -1, hp: 2, swipeTimer: ENEMY.grannySwipeInterval, homeX: at.x },
+    { dir: -1, hp: 2, swipeTimer: ENEMY.grannySwipeInterval, homeX: at.x, phase: "walk", phaseTimer: 0.5 + Math.random() * 2 },
   ]) as unknown as EnemyObj;
 
   e.onUpdate(() => {
-    ensureRun(e);
-    e.move(e.dir * ENEMY.grannySpeed, 0);
-    e.flipX = e.dir > 0;
+    if (tickPhase(e, k.dt())) {
+      ensureAnim(e, "run");
+      e.move(e.dir * ENEMY.grannySpeed, 0);
+      e.flipX = e.dir > 0;
+      patrol(e, 90);
+    } else {
+      ensureAnim(e, "idle");
+    }
     e.swipeTimer = (e.swipeTimer ?? ENEMY.grannySwipeInterval) - k.dt();
     if (e.swipeTimer <= 0) {
       e.swipeTimer = ENEMY.grannySwipeInterval;
@@ -109,7 +136,6 @@ export function makeBroomGranny(k: KAPLAYCtx, at: SpawnAt): GameObj {
         "hazard",
       ]);
     }
-    patrol(e, 90);
   });
 
   e.onCollide("wall", () => { e.dir *= -1; });
