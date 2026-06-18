@@ -77,6 +77,28 @@ async function keyOutWhiteBg(pngBuf) {
     const y = (p / width) | 0;
     seed(x + 1, y); seed(x - 1, y); seed(x, y + 1); seed(x, y - 1);
   }
+
+  // Defringe: peel the light anti-aliased halo left between the transparent bg
+  // and the dark outline. Only light-ish opaque pixels touching transparency are
+  // removed, so the dark outline (and interior fills) stay intact.
+  const isLight = (p) => data[p * 4] > 188 && data[p * 4 + 1] > 188 && data[p * 4 + 2] > 188;
+  const transparent = (x, y) =>
+    x < 0 || y < 0 || x >= width || y >= height || data[(y * width + x) * 4 + 3] === 0;
+  for (let pass = 0; pass < 3; pass++) {
+    const clear = [];
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const p = y * width + x;
+        if (data[p * 4 + 3] === 0 || !isLight(p)) continue;
+        if (transparent(x - 1, y) || transparent(x + 1, y) || transparent(x, y - 1) || transparent(x, y + 1)) {
+          clear.push(p);
+        }
+      }
+    }
+    if (clear.length === 0) break;
+    for (const p of clear) data[p * 4 + 3] = 0;
+  }
+
   return sharp(Buffer.from(data), { raw: { width, height, channels: 4 } }).png().toBuffer();
 }
 
