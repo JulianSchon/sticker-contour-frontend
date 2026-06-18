@@ -58,7 +58,8 @@ export function makePlayer(
     player.slip = Math.max(0, player.slip - dt);
     if (input.moveX !== 0) {
       player.facing = input.moveX > 0 ? 1 : -1;
-      player.flipX = player.facing < 0;
+      // Art is drawn facing LEFT, so mirror when moving right.
+      player.flipX = player.facing > 0;
     }
 
     if (player.isGrounded()) player.coyote = PLAYER.coyoteTime;
