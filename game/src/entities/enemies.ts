@@ -13,7 +13,17 @@ type EnemyObj = GameObj & {
   swipeTimer?: number;
   puddleTimer?: number;
   curAnim?: string;
+  homeX?: number;
 };
+
+// Patrol within +/- range of the spawn point, reversing only at the bounds and
+// only when heading outward — so direction can never oscillate frame-to-frame
+// (which previously mirrored the sprite ~60x/sec and looked like a blur).
+function patrol(e: EnemyObj, range: number): void {
+  const home = e.homeX ?? e.pos.x;
+  if (e.dir < 0 && e.pos.x <= home - range) e.dir = 1;
+  else if (e.dir > 0 && e.pos.x >= home + range) e.dir = -1;
+}
 
 // Re-assert the walk animation every frame (guarded), matching the boss's
 // self-healing pattern: if the first play() landed before the sheet loaded
@@ -38,14 +48,14 @@ export function makeMopJanitor(k: KAPLAYCtx, at: SpawnAt): GameObj {
     k.z(8),
     "enemy",
     "janitor",
-    { dir: -1, hp: 1, puddleTimer: ENEMY.janitorPuddleInterval },
+    { dir: -1, hp: 1, puddleTimer: ENEMY.janitorPuddleInterval, homeX: at.x },
   ]) as unknown as EnemyObj;
 
   e.onUpdate(() => {
     ensureRun(e);
     e.move(e.dir * ENEMY.janitorSpeed, 0);
     e.flipX = e.dir > 0;
-    reverseAtLedge(k, e, 24);
+    patrol(e, 110);
     e.puddleTimer = (e.puddleTimer ?? ENEMY.janitorPuddleInterval) - k.dt();
     if (e.puddleTimer <= 0) {
       e.puddleTimer = ENEMY.janitorPuddleInterval;
@@ -75,7 +85,7 @@ export function makeBroomGranny(k: KAPLAYCtx, at: SpawnAt): GameObj {
     k.z(8),
     "enemy",
     "granny",
-    { dir: -1, hp: 2, swipeTimer: ENEMY.grannySwipeInterval },
+    { dir: -1, hp: 2, swipeTimer: ENEMY.grannySwipeInterval, homeX: at.x },
   ]) as unknown as EnemyObj;
 
   e.onUpdate(() => {
@@ -99,7 +109,7 @@ export function makeBroomGranny(k: KAPLAYCtx, at: SpawnAt): GameObj {
         "hazard",
       ]);
     }
-    reverseAtLedge(k, e, 26);
+    patrol(e, 90);
   });
 
   e.onCollide("wall", () => { e.dir *= -1; });
@@ -110,16 +120,6 @@ export function makeBroomGranny(k: KAPLAYCtx, at: SpawnAt): GameObj {
   });
 
   return e;
-}
-
-/**
- * Reverse direction at platform edges: probe just ahead of the feet and cast a
- * short ray downward. If nothing is hit (a gap/pit ahead), turn around.
- */
-function reverseAtLedge(k: KAPLAYCtx, e: EnemyObj, halfWidth: number): void {
-  const origin = k.vec2(e.pos.x + e.dir * (halfWidth + 6), e.pos.y - 4);
-  const hit = k.raycast(origin, k.vec2(0, 28));
-  if (!hit) e.dir *= -1;
 }
 
 /** Shared defeat burst + cleanup. */
