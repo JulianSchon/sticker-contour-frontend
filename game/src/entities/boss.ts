@@ -19,12 +19,12 @@ type BossObj = GameObj & {
  */
 export function makeBoss(k: KAPLAYCtx, at: SpawnAt, onDefeat: () => void): GameObj {
   const boss = k.add([
-    k.rect(96, 110),
-    k.color(40, 40, 50),
-    k.outline(4, k.rgb(0, 0, 0)),
+    k.sprite("boss"),
+    k.scale(0.42),
+    k.color(255, 255, 255),
     k.pos(at.x, at.y),
     k.anchor("bot"),
-    k.area(),
+    k.area({ scale: 0.55 }),
     k.body(),
     k.z(8),
     "enemy",
@@ -35,6 +35,7 @@ export function makeBoss(k: KAPLAYCtx, at: SpawnAt, onDefeat: () => void): GameO
   boss.onUpdate(() => {
     boss.invuln = Math.max(0, boss.invuln - k.dt());
     const dt = k.dt();
+    boss.flipX = boss.dir > 0;
     if (boss.charging) {
       boss.move(boss.dir * BOSS.chargeSpeed, 0);
       if (boss.pos.x < 120 || boss.pos.x > GAME_WIDTH - 120) {
@@ -60,8 +61,8 @@ export function makeBoss(k: KAPLAYCtx, at: SpawnAt, onDefeat: () => void): GameO
       k.destroy(boss);
       onDefeat();
     } else {
-      boss.color = k.rgb(200, 60, 60);
-      k.wait(0.15, () => { boss.color = k.rgb(40, 40, 50); });
+      boss.color = k.rgb(255, 90, 90);
+      k.wait(0.15, () => { boss.color = k.rgb(255, 255, 255); });
     }
   };
 

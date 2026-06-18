@@ -17,12 +17,11 @@ type EnemyObj = GameObj & {
 /** A walking janitor: patrols, reverses at walls, dies to stomp or sticker. */
 export function makeMopJanitor(k: KAPLAYCtx, at: SpawnAt): GameObj {
   const e = k.add([
-    k.rect(48, 56),
-    k.color(60, 60, 70),
-    k.outline(3, k.rgb(0, 0, 0)),
+    k.sprite("janitor"),
+    k.scale(0.34),
     k.pos(at.x, at.y),
     k.anchor("bot"),
-    k.area(),
+    k.area({ scale: 0.5 }),
     k.body(),
     k.z(8),
     "enemy",
@@ -32,6 +31,7 @@ export function makeMopJanitor(k: KAPLAYCtx, at: SpawnAt): GameObj {
 
   e.onUpdate(() => {
     e.move(e.dir * ENEMY.janitorSpeed, 0);
+    e.flipX = e.dir > 0;
     reverseAtLedge(k, e, 24);
     e.puddleTimer = (e.puddleTimer ?? ENEMY.janitorPuddleInterval) - k.dt();
     if (e.puddleTimer <= 0) {
@@ -53,12 +53,11 @@ export function makeMopJanitor(k: KAPLAYCtx, at: SpawnAt): GameObj {
  */
 export function makeBroomGranny(k: KAPLAYCtx, at: SpawnAt): GameObj {
   const e = k.add([
-    k.rect(52, 64),
-    k.color(120, 80, 140),
-    k.outline(3, k.rgb(0, 0, 0)),
+    k.sprite("granny"),
+    k.scale(0.30),
     k.pos(at.x, at.y),
     k.anchor("bot"),
-    k.area(),
+    k.area({ scale: 0.5 }),
     k.body(),
     k.z(8),
     "enemy",
@@ -68,6 +67,7 @@ export function makeBroomGranny(k: KAPLAYCtx, at: SpawnAt): GameObj {
 
   e.onUpdate(() => {
     e.move(e.dir * ENEMY.grannySpeed, 0);
+    e.flipX = e.dir > 0;
     e.swipeTimer = (e.swipeTimer ?? ENEMY.grannySwipeInterval) - k.dt();
     if (e.swipeTimer <= 0) {
       e.swipeTimer = ENEMY.grannySwipeInterval;

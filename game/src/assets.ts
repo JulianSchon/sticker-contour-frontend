@@ -2,8 +2,8 @@ import type { KAPLAYCtx } from "kaplay";
 
 // In WordPress, window.NIMSTICK_GAME_BASE points at the plugin's dist/ folder.
 // In dev/preview it is undefined, so assets resolve relative to the page root.
-// NOTE: "stickan-idle" is intentionally backed by stickan-wave.png (placeholder).
-// When real art is added, give idle its own file and update this mapping.
+// Sprites are authored as SVG and rasterized to PNG by scripts/gen-art.cjs.
+// "stickan-idle" uses the waving pose.
 declare global {
   interface Window {
     NIMSTICK_GAME_BASE?: string;
@@ -17,6 +17,9 @@ export function loadAssets(k: KAPLAYCtx): void {
   k.loadSprite("stickan-idle", BASE + "sprites/stickan-wave.png");
   k.loadSprite("stickan-run", BASE + "sprites/stickan-run.png");
   k.loadSprite("stickan-jump", BASE + "sprites/stickan-jump.png");
+  k.loadSprite("janitor", BASE + "sprites/janitor.png");
+  k.loadSprite("granny", BASE + "sprites/granny.png");
+  k.loadSprite("boss", BASE + "sprites/boss.png");
 
   k.loadSound("jump", BASE + "sfx/jump.wav");
   k.loadSound("throw", BASE + "sfx/throw.wav");
