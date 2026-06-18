@@ -12,7 +12,19 @@ type EnemyObj = GameObj & {
   hp: number;
   swipeTimer?: number;
   puddleTimer?: number;
+  curAnim?: string;
 };
+
+// Re-assert the walk animation every frame (guarded), matching the boss's
+// self-healing pattern: if the first play() landed before the sheet loaded
+// (or after a hot-reload), the next frame retries instead of leaving the
+// sprite cycling all frames.
+function ensureRun(e: EnemyObj) {
+  if (e.curAnim !== "run") {
+    e.play("run");
+    e.curAnim = "run";
+  }
+}
 
 /** A walking janitor: patrols, reverses at walls, dies to stomp or sticker. */
 export function makeMopJanitor(k: KAPLAYCtx, at: SpawnAt): GameObj {
@@ -28,9 +40,9 @@ export function makeMopJanitor(k: KAPLAYCtx, at: SpawnAt): GameObj {
     "janitor",
     { dir: -1, hp: 1, puddleTimer: ENEMY.janitorPuddleInterval },
   ]) as unknown as EnemyObj;
-  e.play("run"); // explicitly play, else the sheet cycles all frames
 
   e.onUpdate(() => {
+    ensureRun(e);
     e.move(e.dir * ENEMY.janitorSpeed, 0);
     e.flipX = e.dir > 0;
     reverseAtLedge(k, e, 24);
@@ -65,9 +77,9 @@ export function makeBroomGranny(k: KAPLAYCtx, at: SpawnAt): GameObj {
     "granny",
     { dir: -1, hp: 2, swipeTimer: ENEMY.grannySwipeInterval },
   ]) as unknown as EnemyObj;
-  e.play("run"); // explicitly play, else the sheet cycles all frames
 
   e.onUpdate(() => {
+    ensureRun(e);
     e.move(e.dir * ENEMY.grannySpeed, 0);
     e.flipX = e.dir > 0;
     e.swipeTimer = (e.swipeTimer ?? ENEMY.grannySwipeInterval) - k.dt();
