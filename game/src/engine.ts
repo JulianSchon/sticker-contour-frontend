@@ -16,6 +16,19 @@ export function initEngine(root: HTMLElement): KAPLAYCtx {
     background: [135, 183, 255],
     root,
   });
+
+  // Kaplay binds keyboard events to the canvas, so it must hold focus for
+  // controls to work — and its pointer handler preventDefaults, which blocks
+  // the browser's native focus-on-click. Explicitly refocus on pointer-down so
+  // clicking the game restores keyboard control. Scoped to the canvas so we
+  // never hijack the host page's keyboard.
+  const canvas = root.querySelector("canvas") as HTMLCanvasElement | null;
+  if (canvas) {
+    canvas.style.outline = "none";
+    canvas.addEventListener("pointerdown", () => canvas.focus());
+    canvas.focus();
+  }
+
   return ctx;
 }
 

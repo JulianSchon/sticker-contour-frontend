@@ -13,6 +13,8 @@ loadAssets(k);
 initAudio(k);
 
 const input = createInputState();
+// Expose the live input state for debugging and E2E assertions (read-only use).
+(window as unknown as { __nimstickInput?: typeof input }).__nimstickInput = input;
 wireInput(k, input);
 
 registerScenes(k, input);

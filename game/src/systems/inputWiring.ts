@@ -34,6 +34,24 @@ export function wireInput(k: KAPLAYCtx, state: InputState): void {
   const zones = touchZones();
   const activeTouches = new Map<number, string>();
 
+  // Native DOM key tracking — supplements Kaplay's isKeyDown so that the axis
+  // works reliably in headless environments (e.g. Playwright via CDP) where
+  // Kaplay's canvas-bound key state may not be populated.
+  const nativeKeysDown = new Set<string>();
+  const canvas = k.canvas;
+  if (canvas) {
+    canvas.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.repeat) return;
+      nativeKeysDown.add(e.code);
+      // Edge-trigger jump/throw via native events so they survive scene transitions.
+      if (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyW") press(state, "jump");
+      if (e.code === "KeyX" || e.code === "KeyJ" || e.code === "ShiftLeft" || e.code === "ShiftRight") press(state, "throw");
+    });
+    canvas.addEventListener("keyup", (e: KeyboardEvent) => {
+      nativeKeysDown.delete(e.code);
+    });
+  }
+
   const hitZone = (x: number, y: number): string => {
     if (inZone(zones.left, x, y)) return "left";
     if (inZone(zones.right, x, y)) return "right";
@@ -51,16 +69,26 @@ export function wireInput(k: KAPLAYCtx, state: InputState): void {
   };
 
   // Keyboard held axis — only when touch isn't driving the axis.
-  // NOTE: this global onUpdate is registered in main.ts BEFORE any scene/entity
-  // is created, so it runs before entity onUpdate handlers each frame. Keep that
-  // ordering: wireInput() must be called before registerScenes().
-  k.onUpdate(() => {
-    if (activeTouches.size > 0) return;
-    let axis = 0;
-    if (k.isKeyDown("left") || k.isKeyDown("a")) axis -= 1;
-    if (k.isKeyDown("right") || k.isKeyDown("d")) axis += 1;
-    setAxis(state, axis);
-  });
+  // Registered as a stay() object so it persists across k.go() scene transitions.
+  // Uses native DOM key tracking because k.isKeyDown() becomes unreliable in
+  // headless environments (e.g. Playwright CDP) and after scene transitions
+  // clear Kaplay's internal event/key state.
+  k.add([
+    k.stay(),
+    {
+      update() {
+        if (activeTouches.size > 0) return;
+        let axis = 0;
+        const leftHeld = k.isKeyDown("left") || k.isKeyDown("a")
+          || nativeKeysDown.has("ArrowLeft") || nativeKeysDown.has("KeyA");
+        const rightHeld = k.isKeyDown("right") || k.isKeyDown("d")
+          || nativeKeysDown.has("ArrowRight") || nativeKeysDown.has("KeyD");
+        if (leftHeld) axis -= 1;
+        if (rightHeld) axis += 1;
+        setAxis(state, axis);
+      },
+    },
+  ]);
 
   k.onKeyPress(["space", "up", "w"], () => press(state, "jump"));
   k.onKeyPress(["x", "j", "shift"], () => press(state, "throw"));

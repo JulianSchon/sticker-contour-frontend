@@ -28,3 +28,27 @@ test("album persists an unlocked sticker across reload", async ({ page }) => {
   const stored = await page.evaluate(() => localStorage.getItem("nimstick.album.v1"));
   expect(stored).toContain("logo");
 });
+
+test("clicking the game focuses it so keyboard moves the player", async ({ page }) => {
+  await page.goto("/");
+  const canvas = page.locator("#nimstick-game-root canvas");
+  await expect(canvas).toBeVisible({ timeout: 15000 });
+
+  // Start the game (clicking also focuses the canvas).
+  await canvas.click();
+  await page.waitForTimeout(300);
+
+  // Simulate focus being stolen (e.g. devtools), then re-click the game.
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await canvas.click();
+
+  // Hold Right; the unified input state should reflect rightward movement.
+  await page.keyboard.down("ArrowRight");
+  await page.waitForTimeout(200);
+  const moveX = await page.evaluate(
+    () => (window as unknown as { __nimstickInput?: { moveX: number } }).__nimstickInput?.moveX,
+  );
+  await page.keyboard.up("ArrowRight");
+
+  expect(moveX).toBe(1);
+});
