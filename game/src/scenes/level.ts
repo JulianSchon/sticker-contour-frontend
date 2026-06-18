@@ -9,6 +9,7 @@ import { makeBoss } from "../entities/boss";
 import { makeStickerCoin, makeCheckpoint, makeGoal } from "../entities/props";
 import { addHud } from "../ui/hud";
 import { play } from "../systems/audio";
+import { GROUND_TILE_COUNT } from "../assets";
 
 // Augment GameObj with physics body fields accessed in this scene.
 type BodyObj = GameObj & { vel: Vec2; jump: (force?: number) => void };
@@ -35,7 +36,7 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
       tileWidth: TILE_SIZE,
       tileHeight: TILE_SIZE,
       tiles: {
-        "=": () => [k.rect(TILE_SIZE, TILE_SIZE), k.color(90, 70, 50), k.area(), k.body({ isStatic: true }), k.anchor("botleft"), "ground"],
+        "=": () => [k.sprite(`ground-${Math.floor(Math.random() * GROUND_TILE_COUNT)}`), k.area(), k.body({ isStatic: true }), k.anchor("botleft"), "ground"],
         "|": () => [k.rect(TILE_SIZE, TILE_SIZE), k.color(70, 55, 40), k.area(), k.body({ isStatic: true }), k.anchor("botleft"), "wall"],
         "^": () => [k.rect(TILE_SIZE, 8), k.color(200, 40, 40), k.opacity(0), k.area(), k.anchor("botleft"), "pit"],
         "s": () => [k.anchor("center"), "coinmark"],

@@ -195,6 +195,85 @@ function stickanJump() {
   `);
 }
 
+// ---- Metallic platform tiles plastered with stickers -----------------------
+const STK = {
+  yellow: "#FFD400", pink: "#E6177F", blue: "#1F9BFF",
+  green: "#27C26B", orange: "#FF8A1E", red: "#F0322F",
+};
+
+// Die-cut sticker = white halo (fat white stroke) under a colored shape w/ hairline.
+function stkCircle(x, y, r, rot, fill) {
+  return `<g transform="rotate(${rot} ${x} ${y})">
+    <circle cx="${x}" cy="${y}" r="${r}" fill="#fff" stroke="#fff" stroke-width="6"/>
+    <circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" stroke="#161616" stroke-width="1.5"/></g>`;
+}
+function stkSquare(x, y, s, rot, fill) {
+  return `<g transform="rotate(${rot} ${x} ${y})">
+    <rect x="${x - s}" y="${y - s}" width="${2 * s}" height="${2 * s}" rx="4" fill="#fff" stroke="#fff" stroke-width="6"/>
+    <rect x="${x - s}" y="${y - s}" width="${2 * s}" height="${2 * s}" rx="4" fill="${fill}" stroke="#161616" stroke-width="1.5"/></g>`;
+}
+function starPts(x, y, r) {
+  let p = "";
+  for (let i = 0; i < 10; i++) {
+    const a = (Math.PI / 5) * i - Math.PI / 2;
+    const rr = i % 2 ? r * 0.45 : r;
+    p += `${(x + Math.cos(a) * rr).toFixed(1)},${(y + Math.sin(a) * rr).toFixed(1)} `;
+  }
+  return p.trim();
+}
+function stkStar(x, y, r, rot, fill) {
+  const pts = starPts(x, y, r);
+  return `<g transform="rotate(${rot} ${x} ${y})">
+    <polygon points="${pts}" fill="#fff" stroke="#fff" stroke-width="6" stroke-linejoin="round"/>
+    <polygon points="${pts}" fill="${fill}" stroke="#161616" stroke-width="1.2" stroke-linejoin="round"/></g>`;
+}
+function stkHeart(x, y, s, rot, fill) {
+  const d = `M ${x} ${y + s * 0.7} C ${x - s} ${y - s * 0.2} ${x - s * 0.5} ${y - s} ${x} ${y - s * 0.3} C ${x + s * 0.5} ${y - s} ${x + s} ${y - s * 0.2} ${x} ${y + s * 0.7} Z`;
+  return `<g transform="rotate(${rot} ${x} ${y})">
+    <path d="${d}" fill="#fff" stroke="#fff" stroke-width="6" stroke-linejoin="round"/>
+    <path d="${d}" fill="${fill}" stroke="#161616" stroke-width="1.2" stroke-linejoin="round"/></g>`;
+}
+
+function rivet(x, y) {
+  return `<circle cx="${x}" cy="${y}" r="3.2" fill="#6B7079" stroke="#4A4E55" stroke-width="1"/>
+          <circle cx="${x - 1}" cy="${y - 1}" r="1" fill="#CACDD3"/>`;
+}
+
+function metalTile(stickers) {
+  return svgWrapWH(`
+    <defs>
+      <linearGradient id="m" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#BCC0C8"/>
+        <stop offset="0.5" stop-color="#9AA0AA"/>
+        <stop offset="1" stop-color="#7C828C"/>
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="64" height="64" fill="url(#m)"/>
+    <g opacity="0.12" stroke="#2b2e33" stroke-width="1">
+      <line x1="14" y1="2" x2="14" y2="62"/><line x1="30" y1="2" x2="30" y2="62"/>
+      <line x1="46" y1="2" x2="46" y2="62"/>
+    </g>
+    <line x1="0" y1="1.5" x2="64" y2="1.5" stroke="#D8DCE2" stroke-width="2.5"/>
+    <line x1="1.5" y1="0" x2="1.5" y2="64" stroke="#D2D6DD" stroke-width="2"/>
+    <line x1="0" y1="62.5" x2="64" y2="62.5" stroke="#5C616A" stroke-width="2.5"/>
+    <line x1="62.5" y1="0" x2="62.5" y2="64" stroke="#5C616A" stroke-width="2"/>
+    ${rivet(8, 9)}${rivet(56, 9)}${rivet(8, 56)}${rivet(56, 56)}
+    ${stickers}
+  `, 64, 64);
+}
+
+// Sticker layouts per variant (some overhang edges so tiles blend together).
+const GROUND_VARIANTS = [
+  stkCircle(20, 26, 12, -12, STK.yellow) + stkStar(48, 46, 12, 16, STK.blue),
+  stkSquare(42, 22, 12, 12, STK.pink) + stkCircle(16, 48, 10, 0, STK.green),
+  stkStar(32, 30, 16, -8, STK.orange) + stkCircle(54, 14, 7, 0, STK.pink),
+  stkHeart(24, 26, 12, -10, STK.red) + stkSquare(48, 50, 11, 20, STK.yellow),
+  stkCircle(34, 40, 13, 8, STK.blue) + stkCircle(52, 16, 8, 0, STK.pink) + stkStar(14, 18, 9, -20, STK.yellow),
+  stkSquare(22, 32, 13, -14, STK.green) + stkStar(50, 40, 11, 12, STK.yellow) + stkCircle(40, 14, 7, 0, STK.red),
+  stkCircle(30, 22, 11, 6, STK.orange) + stkHeart(52, 46, 11, 14, STK.pink),
+  stkStar(20, 44, 13, 10, STK.green) + stkSquare(46, 24, 11, -10, STK.blue),
+];
+
 // ---- Background ------------------------------------------------------------
 function bgCity() {
   const cloud = (x, y, s) => `
@@ -266,6 +345,12 @@ const ASSETS = [
   { name: "boss", svg: boss(), width: 260 },
   { name: "bg-city", svg: bgCity(), width: 1280 },
 ];
+
+// Metallic sticker platform tiles: ground-0 .. ground-N
+GROUND_VARIANTS.forEach((stickers, i) => {
+  ASSETS.push({ name: `ground-${i}`, svg: metalTile(stickers), width: 64 });
+});
+module.exports = { GROUND_COUNT: GROUND_VARIANTS.length };
 
 const force = process.argv.includes("--force");
 const dir = path.join("public", "sprites");
