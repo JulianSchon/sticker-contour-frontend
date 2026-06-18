@@ -54,6 +54,10 @@ function ensureAnim(e: EnemyObj, name: string) {
   }
 }
 
+function setScale(e: EnemyObj, s: number): void {
+  (e as unknown as { scaleTo: (x: number) => void }).scaleTo(s);
+}
+
 /** A walking janitor: patrols, reverses at walls, dies to stomp or sticker. */
 export function makeMopJanitor(k: KAPLAYCtx, at: SpawnAt): GameObj {
   const e = k.add([
@@ -73,10 +77,12 @@ export function makeMopJanitor(k: KAPLAYCtx, at: SpawnAt): GameObj {
     if (tickPhase(e, k.dt())) {
       ensureAnim(e, "run");
       e.move(e.dir * ENEMY.janitorSpeed, 0);
-      e.flipX = e.dir > 0;
+      e.flipX = e.dir < 0; // art faces right; mirror when moving left
+      setScale(e, 0.39); // 30% bigger while running
       patrol(e, 110);
     } else {
       ensureAnim(e, "idle");
+      setScale(e, 0.3);
     }
     e.puddleTimer = (e.puddleTimer ?? ENEMY.janitorPuddleInterval) - k.dt();
     if (e.puddleTimer <= 0) {
@@ -114,10 +120,12 @@ export function makeBroomGranny(k: KAPLAYCtx, at: SpawnAt): GameObj {
     if (tickPhase(e, k.dt())) {
       ensureAnim(e, "run");
       e.move(e.dir * ENEMY.grannySpeed, 0);
-      e.flipX = e.dir > 0;
+      e.flipX = e.dir < 0; // art faces right; mirror when moving left
+      setScale(e, 0.416); // 30% bigger while running
       patrol(e, 90);
     } else {
       ensureAnim(e, "idle");
+      setScale(e, 0.32);
     }
     e.swipeTimer = (e.swipeTimer ?? ENEMY.grannySwipeInterval) - k.dt();
     if (e.swipeTimer <= 0) {
