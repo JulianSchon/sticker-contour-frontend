@@ -28,7 +28,7 @@ export function loadAssets(k: KAPLAYCtx): void {
     sliceY: 5,
     anims: {
       idle: { from: 0, to: 3, loop: true, speed: 5 },
-      run: { from: 4, to: 21, loop: true, speed: 20 },
+      run: { from: 4, to: 21, loop: true, speed: 12 },
       jump: { from: 22, to: 23, loop: false, speed: 8 },
       throw: { from: 24, to: 26, loop: false, speed: 18 },
       hurt: { from: 27, to: 27 },
