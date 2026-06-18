@@ -1,0 +1,25 @@
+{
+  "name": "nimstick-stickan-game",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "playwright test",
+    "build:wp": "npm run build && node -e \"const fs=require('fs');fs.rmSync('../wordpress-plugin/nimstick-stickan-game/dist',{recursive:true,force:true});fs.cpSync('dist','../wordpress-plugin/nimstick-stickan-game/dist',{recursive:true});console.log('Copied dist to WP plugin')\""
+  },
+  "dependencies": {
+    "kaplay": "^3001.0.19"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.0",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.11",
+    "vitest": "^2.1.9"
+  }
+}
