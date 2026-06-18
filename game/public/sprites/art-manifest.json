@@ -91,5 +91,18 @@
         "to": 9
       }
     }
+  },
+  "spincoin": {
+    "sliceX": 10,
+    "sliceY": 1,
+    "cellW": 51,
+    "cellH": 98,
+    "frameCount": 10,
+    "anims": {
+      "spin": {
+        "from": 0,
+        "to": 9
+      }
+    }
   }
 }

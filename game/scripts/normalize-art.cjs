@@ -194,11 +194,30 @@ async function buildChar(name, def) {
   return { sliceX: SLICE_X, sliceY, cellW, cellH, frameCount: frames.length, anims: ranges };
 }
 
+// Split a strip into exactly n equal-width frames (for strips whose frames
+// touch, so gap-detection would merge them).
+async function splitEven(file, n) {
+  const buf = fs.readFileSync(path.join(IN, file));
+  const meta = await sharp(buf).metadata();
+  const fw = Math.floor(meta.width / n);
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const left = i * fw;
+    const w = i === n - 1 ? meta.width - left : fw;
+    const region = await sharp(buf).extract({ left, top: 0, width: w, height: meta.height }).png().toBuffer();
+    const keyed = await keyOutWhiteBg(region);
+    const t = await sharp(keyed).trim().toBuffer({ resolveWithObject: true });
+    out.push({ data: t.data, w: t.info.width, h: t.info.height });
+  }
+  return out;
+}
+
 // A spinning prop (e.g. the thrown sticker): center-aligned, single uniform
 // scale (no head-width/feet logic), packed in one row as anim "spin".
-async function buildProp(name, file, target) {
-  const frames = await splitTrim({ file });
-  console.log("  " + name + " detected frames:", frames.length);
+// If fixedFrames is given, split evenly into that many frames; otherwise detect.
+async function buildProp(name, file, target, fixedFrames) {
+  const frames = fixedFrames ? await splitEven(file, fixedFrames) : await splitTrim({ file });
+  console.log("  " + name + " frames:", frames.length);
   const maxDim = Math.max(...frames.map((f) => Math.max(f.w, f.h)));
   const scale = target / maxDim;
   for (const f of frames) {
@@ -233,6 +252,8 @@ async function buildProp(name, file, target) {
   }
   manifest.throwsticker = await buildProp("throwsticker", "throwsticker.png", 96);
   console.log("throwsticker", JSON.stringify(manifest.throwsticker));
+  manifest.spincoin = await buildProp("spincoin", "spinsticker.png", 90, 10);
+  console.log("spincoin", JSON.stringify(manifest.spincoin));
   fs.writeFileSync(path.join(OUT, "art-manifest.json"), JSON.stringify(manifest, null, 2));
   console.log("done");
 })();

@@ -4,15 +4,14 @@ interface SpawnAt { x: number; y: number; }
 
 type CoinObj = GameObj & { baseY: number; t: number };
 
-/** Floating sticker-coin worth score; destroyed on player pickup by the level scene. */
+/** Floating spinning-dragon pickup worth score; destroyed on player pickup by the level scene. */
 export function makeStickerCoin(k: KAPLAYCtx, at: SpawnAt): GameObj {
   const c = k.add([
-    k.circle(14),
-    k.color(255, 212, 0),
-    k.outline(3, k.rgb(0, 0, 0)),
+    k.sprite("spincoin", { anim: "spin" }),
+    k.scale(0.42),
     k.pos(at.x, at.y),
     k.anchor("center"),
-    k.area(),
+    k.area({ scale: 0.8 }),
     k.z(6),
     "coin",
     { baseY: at.y, t: 0 },
