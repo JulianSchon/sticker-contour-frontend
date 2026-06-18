@@ -108,11 +108,12 @@ function shootDustBall(k: KAPLAYCtx, e: EnemyObj): void {
     k.circle(13),
     k.color(168, 150, 120),       // dusty tan
     k.outline(3, k.rgb(70, 55, 40)),
+    k.opacity(1),                 // required by lifespan (it fades opacity)
     k.pos(e.pos.x + dir * 30, e.pos.y - 46),
     k.anchor("center"),
     k.area({ scale: 0.8 }),
     k.offscreen({ destroy: true }),
-    k.lifespan(ENEMY.grannyShotLifetime),
+    k.lifespan(ENEMY.grannyShotLifetime, { fade: 0.3 }),
     k.z(7),
     "hazard",
   ]);
