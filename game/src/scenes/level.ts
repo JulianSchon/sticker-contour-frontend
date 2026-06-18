@@ -58,6 +58,9 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
 
     addHud(k, run);
 
+    // Anything that falls below this Y has left the level entirely.
+    const killY = def.map.length * TILE_SIZE + 300;
+
     const hurtPlayer = () => {
       // player.invuln is a custom field typed on PlayerObj internally.
       const p = player as unknown as GameObj & { invuln: number };
@@ -69,6 +72,14 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
       if (isGameOver(run)) {
         k.wait(0.4, () => k.go("gameover"));
       }
+    };
+
+    const respawnPlayer = () => {
+      const pb = player as unknown as BodyObj;
+      player.pos = k.vec2(respawn.x, respawn.y);
+      pb.vel.y = 0;
+      pb.vel.x = 0;
+      (player as unknown as { vx: number }).vx = 0;
     };
 
     player.onCollide("enemy", (e: GameObj) => {
@@ -109,13 +120,7 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
     });
     player.onCollide("pit", () => {
       hurtPlayer();
-      if (!isGameOver(run)) {
-        const pb = player as unknown as BodyObj;
-        player.pos = k.vec2(respawn.x, respawn.y);
-        pb.vel.y = 0;
-        pb.vel.x = 0;
-        (player as unknown as { vx: number }).vx = 0;
-      }
+      if (!isGameOver(run)) respawnPlayer();
     });
     player.onCollide("coin", (c: GameObj) => {
       k.destroy(c);
@@ -133,6 +138,16 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
     player.onCollide("goal", () => k.go("reward"));
     player.onCollideUpdate("puddle", () => {
       (player as unknown as { slip: number }).slip = 0.4;
+    });
+
+    // Safety net: if the player falls off the level entirely (e.g. jumping past
+    // the goal or off an edge with no pit below), treat it as a fall — lose a
+    // heart and respawn, or end the run if it was the last heart.
+    player.onUpdate(() => {
+      if (player.pos.y > killY) {
+        hurtPlayer();
+        respawnPlayer();
+      }
     });
   });
 }

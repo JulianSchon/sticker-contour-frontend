@@ -56,8 +56,9 @@ export function makePuddle(k: KAPLAYCtx, at: SpawnAt): GameObj {
 
 /** Level goal flag; overlap triggers the reward scene. */
 export function makeGoal(k: KAPLAYCtx, at: SpawnAt): GameObj {
+  // Tall trigger column so the player can't clear it with a jump.
   return k.add([
-    k.rect(20, 96),
+    k.rect(28, 260),
     k.color(231, 23, 127),
     k.outline(3, k.rgb(0, 0, 0)),
     k.pos(at.x, at.y),
