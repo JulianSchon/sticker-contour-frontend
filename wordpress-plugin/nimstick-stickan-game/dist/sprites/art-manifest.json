@@ -78,5 +78,18 @@
         "to": 8
       }
     }
+  },
+  "throwsticker": {
+    "sliceX": 10,
+    "sliceY": 1,
+    "cellW": 99,
+    "cellH": 104,
+    "frameCount": 10,
+    "anims": {
+      "spin": {
+        "from": 0,
+        "to": 9
+      }
+    }
   }
 }

@@ -10,14 +10,12 @@ export interface ProjectileOpts {
 
 export function makeProjectile(k: KAPLAYCtx, opts: ProjectileOpts): GameObj {
   const proj = k.add([
-    k.circle(12),
-    k.color(255, 212, 0),
-    k.outline(3, k.rgb(0, 0, 0)),
+    k.sprite("throwsticker", { anim: "spin" }),
+    k.scale(0.4),
     k.opacity(1),
     k.pos(opts.x, opts.y),
     k.anchor("center"),
-    k.area(),
-    k.rotate(0),
+    k.area({ scale: 0.6 }),
     k.z(9),
     k.offscreen({ destroy: true }),
     k.lifespan(PROJECTILE.lifetime, { fade: 0.1 }),
@@ -26,7 +24,6 @@ export function makeProjectile(k: KAPLAYCtx, opts: ProjectileOpts): GameObj {
 
   proj.onUpdate(() => {
     proj.move(opts.dir * opts.speed, 0);
-    proj.angle += 720 * k.dt();
   });
 
   proj.onCollide("enemy", () => k.destroy(proj));

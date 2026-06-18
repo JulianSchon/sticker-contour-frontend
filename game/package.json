@@ -11,7 +11,7 @@
     "test:watch": "vitest",
     "e2e": "playwright test",
     "build:wp": "npm run build && node -e \"const fs=require('fs');fs.rmSync('../wordpress-plugin/nimstick-stickan-game/dist',{recursive:true,force:true});fs.cpSync('dist','../wordpress-plugin/nimstick-stickan-game/dist',{recursive:true});console.log('Copied dist to WP plugin')\"",
-    "art": "node scripts/gen-art.cjs --force && node scripts/normalize-art.cjs"
+    "art": "node scripts/gen-art.cjs --force && node scripts/gen-tiles.cjs && node scripts/normalize-art.cjs"
   },
   "dependencies": {
     "kaplay": "^3001.0.19"

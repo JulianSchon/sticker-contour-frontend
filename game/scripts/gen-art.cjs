@@ -353,17 +353,12 @@ function bgCity() {
 }
 
 // ---- Render ----------------------------------------------------------------
-// Characters now come from hand-drawn art via scripts/normalize-art.cjs.
-// gen-art only produces the environment: background + platform tiles.
+// Characters come from hand-drawn art via scripts/normalize-art.cjs, and the
+// metallic sticker platform tiles from scripts/gen-tiles.cjs. gen-art only
+// produces the background now.
 const ASSETS = [
   { name: "bg-city", svg: bgCity(), width: 1280 },
 ];
-
-// Metallic sticker platform tiles: ground-0 .. ground-N
-GROUND_VARIANTS.forEach((stickers, i) => {
-  ASSETS.push({ name: `ground-${i}`, svg: metalTile(stickers), width: 64 });
-});
-module.exports = { GROUND_COUNT: GROUND_VARIANTS.length };
 
 const force = process.argv.includes("--force");
 const dir = path.join("public", "sprites");

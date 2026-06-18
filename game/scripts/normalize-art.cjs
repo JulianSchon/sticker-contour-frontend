@@ -191,12 +191,45 @@ async function buildChar(name, def) {
   return { sliceX: SLICE_X, sliceY, cellW, cellH, frameCount: frames.length, anims: ranges };
 }
 
+// A spinning prop (e.g. the thrown sticker): center-aligned, single uniform
+// scale (no head-width/feet logic), packed in one row as anim "spin".
+async function buildProp(name, file, target) {
+  const frames = await splitTrim({ file });
+  console.log("  " + name + " detected frames:", frames.length);
+  const maxDim = Math.max(...frames.map((f) => Math.max(f.w, f.h)));
+  const scale = target / maxDim;
+  for (const f of frames) {
+    const nw = Math.max(1, Math.round(f.w * scale));
+    const nh = Math.max(1, Math.round(f.h * scale));
+    f.data = await sharp(f.data).resize(nw, nh).png().toBuffer();
+    f.w = nw;
+    f.h = nh;
+  }
+  const cellW = Math.max(...frames.map((f) => f.w)) + 8;
+  const cellH = Math.max(...frames.map((f) => f.h)) + 8;
+  const composites = frames.map((f, i) => ({
+    input: f.data,
+    left: i * cellW + Math.round((cellW - f.w) / 2),
+    top: Math.round((cellH - f.h) / 2), // centered (spinning)
+  }));
+  const sheet = await sharp({
+    create: { width: cellW * frames.length, height: cellH, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
+  })
+    .composite(composites)
+    .png()
+    .toBuffer();
+  fs.writeFileSync(path.join(OUT, name + ".png"), sheet);
+  return { sliceX: frames.length, sliceY: 1, cellW, cellH, frameCount: frames.length, anims: { spin: { from: 0, to: frames.length - 1 } } };
+}
+
 (async () => {
   const manifest = {};
   for (const [name, def] of Object.entries(CHARS)) {
     manifest[name] = await buildChar(name, def);
     console.log(name, JSON.stringify(manifest[name]));
   }
+  manifest.throwsticker = await buildProp("throwsticker", "throwsticker.png", 96);
+  console.log("throwsticker", JSON.stringify(manifest.throwsticker));
   fs.writeFileSync(path.join(OUT, "art-manifest.json"), JSON.stringify(manifest, null, 2));
   console.log("done");
 })();
