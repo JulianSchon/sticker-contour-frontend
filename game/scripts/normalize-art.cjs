@@ -287,6 +287,15 @@ async function buildProp(name, file, target, fixedFrames) {
     fs.writeFileSync(path.join(OUT, "stickericon.png"), icon);
     console.log("stickericon written");
   }
+
+  // Earned/album reward stickers — real designs mapped to each level reward id.
+  const ALBUM = { logo: "s2.png", shades: "s8.png", mall: "s7.png", golden: "s9.png" };
+  for (const [id, file] of Object.entries(ALBUM)) {
+    const keyed = await keyOutWhiteBg(fs.readFileSync(path.join(IN, "stickers", file)));
+    const out = await sharp(keyed).trim().resize(200, 200, { fit: "inside" }).png().toBuffer();
+    fs.writeFileSync(path.join(OUT, "sticker-" + id + ".png"), out);
+  }
+  console.log("album stickers written");
   fs.writeFileSync(path.join(OUT, "art-manifest.json"), JSON.stringify(manifest, null, 2));
   console.log("done");
 })();

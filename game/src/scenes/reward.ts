@@ -22,16 +22,26 @@ export function registerRewardScene(k: KAPLAYCtx, getRun: () => RunState): void 
     k.add([k.text("You earned a sticker:", { size: 26 }), k.pos(k.center().x, 210), k.anchor("center")]);
 
     const badge = k.add([
-      k.circle(70),
+      k.circle(82),
       k.color(k.Color.fromHex(sticker.color)),
       k.outline(6, k.rgb(0, 0, 0)),
       k.pos(k.center()),
       k.anchor("center"),
       k.scale(0),
     ]) as unknown as ScaleObj;
+    const art = k.add([
+      k.sprite(sticker.img),
+      k.pos(k.center()),
+      k.anchor("center"),
+      k.scale(0),
+      k.z(1),
+    ]) as unknown as ScaleObj;
 
-    k.add([k.text(sticker.name, { size: 24 }), k.pos(k.center().x, k.center().y + 110), k.anchor("center")]);
-    k.tween(0, 1, 0.5, (v: number) => { badge.scale = k.vec2(v); }, k.easings.easeOutBack);
+    k.add([k.text(sticker.name, { size: 24 }), k.pos(k.center().x, k.center().y + 120), k.anchor("center")]);
+    k.tween(0, 1, 0.5, (v: number) => {
+      badge.scale = k.vec2(v);
+      art.scale = k.vec2(v * 0.66);
+    }, k.easings.easeOutBack);
 
     const isLast = run.levelId >= LEVELS.length;
     const prompt = isLast ? "Press SPACE / tap to finish" : "Press SPACE / tap for next level";

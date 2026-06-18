@@ -9,8 +9,10 @@ export type StickerId =
 export interface StickerDef {
   id: StickerId;
   name: string;
-  /** Hex fill used when drawing the placeholder sticker badge. */
+  /** Hex backing colour shown behind the sticker badge. */
   color: string;
+  /** Loaded sprite name for the sticker artwork. */
+  img: string;
 }
 
 /** Persisted album state: which sticker ids have been unlocked. */

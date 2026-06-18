@@ -25,6 +25,11 @@ export function registerAlbumScene(k: KAPLAYCtx): void {
         k.anchor("center"),
         k.opacity(got ? 1 : 0.5),
       ]);
+      if (got) {
+        k.add([k.sprite(s.img), k.pos(cx, cy), k.anchor("center"), k.scale(0.5), k.z(1)]);
+      } else {
+        k.add([k.text("?", { size: 40 }), k.pos(cx, cy), k.anchor("center"), k.color(120, 120, 120)]);
+      }
       k.add([
         k.text(got ? s.name : "???", { size: 18 }),
         k.pos(cx, cy + 78),
