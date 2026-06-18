@@ -72,11 +72,11 @@ const rnd = (a, b) => a + Math.random() * (b - a);
   console.log(`loaded ${stickers.length} stickers`);
 
   for (let i = 0; i < VARIANTS; i++) {
-    const n = 2 + Math.floor(Math.random() * 2); // 2-3 stickers per tile
+    const n = 3 + Math.floor(Math.random() * 2); // 3-4 stickers per tile
     const composites = [];
     for (let j = 0; j < n; j++) {
       const src = stickers[Math.floor(Math.random() * stickers.length)];
-      const size = Math.round(rnd(26, 40));
+      const size = Math.round(rnd(16, 26));
       const deg = Math.round(rnd(-22, 22));
       const sbuf = await sharp(src)
         .resize(size, size, { fit: "inside" })
