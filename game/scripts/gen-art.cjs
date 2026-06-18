@@ -15,59 +15,76 @@ const C = {
   lensHi: "#C9CBC0",
   mouth: "#E6177F",
   glove: "#FFFFFF",
+  cyan: "#18A8E8",
+  cyanHi: "#9BE3FF",
 };
 
 // ---- Reusable Stickan parts (string builders) ------------------------------
 // All parts drawn in a 256x256 viewBox, body centered ~ (128,120).
 
 function sunglasses() {
-  // two rounded lenses + bridge, with a light reflection stripe
+  // bold black frames with bright cyan lenses + angular highlight
+  const lens = C.cyan, hi = C.cyanHi;
   return `
     <g>
-      <rect x="50" y="92" width="66" height="46" rx="16" fill="${C.lens}" stroke="${C.outline}" stroke-width="5"/>
-      <rect x="140" y="92" width="66" height="46" rx="16" fill="${C.lens}" stroke="${C.outline}" stroke-width="5"/>
-      <rect x="112" y="104" width="32" height="12" rx="6" fill="${C.lens}"/>
-      <path d="M60 100 L84 100 L72 124 Z" fill="${C.lensHi}" opacity="0.55"/>
-      <path d="M150 100 L174 100 L162 124 Z" fill="${C.lensHi}" opacity="0.55"/>
+      <rect x="42" y="100" width="16" height="10" rx="5" fill="${C.outline}"/>
+      <rect x="198" y="100" width="16" height="10" rx="5" fill="${C.outline}"/>
+      <path d="M56 90 H120 Q126 90 126 100 V116 Q126 132 104 132 H74 Q56 132 56 114 V98 Q56 90 62 90 Z" fill="${lens}" stroke="${C.outline}" stroke-width="7" stroke-linejoin="round"/>
+      <path d="M136 90 H194 Q200 90 200 98 V114 Q200 132 178 132 H148 Q130 132 130 116 V100 Q130 90 136 90 Z" fill="${lens}" stroke="${C.outline}" stroke-width="7" stroke-linejoin="round"/>
+      <rect x="118" y="95" width="20" height="13" rx="5" fill="${C.outline}"/>
+      <path d="M66 98 L88 98 L70 126 Z" fill="${hi}" opacity="0.9"/>
+      <path d="M144 98 L166 98 L148 126 Z" fill="${hi}" opacity="0.9"/>
     </g>`;
 }
 
 function hair() {
-  // yellow swoosh over the top-right of the head
-  return `<path d="M120 46 C 168 40 206 70 198 116 C 188 86 156 64 120 70 C 116 60 116 52 120 46 Z"
-            fill="${C.hair}" stroke="${C.outline}" stroke-width="5" stroke-linejoin="round"/>`;
+  // yellow quiff swept to the right over the top of the head
+  return `<path d="M112 52 C 150 36 200 50 196 100 C 184 76 156 66 130 74 C 126 64 118 58 112 52 Z"
+            fill="${C.hair}" stroke="${C.outline}" stroke-width="6" stroke-linejoin="round"/>`;
 }
 
 function mouth() {
-  // open happy smile with magenta interior
-  return `
-    <g>
-      <path d="M96 150 Q128 196 160 150 Q128 168 96 150 Z" fill="${C.mouth}" stroke="${C.outline}" stroke-width="5" stroke-linejoin="round"/>
-    </g>`;
+  // wide open happy smile with magenta tongue
+  return `<path d="M94 152 Q128 202 162 152 Q128 174 94 152 Z" fill="${C.mouth}" stroke="${C.outline}" stroke-width="6" stroke-linejoin="round"/>`;
 }
 
 function body() {
-  return `<circle cx="128" cy="120" r="80" fill="${C.cream}" stroke="${C.outline}" stroke-width="8"/>`;
+  return `<circle cx="128" cy="120" r="80" fill="${C.cream}" stroke="${C.outline}" stroke-width="10"/>`;
 }
 
 function face() {
   return hair() + sunglasses() + mouth();
 }
 
-// limb helpers
+// limb helpers — thick rubber-hose limbs
 function arm(d) {
-  return `<path d="${d}" fill="none" stroke="${C.outline}" stroke-width="14" stroke-linecap="round"/>`;
-}
-function glove(cx, cy) {
-  return `<circle cx="${cx}" cy="${cy}" r="16" fill="${C.glove}" stroke="${C.outline}" stroke-width="5"/>`;
+  return `<path d="${d}" fill="none" stroke="${C.outline}" stroke-width="17" stroke-linecap="round"/>`;
 }
 function leg(d) {
-  return `<path d="${d}" fill="none" stroke="${C.outline}" stroke-width="14" stroke-linecap="round"/>`;
+  return `<path d="${d}" fill="none" stroke="${C.outline}" stroke-width="17" stroke-linecap="round"/>`;
 }
+// white clenched cartoon fist (knuckles + thumb)
+function fist(cx, cy, rot) {
+  return `<g transform="rotate(${rot} ${cx} ${cy})">
+    <rect x="${cx - 16}" y="${cy - 8}" width="32" height="26" rx="11" fill="${C.glove}" stroke="${C.outline}" stroke-width="5"/>
+    <circle cx="${cx - 9}" cy="${cy - 10}" r="7.5" fill="${C.glove}" stroke="${C.outline}" stroke-width="4.5"/>
+    <circle cx="${cx + 1}" cy="${cy - 11}" r="8" fill="${C.glove}" stroke="${C.outline}" stroke-width="4.5"/>
+    <circle cx="${cx + 11}" cy="${cy - 10}" r="7.5" fill="${C.glove}" stroke="${C.outline}" stroke-width="4.5"/>
+    <circle cx="${cx - 16}" cy="${cy + 4}" r="7" fill="${C.glove}" stroke="${C.outline}" stroke-width="4.5"/>
+  </g>`;
+}
+// cream shoe with a bright yellow sole; toe points along `flip`
 function shoe(cx, cy, flip) {
-  const dir = flip ? -1 : 1;
-  return `<path d="M${cx - 22 * dir} ${cy} Q${cx - 24 * dir} ${cy + 14} ${cx - 4 * dir} ${cy + 14} L${cx + 18 * dir} ${cy + 14} Q${cx + 24 * dir} ${cy + 14} ${cx + 22 * dir} ${cy} Z"
-            fill="${C.cream}" stroke="${C.outline}" stroke-width="5" stroke-linejoin="round"/>`;
+  const d = flip ? -1 : 1;
+  return `<g>
+    <path d="M ${cx - 20 * d} ${cy - 16} Q ${cx - 28 * d} ${cy - 16} ${cx - 28 * d} ${cy - 4}
+             Q ${cx - 28 * d} ${cy + 2} ${cx - 16 * d} ${cy + 2} L ${cx + 22 * d} ${cy + 2}
+             Q ${cx + 33 * d} ${cy + 2} ${cx + 31 * d} ${cy - 8} Q ${cx + 29 * d} ${cy - 16} ${cx + 16 * d} ${cy - 16} Z"
+          fill="${C.cream}" stroke="${C.outline}" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M ${cx - 26 * d} ${cy} L ${cx + 30 * d} ${cy} Q ${cx + 37 * d} ${cy + 7} ${cx + 24 * d} ${cy + 9}
+             L ${cx - 16 * d} ${cy + 9} Q ${cx - 29 * d} ${cy + 9} ${cx - 26 * d} ${cy} Z"
+          fill="${C.hair}" stroke="${C.outline}" stroke-width="4" stroke-linejoin="round"/>
+  </g>`;
 }
 
 function svgWrap(inner) {
@@ -155,11 +172,11 @@ function stickanIdle() {
     ${shoe(100, 232, false)}
     ${shoe(160, 232, true)}
     ${arm("M64 130 L44 168")}
-    ${glove(42, 174)}
+    ${fist(42, 174, 0)}
     ${body()}
     ${face()}
     ${arm("M196 120 L214 72")}
-    ${glove(216, 64)}
+    ${fist(216, 64, -15)}
   `);
 }
 
@@ -171,11 +188,11 @@ function stickanRun() {
     ${leg("M118 188 L92 220")}
     ${shoe(86, 220, false)}
     ${arm("M192 122 L210 158")}
-    ${glove(212, 164)}
+    ${fist(212, 164, 25)}
     ${body()}
     ${face()}
     ${arm("M66 126 L40 150")}
-    ${glove(36, 156)}
+    ${fist(36, 156, -25)}
   `);
 }
 
@@ -187,11 +204,11 @@ function stickanJump() {
     ${leg("M150 192 L166 214")}
     ${shoe(172, 214, true)}
     ${arm("M70 122 L44 78")}
-    ${glove(40, 70)}
+    ${fist(40, 70, -20)}
     ${body()}
     ${face()}
     ${arm("M190 122 L216 78")}
-    ${glove(220, 70)}
+    ${fist(220, 70, 20)}
   `);
 }
 
