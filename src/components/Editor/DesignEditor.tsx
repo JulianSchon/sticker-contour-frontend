@@ -33,6 +33,8 @@ export interface FlattenedDesign {
 export interface DesignEditorHandle {
   /** Flatten the current design, or null if the canvas is empty. */
   flatten: () => Promise<FlattenedDesign | null>;
+  /** Remove all objects so the user can start a fresh design. */
+  clear: () => void;
 }
 
 export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function DesignEditor({ onComplete }, ref) {
@@ -111,8 +113,9 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
     return { file, dataUrl, widthCm: size.wCm, heightCm: size.hCm };
   }, [editor.canvas, editor.layers.length, size, displayWidth]);
 
-  // Expose flatten() so navigating into the cut tab can refresh from the design.
-  useImperativeHandle(ref, () => ({ flatten }), [flatten]);
+  // Expose flatten()/clear() so the cut tab can refresh from the design and the
+  // sheet flow can reset the artboard for the next design.
+  useImperativeHandle(ref, () => ({ flatten, clear: editor.clear }), [flatten, editor.clear]);
 
   const handleContinue = async () => {
     setIsFlattening(true);

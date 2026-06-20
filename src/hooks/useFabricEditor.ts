@@ -56,6 +56,7 @@ interface UseFabricEditor {
   updateSelected: (patch: Record<string, unknown>) => void;
   duplicateSelected: () => Promise<void>;
   deleteSelected: () => void;
+  clear: () => void;
   bringForward: () => void;
   sendBackward: () => void;
   selectLayer: (id: string) => void;
@@ -280,6 +281,19 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
     pushHistory(canvas);
   }, [canvas, rebuildLayers, pushHistory]);
 
+  const clear = useCallback(() => {
+    if (!canvas) return;
+    // Remove everything in one atomic step (suppress per-object history), then
+    // record a single snapshot so the empty artboard is one undo entry.
+    isRestoringRef.current = true;
+    canvas.remove(...canvas.getObjects());
+    canvas.discardActiveObject();
+    isRestoringRef.current = false;
+    canvas.renderAll();
+    rebuildLayers(canvas);
+    pushHistory(canvas);
+  }, [canvas, rebuildLayers, pushHistory]);
+
   const addShape = useCallback((kind: ShapeKind, color: string) => {
     if (!canvas) return;
     const cw = canvas.getWidth();
@@ -377,6 +391,6 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
   return {
     canvasElRef, canvas, layers, selectedId, selected, canUndo, canRedo,
     addText, addImageFromFile, addImageFromUrl, applyTemplate, addShape, updateSelected, duplicateSelected,
-    deleteSelected, bringForward, sendBackward, selectLayer, undo, redo,
+    deleteSelected, clear, bringForward, sendBackward, selectLayer, undo, redo,
   };
 }

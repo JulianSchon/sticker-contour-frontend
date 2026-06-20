@@ -39,7 +39,7 @@ export default function App() {
   const [params, setParams] = useState<ContourParams>(DEFAULT_PARAMS);
   const [stickerWidthCm, setStickerWidthCm] = useState<number | null>(null);
   const [stickerHeightCm, setStickerHeightCm] = useState<number | null>(null);
-  const [material, setMaterial] = useState<Material>('vinyl');
+  const [material, setMaterial] = useState<Material>('laminerad');
   const [finish, setFinish] = useState<Finish>('glossy');
   const [sheetItems, setSheetItems] = useState<PlannedFile[]>([]);
   const [sendingToSheet, setSendingToSheet] = useState(false);
@@ -99,6 +99,17 @@ export default function App() {
     } finally {
       setSendingToSheet(false);
     }
+  };
+
+  // "Add another design" — reset the artboard and cut-step state for a fresh design.
+  const handleAddAnother = () => {
+    setShowSheetPrompt(false);
+    designRef.current?.clear();
+    setFile(null);
+    setImageDataUrl(null);
+    setStickerWidthCm(null);
+    setStickerHeightCm(null);
+    goToDesign();
   };
 
   // ── Header tagline ──────────────────────────────────────────────────────────
@@ -233,7 +244,7 @@ export default function App() {
             </div>
             <div className="flex flex-col w-full gap-2.5 mt-1">
               <button
-                onClick={() => { setShowSheetPrompt(false); goToDesign(); }}
+                onClick={handleAddAnother}
                 className="w-full px-5 py-3 rounded-lg border-2 border-nim-yellow/60 text-nim-yellow hover:bg-nim-yellow/10 font-bold text-sm uppercase tracking-wide transition-all"
               >
                 + {t.sheetAddAnother}
