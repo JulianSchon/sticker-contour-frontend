@@ -34,6 +34,30 @@ test('design is default, build a design and hand off to the cut dialog', async (
   await expect(page.getByRole('button', { name: /ladda ner pdf|download pdf/i }).first()).toBeVisible();
 });
 
+test('WP: send a design to the sheet and open ARK', async ({ page }) => {
+  await page.goto('/');
+
+  // Build a design.
+  await page.getByRole('button', { name: /^Text$/i }).first().click();
+  await page.getByPlaceholder(/lägg till text|add text/i).fill('SHEET');
+  await page.getByRole('button', { name: /lägg till text|add text/i }).click();
+  await page.getByRole('button', { name: /fortsätt till skärval|continue to cut setup/i }).click();
+
+  // "Send to sheet" only exists in WordPress mode — skip otherwise.
+  const sendBtn = page.getByRole('button', { name: /skicka till ark|send to sheet/i });
+  if (await sendBtn.count() === 0) test.skip(true, 'standalone mode — no sheet flow');
+
+  await sendBtn.first().click();
+
+  // ARK badge appears with a count; open it.
+  const ark = page.getByRole('button', { name: /^(Ark|Sheet)\s*1$/i });
+  await expect(ark).toBeVisible({ timeout: 15000 });
+  await ark.click();
+
+  // ARK shows the sticker list with Save Sheet.
+  await expect(page.getByRole('button', { name: /spara ark|save sheet/i })).toBeVisible();
+});
+
 test('templates and clipart libraries work', async ({ page }) => {
   await page.goto('/');
 
