@@ -43,9 +43,8 @@ export default function App() {
   const [finish, setFinish] = useState<Finish>('glossy');
   const [sheetItems, setSheetItems] = useState<PlannedFile[]>([]);
   const [sendingToSheet, setSendingToSheet] = useState(false);
-  const [sentFlash, setSentFlash] = useState(false);
+  const [showSheetPrompt, setShowSheetPrompt] = useState(false);
   const [sheetError, setSheetError] = useState<string | null>(null);
-  const sentFlashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [lang, setLang] = useState<Lang>('sv');
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = typeof localStorage !== 'undefined' ? localStorage.getItem('cutz-theme') : null;
@@ -94,18 +93,13 @@ export default function App() {
         ...prev,
         { ...item, color: SHEET_COLORS[prev.length % SHEET_COLORS.length] },
       ]);
-      setSentFlash(true);
-      if (sentFlashTimer.current) clearTimeout(sentFlashTimer.current);
-      sentFlashTimer.current = setTimeout(() => setSentFlash(false), 2500);
+      setShowSheetPrompt(true);
     } catch (err) {
       setSheetError(err instanceof Error ? err.message : 'Failed to add to sheet');
     } finally {
       setSendingToSheet(false);
     }
   };
-
-  // Clear the pending "added ✓" flash timer on unmount.
-  useEffect(() => () => { if (sentFlashTimer.current) clearTimeout(sentFlashTimer.current); }, []);
 
   // ── Header tagline ──────────────────────────────────────────────────────────
   const headerTagline = IS_WORDPRESS
@@ -193,11 +187,9 @@ export default function App() {
                 <button
                   onClick={handleSendToSheet}
                   disabled={!file || sendingToSheet}
-                  className={`w-full flex items-center justify-center gap-2 px-5 py-3 rounded-lg border-2 font-bold text-sm uppercase tracking-wide transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
-                    sentFlash ? 'border-green-500 text-green-400' : 'border-nim-yellow/60 text-nim-yellow hover:bg-nim-yellow/10'
-                  }`}
+                  className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-lg border-2 font-bold text-sm uppercase tracking-wide transition-all disabled:opacity-40 disabled:cursor-not-allowed border-nim-yellow/60 text-nim-yellow hover:bg-nim-yellow/10"
                 >
-                  {sendingToSheet ? t.edPreparing : sentFlash ? t.sentToSheet : `+ ${t.sendToSheet}`}
+                  {sendingToSheet ? t.edPreparing : `+ ${t.sendToSheet}`}
                 </button>
                 {sheetError && (
                   <p className="text-xs text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">{sheetError}</p>
@@ -217,6 +209,45 @@ export default function App() {
   return (
     <LangContext.Provider value={{ lang, t, setLang, theme, setTheme }}>
     <div className="min-h-screen bg-nim-black flex flex-col">
+
+      {/* ── "Sent to sheet" prompt — add another design or go to the sheet? ── */}
+      {IS_WORDPRESS && showSheetPrompt && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setShowSheetPrompt(false)}
+        >
+          <div
+            className="w-full max-w-md bg-nim-darker border border-nim-yellow/30 rounded-2xl p-7 shadow-2xl flex flex-col items-center text-center gap-5"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="w-12 h-12 rounded-full bg-green-500/15 border border-green-500/40 flex items-center justify-center">
+              <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-base font-black text-white uppercase tracking-wider">{t.sentToSheet}</p>
+              <p className="text-sm text-white/50 mt-2 leading-relaxed">{t.sheetPromptQuestion}</p>
+            </div>
+            <div className="flex flex-col w-full gap-2.5 mt-1">
+              <button
+                onClick={() => { setShowSheetPrompt(false); goToDesign(); }}
+                className="w-full px-5 py-3 rounded-lg border-2 border-nim-yellow/60 text-nim-yellow hover:bg-nim-yellow/10 font-bold text-sm uppercase tracking-wide transition-all"
+              >
+                + {t.sheetAddAnother}
+              </button>
+              <button
+                onClick={() => { setShowSheetPrompt(false); setWpMode('sheet'); }}
+                className="nim-btn-yellow w-full"
+              >
+                {t.sheetGoToSheet}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Header ── */}
       <header className="bg-nim-darker border-b-2 border-nim-yellow/80 sticky top-0 z-20">

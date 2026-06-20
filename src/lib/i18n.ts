@@ -77,6 +77,9 @@ export const translations = {
     arkBadge: 'Sheet',
     sheetEmpty: 'Your sheet is empty',
     sheetEmptyHint: 'Design a sticker and use "Send to sheet", then arrange them here.',
+    sheetPromptQuestion: 'Add another design to the sheet, or go to the sheet?',
+    sheetAddAnother: 'Add another design',
+    sheetGoToSheet: 'Go to the sheet',
 
     // Steps
     step01: 'Upload Image',
@@ -208,6 +211,9 @@ export const translations = {
     arkBadge: 'Ark',
     sheetEmpty: 'Ditt ark är tomt',
     sheetEmptyHint: 'Designa ett klistermärke och använd "Skicka till ark", ordna dem sedan här.',
+    sheetPromptQuestion: 'Lägg till ytterligare design på ark eller gå till arket?',
+    sheetAddAnother: 'Lägg till ytterligare design',
+    sheetGoToSheet: 'Gå till arket',
 
     // Steps
     step01: 'Ladda upp bild',
