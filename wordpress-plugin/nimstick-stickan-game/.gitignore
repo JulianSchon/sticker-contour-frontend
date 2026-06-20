@@ -1,0 +1,2 @@
+# The plugin ships its built bundle — un-ignore dist/ for this directory only.
+!dist/

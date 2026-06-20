@@ -1,0 +1,108 @@
+{
+  "stickan": {
+    "sliceX": 6,
+    "sliceY": 5,
+    "cellW": 229,
+    "cellH": 215,
+    "frameCount": 28,
+    "anims": {
+      "idle": {
+        "from": 0,
+        "to": 3
+      },
+      "run": {
+        "from": 4,
+        "to": 21
+      },
+      "jump": {
+        "from": 22,
+        "to": 23
+      },
+      "throw": {
+        "from": 24,
+        "to": 26
+      },
+      "hurt": {
+        "from": 27,
+        "to": 27
+      }
+    }
+  },
+  "janitor": {
+    "sliceX": 6,
+    "sliceY": 2,
+    "cellW": 251,
+    "cellH": 236,
+    "frameCount": 9,
+    "anims": {
+      "idle": {
+        "from": 0,
+        "to": 2
+      },
+      "run": {
+        "from": 3,
+        "to": 8
+      }
+    }
+  },
+  "granny": {
+    "sliceX": 6,
+    "sliceY": 2,
+    "cellW": 211,
+    "cellH": 278,
+    "frameCount": 9,
+    "anims": {
+      "idle": {
+        "from": 0,
+        "to": 2
+      },
+      "run": {
+        "from": 3,
+        "to": 8
+      }
+    }
+  },
+  "boss": {
+    "sliceX": 6,
+    "sliceY": 2,
+    "cellW": 294,
+    "cellH": 341,
+    "frameCount": 9,
+    "anims": {
+      "idle": {
+        "from": 0,
+        "to": 2
+      },
+      "charge": {
+        "from": 3,
+        "to": 8
+      }
+    }
+  },
+  "throwsticker": {
+    "sliceX": 10,
+    "sliceY": 1,
+    "cellW": 100,
+    "cellH": 104,
+    "frameCount": 10,
+    "anims": {
+      "spin": {
+        "from": 0,
+        "to": 9
+      }
+    }
+  },
+  "spincoin": {
+    "sliceX": 10,
+    "sliceY": 1,
+    "cellW": 70,
+    "cellH": 98,
+    "frameCount": 10,
+    "anims": {
+      "spin": {
+        "from": 0,
+        "to": 9
+      }
+    }
+  }
+}
