@@ -43,6 +43,11 @@ test('WP: send a design to the sheet and open ARK', async ({ page }) => {
   await page.getByRole('button', { name: /lägg till text|add text/i }).click();
   await page.getByRole('button', { name: /fortsätt till skärval|continue to cut setup/i }).click();
 
+  // Wait for the cut step to render (its download/save button is present in both modes).
+  await page
+    .getByRole('button', { name: /spara design|save design|ladda ner pdf|download pdf/i })
+    .waitFor({ timeout: 15000 });
+
   // "Send to sheet" only exists in WordPress mode — skip otherwise.
   const sendBtn = page.getByRole('button', { name: /skicka till ark|send to sheet/i });
   if (await sendBtn.count() === 0) test.skip(true, 'standalone mode — no sheet flow');
