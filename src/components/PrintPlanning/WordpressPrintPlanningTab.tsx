@@ -39,7 +39,7 @@ export function WordpressPrintPlanningTab({ items, onItemsChange, onGoToDesign }
   const [copies, setCopies] = useState<PackedCopy[]>([]);
   const [totalLengthMm, setTotalLengthMm] = useState(0);
   const [utilizationPct, setUtilizationPct] = useState(0);
-  const [material, setMaterial] = useState<Material>('vinyl');
+  const [material, setMaterial] = useState<Material>('laminerad');
   const [finish, setFinish] = useState<Finish>('glossy');
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);

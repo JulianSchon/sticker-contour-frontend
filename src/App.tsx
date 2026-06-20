@@ -39,7 +39,7 @@ export default function App() {
   const [params, setParams] = useState<ContourParams>(DEFAULT_PARAMS);
   const [stickerWidthCm, setStickerWidthCm] = useState<number | null>(null);
   const [stickerHeightCm, setStickerHeightCm] = useState<number | null>(null);
-  const [material, setMaterial] = useState<Material>('vinyl');
+  const [material, setMaterial] = useState<Material>('laminerad');
   const [finish, setFinish] = useState<Finish>('glossy');
   const [sheetItems, setSheetItems] = useState<PlannedFile[]>([]);
   const [sendingToSheet, setSendingToSheet] = useState(false);
