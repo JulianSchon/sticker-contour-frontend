@@ -3,7 +3,7 @@
  *  backend's 20 MB upload + processing limits). */
 
 export const EXPORT_DPI = 300;
-export const MAX_EXPORT_PX = 3000;
+export const MAX_EXPORT_PX = 3100; // 25 cm @ 300 DPI ≈ 2953 px, so it stays full-res
 const CM_PER_INCH = 2.54;
 
 export interface SizePreset {
@@ -14,9 +14,12 @@ export interface SizePreset {
 }
 
 export const SIZE_PRESETS: SizePreset[] = [
-  { labelEn: 'Small 5×5',  labelSv: 'Liten 5×5',  wCm: 5,  hCm: 5 },
-  { labelEn: 'Medium 7×7', labelSv: 'Mellan 7×7', wCm: 7,  hCm: 7 },
-  { labelEn: 'Large 10×10', labelSv: 'Stor 10×10', wCm: 10, hCm: 10 },
+  { labelEn: 'Small 5×5',   labelSv: 'Liten 5×5',   wCm: 5,  hCm: 5  },
+  { labelEn: 'Medium 7×7',  labelSv: 'Mellan 7×7',  wCm: 7,  hCm: 7  },
+  { labelEn: 'Large 10×10', labelSv: 'Stor 10×10',  wCm: 10, hCm: 10 },
+  { labelEn: '15×15',       labelSv: '15×15',       wCm: 15, hCm: 15 },
+  { labelEn: '20×20',       labelSv: '20×20',       wCm: 20, hCm: 20 },
+  { labelEn: 'XL 25×25',    labelSv: 'XL 25×25',    wCm: 25, hCm: 25 },
 ];
 
 export function cmToPx(cm: number, dpi: number): number {
