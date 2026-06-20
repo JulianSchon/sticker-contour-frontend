@@ -91,7 +91,7 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Prop
           const kissPath = new Path2D(scalePath(contour.kissSvgPath, scaleX, scaleY, padPx, padPx));
           ctx.save();
           ctx.strokeStyle = '#ec4899';
-          ctx.lineWidth = Math.max(1.5, 2 / scale);
+          ctx.lineWidth = 1.5;
           ctx.setLineDash([]);
           ctx.stroke(kissPath);
           ctx.restore();
@@ -100,8 +100,8 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Prop
           const perfPath = new Path2D(scalePath(contour.perfSvgPath, scaleX, scaleY, padPx, padPx));
           ctx.save();
           ctx.strokeStyle = '#f97316';
-          ctx.lineWidth = Math.max(1.5, 2 / scale);
-          ctx.setLineDash([6, 4]);
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([]);
           ctx.stroke(perfPath);
           ctx.restore();
         }
