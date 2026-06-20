@@ -10,6 +10,8 @@ import type { ContourParams } from './types/contour.ts';
 import { LangContext, type Theme } from './lib/LangContext.ts';
 import { translations, type Lang } from './lib/i18n.ts';
 import { MaterialFinishPicker, type Material, type Finish } from './components/MaterialFinishPicker.tsx';
+import type { PlannedFile } from './types/printPlanning.ts';
+import { buildSheetItem } from './lib/sheetItem.ts';
 
 const DEFAULT_PARAMS: ContourParams = {
   threshold: 128,
@@ -39,6 +41,10 @@ export default function App() {
   const [stickerHeightCm, setStickerHeightCm] = useState<number | null>(null);
   const [material, setMaterial] = useState<Material>('vinyl');
   const [finish, setFinish] = useState<Finish>('glossy');
+  const [sheetItems, setSheetItems] = useState<PlannedFile[]>([]);
+  const [sendingToSheet, setSendingToSheet] = useState(false);
+  const [sentFlash, setSentFlash] = useState(false);
+  const [sheetError, setSheetError] = useState<string | null>(null);
   const [lang, setLang] = useState<Lang>('sv');
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = typeof localStorage !== 'undefined' ? localStorage.getItem('cutz-theme') : null;
@@ -73,6 +79,22 @@ export default function App() {
     const result = await designRef.current?.flatten();
     if (result) handleDesignComplete(result.file, result.dataUrl, result.widthCm, result.heightCm);
     else if (IS_WORDPRESS) setWpMode('single'); else setTab('contour');
+  };
+
+  const handleSendToSheet = async () => {
+    if (!file || !stickerWidthCm || !stickerHeightCm || sendingToSheet) return;
+    setSendingToSheet(true);
+    setSheetError(null);
+    try {
+      const item = await buildSheetItem(file, params, stickerWidthCm, stickerHeightCm, sheetItems.length);
+      setSheetItems(prev => [...prev, item]);
+      setSentFlash(true);
+      setTimeout(() => setSentFlash(false), 2500);
+    } catch (err) {
+      setSheetError(err instanceof Error ? err.message : 'Failed to add to sheet');
+    } finally {
+      setSendingToSheet(false);
+    }
   };
 
   // ── Header tagline ──────────────────────────────────────────────────────────
@@ -152,10 +174,26 @@ export default function App() {
         )}
         <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
           <div className="px-5 pt-5 pb-2"><StepLabel n={IS_WORDPRESS ? '03' : '02'} label={IS_WORDPRESS ? t.step03wp : t.step03} /></div>
-          <div className="px-5 pb-5">
+          <div className="px-5 pb-5 flex flex-col gap-3">
             {IS_WORDPRESS
               ? <DownloadButton file={file} params={params} widthCm={stickerWidthCm} heightCm={stickerHeightCm} material={material} finish={finish} />
               : <DownloadButton file={file} params={params} widthCm={stickerWidthCm} heightCm={stickerHeightCm} />}
+            {IS_WORDPRESS && (
+              <>
+                <button
+                  onClick={handleSendToSheet}
+                  disabled={!file || sendingToSheet}
+                  className={`w-full flex items-center justify-center gap-2 px-5 py-3 rounded-lg border-2 font-bold text-sm uppercase tracking-wide transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                    sentFlash ? 'border-green-500 text-green-400' : 'border-nim-yellow/60 text-nim-yellow hover:bg-nim-yellow/10'
+                  }`}
+                >
+                  {sendingToSheet ? t.edPreparing : sentFlash ? t.sentToSheet : `+ ${t.sendToSheet}`}
+                </button>
+                {sheetError && (
+                  <p className="text-xs text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">{sheetError}</p>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -200,6 +238,17 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2">
+            {IS_WORDPRESS && sheetItems.length > 0 && (
+              <button
+                onClick={() => setWpMode('sheet')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-nim-yellow/15 border border-nim-yellow/40 text-xs font-bold uppercase tracking-widest text-nim-yellow hover:bg-nim-yellow/25 transition-all"
+              >
+                {t.arkBadge}
+                <span className="inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-nim-yellow text-nim-black text-[10px] font-black">
+                  {sheetItems.length}
+                </span>
+              </button>
+            )}
             {/* Tab switcher — non-WP only. Design first + default. */}
             {!IS_WORDPRESS && (
               <nav className="flex gap-1 bg-white/5 p-1 rounded-lg border border-white/10">
@@ -325,7 +374,11 @@ export default function App() {
 
         {/* ── WordPress: sheet mode ── */}
         {IS_WORDPRESS && wpMode === 'sheet' && (
-          <WordpressPrintPlanningTab />
+          <WordpressPrintPlanningTab
+            items={sheetItems}
+            onItemsChange={setSheetItems}
+            onGoToDesign={goToDesign}
+          />
         )}
 
         {/* ── Non-WordPress: tabs (design editor is the always-mounted block above) ── */}
