@@ -63,14 +63,24 @@ export function WordpressPrintPlanningTab({ items, onItemsChange, onGoToDesign }
     setExportError(null);
     setExportSuccess(false);
     try {
-      const exportCopies: ExportCopy[] = copies.map(c => ({
-        fileIndex: items.findIndex(f => f.id === c.fileId),
-        x: c.x,
-        y: c.y,
-        widthMm: c.w,
-        heightMm: c.h,
-        rotated: c.rotated,
-      }));
+      // Drop any copies whose source item is no longer present (a stale
+      // `copies` state between an item removal and the re-pack effect) so the
+      // backend never receives a -1 fileIndex.
+      const exportCopies: ExportCopy[] = copies
+        .map(c => ({
+          fileIndex: items.findIndex(f => f.id === c.fileId),
+          x: c.x,
+          y: c.y,
+          widthMm: c.w,
+          heightMm: c.h,
+          rotated: c.rotated,
+        }))
+        .filter(c => c.fileIndex !== -1);
+      if (exportCopies.length === 0) {
+        setExportError(lang === 'sv' ? 'Layouten är inte synkad – försök igen.' : 'Layout is out of sync; please try again.');
+        setIsExporting(false);
+        return;
+      }
       const layout = {
         foilWidthMm: page.widthMm,
         totalLengthMm: page.heightMm,

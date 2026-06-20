@@ -11,7 +11,7 @@ import { LangContext, type Theme } from './lib/LangContext.ts';
 import { translations, type Lang } from './lib/i18n.ts';
 import { MaterialFinishPicker, type Material, type Finish } from './components/MaterialFinishPicker.tsx';
 import type { PlannedFile } from './types/printPlanning.ts';
-import { buildSheetItem } from './lib/sheetItem.ts';
+import { buildSheetItem, SHEET_COLORS } from './lib/sheetItem.ts';
 
 const DEFAULT_PARAMS: ContourParams = {
   threshold: 128,
@@ -45,6 +45,7 @@ export default function App() {
   const [sendingToSheet, setSendingToSheet] = useState(false);
   const [sentFlash, setSentFlash] = useState(false);
   const [sheetError, setSheetError] = useState<string | null>(null);
+  const sentFlashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [lang, setLang] = useState<Lang>('sv');
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = typeof localStorage !== 'undefined' ? localStorage.getItem('cutz-theme') : null;
@@ -87,15 +88,24 @@ export default function App() {
     setSheetError(null);
     try {
       const item = await buildSheetItem(file, params, stickerWidthCm, stickerHeightCm, sheetItems.length);
-      setSheetItems(prev => [...prev, item]);
+      // Derive the color tag from the authoritative previous state so rapid
+      // adds always get a distinct, correctly-cycled color.
+      setSheetItems(prev => [
+        ...prev,
+        { ...item, color: SHEET_COLORS[prev.length % SHEET_COLORS.length] },
+      ]);
       setSentFlash(true);
-      setTimeout(() => setSentFlash(false), 2500);
+      if (sentFlashTimer.current) clearTimeout(sentFlashTimer.current);
+      sentFlashTimer.current = setTimeout(() => setSentFlash(false), 2500);
     } catch (err) {
       setSheetError(err instanceof Error ? err.message : 'Failed to add to sheet');
     } finally {
       setSendingToSheet(false);
     }
   };
+
+  // Clear the pending "added ✓" flash timer on unmount.
+  useEffect(() => () => { if (sentFlashTimer.current) clearTimeout(sentFlashTimer.current); }, []);
 
   // ── Header tagline ──────────────────────────────────────────────────────────
   const headerTagline = IS_WORDPRESS
