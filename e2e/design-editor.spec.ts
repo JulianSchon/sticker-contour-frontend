@@ -49,10 +49,16 @@ test('WP: send a design to the sheet and open ARK', async ({ page }) => {
 
   await sendBtn.first().click();
 
-  // ARK badge appears with a count; open it.
-  const ark = page.getByRole('button', { name: /^(Ark|Sheet)\s*1$/i });
-  await expect(ark).toBeVisible({ timeout: 15000 });
-  await ark.click();
+  // After a successful send, a prompt asks whether to add another or go to the sheet.
+  await expect(
+    page.getByText(/lägg till ytterligare design på ark eller gå till arket|add another design to the sheet/i)
+  ).toBeVisible({ timeout: 15000 });
+
+  // The ARK badge also appears with a count.
+  await expect(page.getByRole('button', { name: /^(Ark|Sheet)\s*1$/i })).toBeVisible();
+
+  // Choosing "go to the sheet" opens the ARK view.
+  await page.getByRole('button', { name: /gå till arket|go to the sheet/i }).click();
 
   // ARK shows the sticker list with Save Sheet.
   await expect(page.getByRole('button', { name: /spara ark|save sheet/i })).toBeVisible();
