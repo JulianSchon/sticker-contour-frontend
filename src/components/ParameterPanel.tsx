@@ -123,7 +123,6 @@ export function ParameterPanel({ params, onChange, hideCutMode = false, hideThre
       {showPerf && !hideOffsets && (
         <div className="pl-3 border-l-2 border-orange-500/60 space-y-2">
           <div className="flex items-center gap-2">
-            <span className="inline-block w-5 border-t-2 border-dashed border-orange-500" />
             <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">{t.perfCutOffset}</span>
           </div>
           <Slider
