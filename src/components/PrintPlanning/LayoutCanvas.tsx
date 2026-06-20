@@ -236,7 +236,7 @@ export function LayoutCanvas({ foilWidthMm, totalLengthMm, copies, files, regmar
 
   const [zoom, setZoom] = useState(0.3);
   const [pan, setPan] = useState({ x: 20, y: 20 });
-  const [showStickers, setShowStickers] = useState(false);
+  const [showStickers, setShowStickers] = useState(true);
 
   const [dragging, setDragging] = useState<{
     copyId: string;
