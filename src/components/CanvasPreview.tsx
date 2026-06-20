@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { scalePath } from '../lib/pathTransforms.ts';
+import { useLang } from '../lib/LangContext.ts';
 import type { ContourPreviewResponse, ContourParams } from '../types/contour.ts';
 
 interface Props {
@@ -10,9 +11,35 @@ interface Props {
 }
 
 const CANVAS_MAX = 600;
+const MAX_TILT = 14; // degrees
+
+// A recessed "well": vignette that darkens toward the edges + a deep inset
+// shadow, so the sticker reads as floating above a deep, carved space.
+const WELL_STYLE: Record<'dark' | 'light', React.CSSProperties> = {
+  dark: {
+    background: 'radial-gradient(125% 120% at 50% 36%, #232323 0%, #141414 38%, #070707 78%, #030303 100%)',
+    boxShadow: 'inset 0 0 70px 24px rgba(0,0,0,0.8), inset 0 2px 3px rgba(0,0,0,0.7)',
+  },
+  light: {
+    background: 'radial-gradient(125% 120% at 50% 36%, #fdfdff 0%, #edeef2 52%, #d4d7df 88%, #c7cad3 100%)',
+    boxShadow: 'inset 0 0 60px 22px rgba(0,0,0,0.10), inset 0 2px 3px rgba(0,0,0,0.12)',
+  },
+};
 
 export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Props) {
+  const { theme } = useLang();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
+  const [tilting, setTilting] = useState(false);
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width - 0.5;
+    const py = (e.clientY - rect.top) / rect.height - 0.5;
+    setTilt({ rx: -py * 2 * MAX_TILT, ry: px * 2 * MAX_TILT });
+    setTilting(true);
+  };
+  const resetTilt = () => { setTilt({ rx: 0, ry: 0 }); setTilting(false); };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -28,52 +55,71 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Prop
     const img = new Image();
     img.onload = () => {
       // The contour path can extend `pad` pixels beyond the image on all sides.
-      // Expand the canvas to show that area, and shift the image inward by padPx.
       const pad = contour?.pad ?? 0;
-      const totalW = img.naturalWidth  + pad * 2;
+      const totalW = img.naturalWidth + pad * 2;
       const totalH = img.naturalHeight + pad * 2;
 
       const scale = Math.min(CANVAS_MAX / totalW, CANVAS_MAX / totalH, 1);
       const canvasW = Math.round(totalW * scale);
       const canvasH = Math.round(totalH * scale);
-      const padPx = Math.round(pad * scale); // pad in canvas pixels
+      const padPx = Math.round(pad * scale);
 
       canvas.width = canvasW;
       canvas.height = canvasH;
 
-      drawCheckerboard(ctx, canvasW, canvasH);
-      // Draw image offset inward by padPx so path coords align with the image
-      ctx.drawImage(img, padPx, padPx, Math.round(img.naturalWidth * scale), Math.round(img.naturalHeight * scale));
-
-      if (!contour) return;
-
-      // Path coords are in bitmap pixel space (0..contour.width, 0..contour.height),
-      // but can be negative by up to `pad` pixels.
-      // Scale to canvas coords and shift right/down by padPx so negative coords show.
-      const scaleX = (img.naturalWidth  * scale) / contour.width;
-      const scaleY = (img.naturalHeight * scale) / contour.height;
+      ctx.clearRect(0, 0, canvasW, canvasH);
 
       const showKiss = params.cutMode === 'kiss' || params.cutMode === 'both';
-      const showPerf = (params.cutMode === 'perf' || params.cutMode === 'both') && contour.perfSvgPath;
+      const showPerf = (params.cutMode === 'perf' || params.cutMode === 'both') && !!contour?.perfSvgPath;
 
-      if (showKiss) {
-        const kissPath = new Path2D(scalePath(contour.kissSvgPath, scaleX, scaleY, padPx, padPx));
-        ctx.save();
-        ctx.strokeStyle = '#ff00aa';
-        ctx.lineWidth = Math.max(1.5, 2 / scale);
-        ctx.setLineDash([]);
-        ctx.stroke(kissPath);
-        ctx.restore();
-      }
+      if (contour) {
+        const scaleX = (img.naturalWidth * scale) / contour.width;
+        const scaleY = (img.naturalHeight * scale) / contour.height;
 
-      if (showPerf && contour.perfSvgPath) {
-        const perfPath = new Path2D(scalePath(contour.perfSvgPath, scaleX, scaleY, padPx, padPx));
+        // Fill the sticker body white — the real die-cut look. The cut outline is
+        // the sticker edge; with an offset > 0 this shows as a white margin/border.
+        const bodySvg = showPerf && contour.perfSvgPath ? contour.perfSvgPath : contour.kissSvgPath;
+        const bodyPath = new Path2D(scalePath(bodySvg, scaleX, scaleY, padPx, padPx));
+        ctx.fillStyle = '#ffffff';
+        ctx.fill(bodyPath);
+
+        // Artwork on top of the white body.
+        ctx.drawImage(img, padPx, padPx, Math.round(img.naturalWidth * scale), Math.round(img.naturalHeight * scale));
+
+        // Cut outlines.
+        if (showKiss) {
+          const kissPath = new Path2D(scalePath(contour.kissSvgPath, scaleX, scaleY, padPx, padPx));
+          ctx.save();
+          ctx.strokeStyle = '#ec4899';
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([]);
+          ctx.stroke(kissPath);
+          ctx.restore();
+        }
+        if (showPerf && contour.perfSvgPath) {
+          const perfPath = new Path2D(scalePath(contour.perfSvgPath, scaleX, scaleY, padPx, padPx));
+          ctx.save();
+          ctx.strokeStyle = '#f97316';
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([]);
+          ctx.stroke(perfPath);
+          ctx.restore();
+        }
+
+        // Glossy laminate sheen across the sticker surface (clipped to the body).
         ctx.save();
-        ctx.strokeStyle = '#ff6600';
-        ctx.lineWidth = Math.max(1.5, 2 / scale);
-        ctx.setLineDash([6, 4]);
-        ctx.stroke(perfPath);
+        ctx.clip(bodyPath);
+        const sheen = ctx.createLinearGradient(0, 0, canvasW * 0.7, canvasH);
+        sheen.addColorStop(0, 'rgba(255,255,255,0.30)');
+        sheen.addColorStop(0.22, 'rgba(255,255,255,0.07)');
+        sheen.addColorStop(0.5, 'rgba(255,255,255,0)');
+        sheen.addColorStop(1, 'rgba(0,0,0,0.12)');
+        ctx.fillStyle = sheen;
+        ctx.fillRect(0, 0, canvasW, canvasH);
         ctx.restore();
+      } else {
+        // No contour yet — just show the artwork.
+        ctx.drawImage(img, padPx, padPx, Math.round(img.naturalWidth * scale), Math.round(img.naturalHeight * scale));
       }
     };
     img.src = imageDataUrl;
@@ -81,20 +127,35 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Prop
 
   if (!imageDataUrl) {
     return (
-      <div className="flex items-center justify-center h-64 bg-gray-100 rounded-xl border border-gray-200">
-        <p className="text-gray-400 text-sm">Upload an image to see the preview</p>
+      <div className="flex items-center justify-center h-full min-h-64" style={WELL_STYLE[theme]}>
+        <p className="text-white/30 text-sm">Upload or design a sticker to see the preview</p>
       </div>
     );
   }
 
   return (
-    <div className="relative inline-block">
-      <canvas ref={canvasRef} className="rounded-xl border border-gray-200 max-w-full" />
+    <div
+      className="relative w-full h-full flex items-center justify-center p-8 overflow-hidden"
+      style={{ perspective: '1000px', ...WELL_STYLE[theme] }}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={resetTilt}
+    >
+      <canvas
+        ref={canvasRef}
+        className="max-w-full"
+        style={{
+          transform: `rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) scale(${tilting ? 1.03 : 1})`,
+          filter: `drop-shadow(${-tilt.ry * 0.7}px ${18 - tilt.rx * 0.7}px 26px rgba(0,0,0,${theme === 'light' ? 0.3 : 0.6}))`,
+          transition: tilting ? 'filter 0.08s linear' : 'transform 0.5s ease, filter 0.5s ease',
+          transformStyle: 'preserve-3d',
+          willChange: 'transform, filter',
+        }}
+      />
 
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-white/60">
-          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow text-sm text-gray-600">
-            <svg className="animate-spin w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="flex items-center gap-2 bg-black/70 px-4 py-2 rounded-full text-sm text-white/80">
+            <svg className="animate-spin w-4 h-4 text-nim-yellow" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
             </svg>
@@ -102,24 +163,6 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Prop
           </div>
         </div>
       )}
-
-      <div className="mt-2 flex items-center gap-3 text-xs text-gray-400">
-        <span className="inline-block w-4 h-0.5 bg-[#ff00aa]" />
-        <span>Kiss cut</span>
-        <span className="inline-block w-4 border-t-2 border-dashed border-[#ff6600]" />
-        <span>Perf cut</span>
-        <span className="ml-auto italic">Preview is approximate</span>
-      </div>
     </div>
   );
-}
-
-function drawCheckerboard(ctx: CanvasRenderingContext2D, w: number, h: number) {
-  const size = 12;
-  for (let y = 0; y < h; y += size) {
-    for (let x = 0; x < w; x += size) {
-      ctx.fillStyle = (Math.floor(x / size) + Math.floor(y / size)) % 2 === 0 ? '#e0e0e0' : '#f8f8f8';
-      ctx.fillRect(x, y, size, size);
-    }
-  }
 }

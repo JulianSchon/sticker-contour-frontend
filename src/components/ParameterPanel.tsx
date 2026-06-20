@@ -25,12 +25,12 @@ function Slider({ label, value, min, max, step, unit = '', onChange }: SliderPro
   const pct = ((value - min) / (max - min)) * 100;
   return (
     <div className="space-y-2">
-      {label && (
-        <div className="flex justify-between items-baseline">
-          <span className="text-xs font-semibold text-white">{label}</span>
-          <span className="text-xs font-bold text-nim-yellow tabular-nums">{value}{unit}</span>
-        </div>
-      )}
+      {/* Always show the current value (incl. unit); label is optional because
+          the offset sliders render their heading separately. */}
+      <div className="flex justify-between items-baseline">
+        {label ? <span className="text-xs font-semibold text-white">{label}</span> : <span />}
+        <span className="text-xs font-bold text-nim-yellow tabular-nums">{value}{unit}</span>
+      </div>
       <div className="relative">
         <input
           type="range"
@@ -123,7 +123,6 @@ export function ParameterPanel({ params, onChange, hideCutMode = false, hideThre
       {showPerf && !hideOffsets && (
         <div className="pl-3 border-l-2 border-orange-500/60 space-y-2">
           <div className="flex items-center gap-2">
-            <span className="inline-block w-5 border-t-2 border-dashed border-orange-500" />
             <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">{t.perfCutOffset}</span>
           </div>
           <Slider
