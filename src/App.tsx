@@ -134,7 +134,9 @@ export default function App() {
         <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
           <div className="px-5 pt-5 pb-2"><StepLabel n="01" label={t.step02} /></div>
           <div className="px-5 pb-5">
-            <ParameterPanel params={params} onChange={setParams} />
+            {/* Cut mode hidden for now — perf-cut only (DEFAULT_PARAMS.cutMode='perf').
+                Remove hideCutMode to bring kiss/perf/both back. */}
+            <ParameterPanel params={params} onChange={setParams} hideCutMode />
           </div>
         </div>
         {IS_WORDPRESS && (
