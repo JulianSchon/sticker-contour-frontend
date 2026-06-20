@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { PlannedFile, PackedCopy, ExportCopy } from '../../types/printPlanning.ts';
 import { packItems } from '../../lib/packer.ts';
 import { exportPrintLayout, exportPrintLayoutBlob } from '../../lib/api.ts';
+import { renderPdfFirstPageBlob } from '../../lib/pdfPreview.ts';
 import { LayoutCanvas } from './LayoutCanvas.tsx';
 import { MaterialFinishPicker, MATERIALS } from '../MaterialFinishPicker.tsx';
 import type { Material, Finish } from '../MaterialFinishPicker.tsx';
@@ -9,6 +10,16 @@ import { useLang } from '../../lib/LangContext.ts';
 
 const SHEET_MATERIALS = MATERIALS.filter(m => m.value !== 'reflex') as ReadonlyArray<typeof MATERIALS[number]>;
 const IS_WORDPRESS = import.meta.env.VITE_MODE === 'wordpress';
+
+// A valid 1×1 transparent PNG, used only if rendering a sheet thumbnail fails —
+// the WP media upload rejects an empty/invalid image, so we never send 0 bytes.
+function fallbackPngBlob(): Blob {
+  const b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes], { type: 'image/png' });
+}
 
 const PAGE_SIZES = {
   a4: { label: 'A4', widthMm: 210, heightMm: 297 },
@@ -91,7 +102,12 @@ export function WordpressPrintPlanningTab({ items, onItemsChange, onGoToDesign }
 
       if (IS_WORDPRESS) {
         const pdfBlob = await exportPrintLayoutBlob(items.map(f => f.file), layout);
-        const imageFile = new File([new Uint8Array(0)], 'sheet.png', { type: 'image/png' });
+        // The WP plugin uploads BOTH the PDF and an image, and fails the cart-add
+        // if either upload fails — so render a real thumbnail of the sheet rather
+        // than a 0-byte placeholder (which WP media upload rejects).
+        const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
+        const thumbBlob = await renderPdfFirstPageBlob(pdfFile).catch(() => fallbackPngBlob());
+        const imageFile = new File([thumbBlob], 'sheet.png', { type: 'image/png' });
         const widthCm = Math.ceil(page.widthMm / 10);
         const heightCm = Math.ceil(page.heightMm / 10);
         window.parent.postMessage(

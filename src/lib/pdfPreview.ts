@@ -27,3 +27,30 @@ export async function renderPdfFirstPage(file: File, scale = 2): Promise<string>
 
   return canvas.toDataURL('image/png');
 }
+
+/**
+ * Renders the first page of a PDF file to a PNG Blob (for upload, not display).
+ * @param file  The PDF File object
+ * @param scale Resolution multiplier
+ */
+export async function renderPdfFirstPageBlob(file: File, scale = 1): Promise<Blob> {
+  const arrayBuffer = await file.arrayBuffer();
+  const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+  const pdf = await loadingTask.promise;
+  const page = await pdf.getPage(1);
+
+  const viewport = page.getViewport({ scale });
+  const canvas = document.createElement('canvas');
+  canvas.width  = viewport.width;
+  canvas.height = viewport.height;
+
+  const ctx = canvas.getContext('2d')!;
+  await page.render({ canvasContext: ctx, viewport, canvas }).promise;
+
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      blob => (blob ? resolve(blob) : reject(new Error('Failed to render PDF thumbnail'))),
+      'image/png',
+    );
+  });
+}
