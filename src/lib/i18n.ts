@@ -72,6 +72,11 @@ export const translations = {
     cutEmptyHint: 'Create your sticker in the Design tab, then continue here to set up the cut.',
     cutGoToDesign: 'Go to Design',
     cutEditDesign: 'Edit design',
+    sendToSheet: 'Send to sheet',
+    sentToSheet: 'Added to sheet ✓',
+    arkBadge: 'Sheet',
+    sheetEmpty: 'Your sheet is empty',
+    sheetEmptyHint: 'Design a sticker and use "Send to sheet", then arrange them here.',
 
     // Steps
     step01: 'Upload Image',
@@ -198,6 +203,11 @@ export const translations = {
     cutEmptyHint: 'Skapa din dekal i Design-fliken, fortsätt sedan hit för att ställa in skäret.',
     cutGoToDesign: 'Gå till Design',
     cutEditDesign: 'Redigera design',
+    sendToSheet: 'Skicka till ark',
+    sentToSheet: 'Tillagd på arket ✓',
+    arkBadge: 'Ark',
+    sheetEmpty: 'Ditt ark är tomt',
+    sheetEmptyHint: 'Designa ett klistermärke och använd "Skicka till ark", ordna dem sedan här.',
 
     // Steps
     step01: 'Ladda upp bild',
