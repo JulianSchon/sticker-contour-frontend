@@ -101,6 +101,17 @@ export default function App() {
     }
   };
 
+  // "Add another design" — reset the artboard and cut-step state for a fresh design.
+  const handleAddAnother = () => {
+    setShowSheetPrompt(false);
+    designRef.current?.clear();
+    setFile(null);
+    setImageDataUrl(null);
+    setStickerWidthCm(null);
+    setStickerHeightCm(null);
+    goToDesign();
+  };
+
   // ── Header tagline ──────────────────────────────────────────────────────────
   const headerTagline = IS_WORDPRESS
     ? (wpMode === 'single' ? t.taglineContour : wpMode === 'sheet' ? t.taglinePrint : wpMode === 'design' ? t.modeDesign : 'CUTZ')
@@ -233,7 +244,7 @@ export default function App() {
             </div>
             <div className="flex flex-col w-full gap-2.5 mt-1">
               <button
-                onClick={() => { setShowSheetPrompt(false); goToDesign(); }}
+                onClick={handleAddAnother}
                 className="w-full px-5 py-3 rounded-lg border-2 border-nim-yellow/60 text-nim-yellow hover:bg-nim-yellow/10 font-bold text-sm uppercase tracking-wide transition-all"
               >
                 + {t.sheetAddAnother}
