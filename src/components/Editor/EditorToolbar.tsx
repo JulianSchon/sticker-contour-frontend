@@ -46,7 +46,7 @@ export function EditorToolbar({ size, onSizeChange, canUndo, canRedo, onUndo, on
         >
           {SIZE_PRESETS.map(p => (
             <option key={`${p.wCm}x${p.hCm}`} value={`${p.wCm}x${p.hCm}`}>
-              {lang === 'sv' ? p.labelSv : p.labelEn} ({p.wCm}×{p.hCm} cm)
+              {lang === 'sv' ? p.labelSv : p.labelEn}
             </option>
           ))}
         </select>
