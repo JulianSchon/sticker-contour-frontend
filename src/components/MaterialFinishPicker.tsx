@@ -1,9 +1,7 @@
 import { useLang } from '../lib/LangContext.ts';
 
 export const MATERIALS = [
-  { value: 'vinyl',     labelKey: 'matVinyl'    },
   { value: 'laminerad', labelKey: 'matLaminerad' },
-  { value: 'reflex',    labelKey: 'matReflex'    },
 ] as const;
 
 export const FINISHES = [
@@ -31,25 +29,27 @@ export function MaterialFinishPicker({ material, finish, onMaterialChange, onFin
 
   return (
     <div className="space-y-4">
-      {/* Material */}
-      <div className={`space-y-2 ${hideMaterialOnMobile ? 'hidden sm:block' : ''}`}>
-        <span className="text-xs font-semibold text-white">{t.material}</span>
-        <div className="flex flex-col gap-1.5">
-          {visibleMaterials.map(m => (
-            <button
-              key={m.value}
-              onClick={() => onMaterialChange(m.value)}
-              className={`w-full text-left px-3 py-2 rounded-lg border-2 text-xs font-semibold transition-all ${
-                material === m.value
-                  ? 'border-nim-yellow bg-nim-yellow/10 text-nim-yellow'
-                  : 'border-white/10 text-white/40 hover:border-white/20 hover:text-white/60'
-              }`}
-            >
-              {t[m.labelKey as keyof typeof t] as string}
-            </button>
-          ))}
+      {/* Material — only shown when there's an actual choice (>1 option). */}
+      {visibleMaterials.length > 1 && (
+        <div className={`space-y-2 ${hideMaterialOnMobile ? 'hidden sm:block' : ''}`}>
+          <span className="text-xs font-semibold text-white">{t.material}</span>
+          <div className="flex flex-col gap-1.5">
+            {visibleMaterials.map(m => (
+              <button
+                key={m.value}
+                onClick={() => onMaterialChange(m.value)}
+                className={`w-full text-left px-3 py-2 rounded-lg border-2 text-xs font-semibold transition-all ${
+                  material === m.value
+                    ? 'border-nim-yellow bg-nim-yellow/10 text-nim-yellow'
+                    : 'border-white/10 text-white/40 hover:border-white/20 hover:text-white/60'
+                }`}
+              >
+                {t[m.labelKey as keyof typeof t] as string}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Finish */}
       <div className="space-y-2">

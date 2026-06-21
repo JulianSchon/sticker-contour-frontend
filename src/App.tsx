@@ -202,11 +202,8 @@ export default function App() {
           </div>
           {IS_WORDPRESS && (
             <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
-              <div className="px-5 pt-5 pb-2">
-                {/* Mobile hides Material, so the title is just "Finish". */}
-                <div className="hidden sm:block"><StepLabel n="02" label={t.stepMaterial} /></div>
-                <div className="sm:hidden"><StepLabel n="02" label={t.finish} /></div>
-              </div>
+              {/* Only Finish is shown (single material), so the title is "Finish". */}
+              <div className="px-5 pt-5 pb-2"><StepLabel n="02" label={t.finish} /></div>
               <div className="px-5 pb-5">
                 <MaterialFinishPicker
                   material={material} finish={finish}

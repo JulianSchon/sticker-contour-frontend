@@ -8,7 +8,7 @@ import { MaterialFinishPicker, MATERIALS } from '../MaterialFinishPicker.tsx';
 import type { Material, Finish } from '../MaterialFinishPicker.tsx';
 import { useLang } from '../../lib/LangContext.ts';
 
-const SHEET_MATERIALS = MATERIALS.filter(m => m.value !== 'reflex') as ReadonlyArray<typeof MATERIALS[number]>;
+const SHEET_MATERIALS: ReadonlyArray<typeof MATERIALS[number]> = MATERIALS;
 const IS_WORDPRESS = import.meta.env.VITE_MODE === 'wordpress';
 
 // A valid 1×1 transparent PNG, used only if rendering a sheet thumbnail fails —
@@ -187,12 +187,8 @@ export function WordpressPrintPlanningTab({ items, onItemsChange, onGoToDesign }
       </div>
 
       <div className="bg-nim-darker rounded-2xl border border-white/10 px-5 py-4">
-        <p className="nim-label mb-3">
-          {/* Material is hidden on mobile (defaults to Premium Laminated), so the
-              header reads just "Finish" there — matching the cut step. */}
-          <span className="sm:hidden">Finish</span>
-          <span className="hidden sm:inline">{lang === 'sv' ? 'Material & finish' : 'Material & Finish'}</span>
-        </p>
+        {/* Single material → only Finish is shown. */}
+        <p className="nim-label mb-3">Finish</p>
         <MaterialFinishPicker
           material={material}
           finish={finish}
