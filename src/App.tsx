@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ParameterPanel } from './components/ParameterPanel.tsx';
 import { CanvasPreview } from './components/CanvasPreview.tsx';
 import { DownloadButton } from './components/DownloadButton.tsx';
@@ -182,7 +182,18 @@ export default function App() {
         {/* Cut params (01) + material & finish (02) */}
         <div className="order-1 lg:col-start-1 lg:row-start-1 flex flex-col gap-4">
           <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
-            <div className="px-5 pt-5 pb-2"><StepLabel n="01" label={t.step02} /></div>
+            <div className="px-5 pt-5 pb-2">
+              {/* Desktop: full "Adjust parameters". Mobile: only the offset shows,
+                  so the title becomes the offset name + its value. */}
+              <div className="hidden sm:block"><StepLabel n="01" label={t.step02} /></div>
+              <div className="sm:hidden">
+                <StepLabel
+                  n="01"
+                  label={t.perfCutOffset}
+                  right={<span className="text-xs font-bold text-nim-yellow tabular-nums">{params.perfOffset} mm</span>}
+                />
+              </div>
+            </div>
             <div className="px-5 pb-5">
               {/* Cut mode hidden for now — perf-cut only (DEFAULT_PARAMS.cutMode='perf').
                   Remove hideCutMode to bring kiss/perf/both back. */}
@@ -191,7 +202,11 @@ export default function App() {
           </div>
           {IS_WORDPRESS && (
             <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
-              <div className="px-5 pt-5 pb-2"><StepLabel n="02" label={t.stepMaterial} /></div>
+              <div className="px-5 pt-5 pb-2">
+                {/* Mobile hides Material, so the title is just "Finish". */}
+                <div className="hidden sm:block"><StepLabel n="02" label={t.stepMaterial} /></div>
+                <div className="sm:hidden"><StepLabel n="02" label={t.finish} /></div>
+              </div>
               <div className="px-5 pb-5">
                 <MaterialFinishPicker
                   material={material} finish={finish}
@@ -475,13 +490,14 @@ export default function App() {
   );
 }
 
-function StepLabel({ n, label }: { n: string; label: string }) {
+function StepLabel({ n, label, right }: { n: string; label: string; right?: ReactNode }) {
   return (
     <div className="flex items-center gap-2 mb-1">
       <span className="w-5 h-5 rounded-md bg-nim-yellow flex items-center justify-center text-nim-black text-xs font-black leading-none shrink-0">
         {n}
       </span>
       <span className="text-xs font-bold uppercase tracking-widest text-white">{label}</span>
+      {right && <span className="ml-auto">{right}</span>}
     </div>
   );
 }
