@@ -68,19 +68,20 @@ export function ParameterPanel({ params, onChange, hideCutMode = false, hideThre
   return (
     <div className="space-y-6">
 
-      {!hideThreshold && <Slider
+      {/* Advanced tuning — hidden on mobile to keep the customer flow simple. */}
+      {!hideThreshold && <div className="hidden sm:block"><Slider
         label={t.thresholdSensitivity}
         value={params.threshold}
         min={1} max={255} step={1}
         onChange={v => set('threshold', v)}
-      />}
+      /></div>}
 
-      {!hideSmoothing && <Slider
+      {!hideSmoothing && <div className="hidden sm:block"><Slider
         label={t.smoothingLevel}
         value={params.smoothing}
         min={0} max={4} step={1}
         onChange={v => set('smoothing', v)}
-      />}
+      /></div>}
 
       {/* Cut mode */}
       {!hideCutMode && <div className="space-y-2">
@@ -134,10 +135,10 @@ export function ParameterPanel({ params, onChange, hideCutMode = false, hideThre
         </div>
       )}
 
-      {/* Enclose toggle */}
+      {/* Enclose toggle — hidden on mobile (advanced) */}
       {!hideEnclose && <button
         onClick={() => set('enclose', !params.enclose)}
-        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border-2 transition-all ${
+        className={`w-full hidden sm:flex items-center gap-3 px-3 py-2.5 rounded-lg border-2 transition-all ${
           params.enclose
             ? 'border-nim-yellow bg-nim-yellow/10'
             : 'border-white/10 hover:border-white/20'

@@ -195,6 +195,7 @@ export default function App() {
               <MaterialFinishPicker
                 material={material} finish={finish}
                 onMaterialChange={setMaterial} onFinishChange={setFinish}
+                hideMaterialOnMobile
               />
             </div>
           </div>
