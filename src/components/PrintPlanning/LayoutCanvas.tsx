@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
-import { useLang } from '../../lib/LangContext.ts';
 import type { PackedCopy, PlannedFile, RegmarkType } from '../../types/printPlanning.ts';
 import { GAP_MM } from '../../lib/packer.ts';
 import {
@@ -230,13 +229,11 @@ function RolandLayer({
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export function LayoutCanvas({ foilWidthMm, totalLengthMm, copies, files, regmarkType, onCopiesChange, pageLengthMm }: Props) {
-  const { lang } = useLang();
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
   const [zoom, setZoom] = useState(0.3);
   const [pan, setPan] = useState({ x: 20, y: 20 });
-  const [showStickers, setShowStickers] = useState(true);
 
   const [dragging, setDragging] = useState<{
     copyId: string;
@@ -349,25 +346,6 @@ export function LayoutCanvas({ foilWidthMm, totalLengthMm, copies, files, regmar
 
         {/* Right: controls */}
         <div className="pointer-events-auto flex items-center gap-1">
-          {/* Sticker toggle */}
-          <button
-            onClick={() => setShowStickers(s => !s)}
-            className={`flex items-center gap-2 h-8 px-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
-              showStickers
-                ? 'bg-nim-yellow text-nim-black shadow-lg shadow-nim-yellow/30'
-                : 'bg-white/15 text-white hover:bg-white/25 backdrop-blur-sm border border-white/20'
-            }`}
-          >
-            <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            {showStickers
-              ? (lang === 'sv' ? 'Dölj klistermärken' : 'Hide stickers')
-              : (lang === 'sv' ? 'Visa faktiska klistermärken' : 'Show actual stickers')}
-          </button>
-
-          <div className="w-px h-4 bg-white/20 mx-0.5" />
 
           <button
             onClick={() => { const nz = Math.max(zoom * 0.77, 0.03); const cw = containerRef.current?.clientWidth ?? 0; const ch = containerRef.current?.clientHeight ?? 0; setPan(p => ({ x: cw/2 - (cw/2 - p.x) * (nz/zoom), y: ch/2 - (ch/2 - p.y) * (nz/zoom) })); setZoom(nz); }}
@@ -504,7 +482,7 @@ export function LayoutCanvas({ foilWidthMm, totalLengthMm, copies, files, regmar
             const dy = isDraggingThis && dragPos ? dragPos.y : copy.y;
             const label = file.name.replace(/\.pdf$/i, '').slice(0, 16);
             const fontSize = Math.max(3, Math.min(9, copy.h * 0.14));
-            const useImage = showStickers && !!file.previewUrl;
+            const useImage = !!file.previewUrl;
 
             return (
               <g
