@@ -53,7 +53,7 @@ export function MaterialFinishPicker({ material, finish, onMaterialChange, onFin
 
       {/* Finish */}
       <div className="space-y-2">
-        <span className="text-xs font-semibold text-white">{t.finish}</span>
+        <span className={`text-xs font-semibold text-white ${hideMaterialOnMobile ? 'hidden sm:block' : ''}`}>{t.finish}</span>
         <div className="grid grid-cols-2 gap-2">
           {FINISHES.map(f => (
             <button

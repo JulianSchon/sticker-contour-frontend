@@ -19,15 +19,17 @@ interface SliderProps {
   step: number;
   unit?: string;
   onChange: (value: number) => void;
+  /** Hide the label/value row on mobile (when it's shown in the step title instead). */
+  hideValueOnMobile?: boolean;
 }
 
-function Slider({ label, value, min, max, step, unit = '', onChange }: SliderProps) {
+function Slider({ label, value, min, max, step, unit = '', onChange, hideValueOnMobile = false }: SliderProps) {
   const pct = ((value - min) / (max - min)) * 100;
   return (
     <div className="space-y-2">
       {/* Always show the current value (incl. unit); label is optional because
           the offset sliders render their heading separately. */}
-      <div className="flex justify-between items-baseline">
+      <div className={`justify-between items-baseline ${hideValueOnMobile ? 'hidden sm:flex' : 'flex'}`}>
         {label ? <span className="text-xs font-semibold text-white">{label}</span> : <span />}
         <span className="text-xs font-bold text-nim-yellow tabular-nums">{value}{unit}</span>
       </div>
@@ -120,10 +122,11 @@ export function ParameterPanel({ params, onChange, hideCutMode = false, hideThre
         </div>
       )}
 
-      {/* Perf offset */}
+      {/* Perf offset — on mobile the label + value live in the step title, so we
+          drop the heading/value row and the decorative border here. */}
       {showPerf && !hideOffsets && (
-        <div className="pl-3 border-l-2 border-orange-500/60 space-y-2">
-          <div className="flex items-center gap-2">
+        <div className="space-y-2 sm:pl-3 sm:border-l-2 sm:border-orange-500/60">
+          <div className="hidden sm:flex items-center gap-2">
             <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">{t.perfCutOffset}</span>
           </div>
           <Slider
@@ -131,6 +134,7 @@ export function ParameterPanel({ params, onChange, hideCutMode = false, hideThre
             value={params.perfOffset}
             min={-2} max={6} step={0.5} unit=" mm"
             onChange={v => set('perfOffset', v)}
+            hideValueOnMobile
           />
         </div>
       )}
