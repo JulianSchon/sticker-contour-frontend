@@ -157,15 +157,27 @@ export default function App() {
     />
   ) : (
     <div className="space-y-4">
-      <button
-        onClick={goToDesign}
-        className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-white/50 hover:text-white transition-colors"
-      >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-        {t.cutEditDesign}
-      </button>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <button
+          onClick={goToDesign}
+          className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-white/50 hover:text-white transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          {t.cutEditDesign}
+        </button>
+        {stickerWidthCm && stickerHeightCm && (
+          <div className="flex items-center gap-2 rounded-xl bg-nim-yellow/10 border border-nim-yellow/30 px-3 py-1.5">
+            <svg className="w-4 h-4 text-nim-yellow flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 8l4-4 14 14-4 4L3 8z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 7l2 2M11 10l2 2M14 13l2 2" />
+            </svg>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-nim-yellow/70">{t.edSize}</span>
+            <span className="text-sm font-black text-white tabular-nums">{stickerWidthCm} × {stickerHeightCm} cm</span>
+          </div>
+        )}
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6">
       <div className="flex flex-col gap-4">
         <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
