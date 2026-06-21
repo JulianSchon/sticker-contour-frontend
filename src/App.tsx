@@ -141,7 +141,7 @@ export default function App() {
         </div>
       )}
       <div className="flex-1 rounded-2xl overflow-hidden border border-white/10" style={{ minHeight: '500px' }}>
-        <CanvasPreview imageDataUrl={imageDataUrl} contour={contour ?? null} params={params} isLoading={isLoading} />
+        <CanvasPreview imageDataUrl={imageDataUrl} contour={contour ?? null} params={params} isLoading={isLoading} finish={finish} />
       </div>
     </div>
   );

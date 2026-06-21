@@ -2,12 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 import { scalePath } from '../lib/pathTransforms.ts';
 import { useLang } from '../lib/LangContext.ts';
 import type { ContourPreviewResponse, ContourParams } from '../types/contour.ts';
+import type { Finish } from './MaterialFinishPicker.tsx';
 
 interface Props {
   imageDataUrl: string | null;
   contour: ContourPreviewResponse | null;
   params: ContourParams;
   isLoading: boolean;
+  /** Surface finish — drives the preview sheen vs. matte haze. Preview only. */
+  finish?: Finish;
 }
 
 const CANVAS_MAX = 600;
@@ -26,7 +29,7 @@ const WELL_STYLE: Record<'dark' | 'light', React.CSSProperties> = {
   },
 };
 
-export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Props) {
+export function CanvasPreview({ imageDataUrl, contour, params, isLoading, finish = 'glossy' }: Props) {
   const { theme } = useLang();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
@@ -106,16 +109,24 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Prop
           ctx.restore();
         }
 
-        // Glossy laminate sheen across the sticker surface (clipped to the body).
+        // Surface finish over the sticker body (clipped). Preview only — the
+        // print file is generated server-side and never includes this.
         ctx.save();
         ctx.clip(bodyPath);
-        const sheen = ctx.createLinearGradient(0, 0, canvasW * 0.7, canvasH);
-        sheen.addColorStop(0, 'rgba(255,255,255,0.30)');
-        sheen.addColorStop(0.22, 'rgba(255,255,255,0.07)');
-        sheen.addColorStop(0.5, 'rgba(255,255,255,0)');
-        sheen.addColorStop(1, 'rgba(0,0,0,0.12)');
-        ctx.fillStyle = sheen;
-        ctx.fillRect(0, 0, canvasW, canvasH);
+        if (finish === 'matte') {
+          // Matte: a soft, uniform grey haze — no shine, slightly flattened.
+          ctx.fillStyle = 'rgba(150,150,150,0.22)';
+          ctx.fillRect(0, 0, canvasW, canvasH);
+        } else {
+          // Glossy laminate sheen across the sticker surface.
+          const sheen = ctx.createLinearGradient(0, 0, canvasW * 0.7, canvasH);
+          sheen.addColorStop(0, 'rgba(255,255,255,0.30)');
+          sheen.addColorStop(0.22, 'rgba(255,255,255,0.07)');
+          sheen.addColorStop(0.5, 'rgba(255,255,255,0)');
+          sheen.addColorStop(1, 'rgba(0,0,0,0.12)');
+          ctx.fillStyle = sheen;
+          ctx.fillRect(0, 0, canvasW, canvasH);
+        }
         ctx.restore();
       } else {
         // No contour yet — just show the artwork.
@@ -123,7 +134,7 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading }: Prop
       }
     };
     img.src = imageDataUrl;
-  }, [imageDataUrl, contour, params.cutMode]);
+  }, [imageDataUrl, contour, params.cutMode, finish]);
 
   if (!imageDataUrl) {
     return (
