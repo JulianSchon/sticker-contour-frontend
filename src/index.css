@@ -88,6 +88,11 @@
     @apply text-xs font-bold tracking-widest uppercase text-white;
   }
 
+  /* Playful handwritten hint (Caveat, loaded in index.html) */
+  .font-hand {
+    font-family: 'Caveat', cursive;
+  }
+
   /* Yellow CTA button */
   .nim-btn-yellow {
     @apply flex items-center justify-center gap-2 px-5 py-3 rounded-lg
