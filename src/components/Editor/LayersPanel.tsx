@@ -56,6 +56,9 @@ export function LayersPanel({ layers, selectedId, selected, onSelect, onDelete, 
         <button onClick={onForward} title={t.edTipForward} aria-label={t.edTipForward} className="flex-1 py-1.5 rounded-lg border border-white/10 text-white/50 text-xs">↑</button>
         <button onClick={onDelete} title={t.edTipDelete} className="flex-1 py-1.5 rounded-lg border border-red-800/50 text-red-400 text-xs">{t.edDelete}</button>
       </div>
+
+      {/* Playful hint about the layer-order buttons — desktop only */}
+      <p className="hidden lg:block font-hand text-base leading-tight text-nim-yellow text-center">{t.edLayersHint}</p>
     </div>
   );
 }
