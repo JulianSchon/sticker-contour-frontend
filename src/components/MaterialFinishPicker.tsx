@@ -21,16 +21,18 @@ interface Props {
   onFinishChange: (v: Finish) => void;
   /** Restrict which materials are shown. Defaults to all MATERIALS. */
   allowedMaterials?: ReadonlyArray<typeof MATERIALS[number]>;
+  /** Hide the Material selector on mobile (keeps the default material). */
+  hideMaterialOnMobile?: boolean;
 }
 
-export function MaterialFinishPicker({ material, finish, onMaterialChange, onFinishChange, allowedMaterials }: Props) {
+export function MaterialFinishPicker({ material, finish, onMaterialChange, onFinishChange, allowedMaterials, hideMaterialOnMobile = false }: Props) {
   const { t } = useLang();
   const visibleMaterials = allowedMaterials ?? MATERIALS;
 
   return (
     <div className="space-y-4">
       {/* Material */}
-      <div className="space-y-2">
+      <div className={`space-y-2 ${hideMaterialOnMobile ? 'hidden sm:block' : ''}`}>
         <span className="text-xs font-semibold text-white">{t.material}</span>
         <div className="flex flex-col gap-1.5">
           {visibleMaterials.map(m => (
