@@ -187,13 +187,19 @@ export function WordpressPrintPlanningTab({ items, onItemsChange, onGoToDesign }
       </div>
 
       <div className="bg-nim-darker rounded-2xl border border-white/10 px-5 py-4">
-        <p className="nim-label mb-3">{lang === 'sv' ? 'Material & finish' : 'Material & Finish'}</p>
+        <p className="nim-label mb-3">
+          {/* Material is hidden on mobile (defaults to Premium Laminated), so the
+              header reads just "Finish" there — matching the cut step. */}
+          <span className="sm:hidden">Finish</span>
+          <span className="hidden sm:inline">{lang === 'sv' ? 'Material & finish' : 'Material & Finish'}</span>
+        </p>
         <MaterialFinishPicker
           material={material}
           finish={finish}
           onMaterialChange={setMaterial}
           onFinishChange={setFinish}
           allowedMaterials={SHEET_MATERIALS}
+          hideMaterialOnMobile
         />
       </div>
 
