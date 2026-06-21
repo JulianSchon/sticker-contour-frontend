@@ -298,7 +298,7 @@ export default function App() {
 
       {/* ── Header ── */}
       <header className="bg-nim-darker border-b-2 border-nim-yellow/80 sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex items-center justify-between gap-3 sm:gap-6 flex-wrap">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-3 flex items-center justify-between gap-3 sm:gap-6 flex-wrap">
 
           {/* Logo + back button (WP mode with a chosen mode) */}
           <div className="flex items-center gap-3 sm:gap-4">
@@ -312,16 +312,20 @@ export default function App() {
                 </svg>
               </button>
             )}
-            <img
-              src="/nimstick-logo.png"
-              alt="Nimstick"
-              className="h-10 w-auto"
-              onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-            />
-            <div className="h-6 w-px bg-white/10" />
-            <div>
-              <p className="text-white font-bold text-sm tracking-widest uppercase leading-none">CUTZ</p>
-              <p className="hidden sm:block text-white/30 text-xs tracking-wider mt-0.5">{headerTagline}</p>
+            {/* Branding — redundant inside the WordPress page on mobile (the WP
+                site shows its own logo), so hide it there to reclaim space. */}
+            <div className={`items-center gap-3 sm:gap-4 ${IS_WORDPRESS ? 'hidden sm:flex' : 'flex'}`}>
+              <img
+                src="/nimstick-logo.png"
+                alt="Nimstick"
+                className="h-10 w-auto"
+                onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+              <div className="h-6 w-px bg-white/10" />
+              <div>
+                <p className="text-white font-bold text-sm tracking-widest uppercase leading-none">CUTZ</p>
+                <p className="hidden sm:block text-white/30 text-xs tracking-wider mt-0.5">{headerTagline}</p>
+              </div>
             </div>
           </div>
 
