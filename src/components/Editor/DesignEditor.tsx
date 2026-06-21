@@ -212,7 +212,12 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
       </div>
 
       <div className="flex items-center justify-end gap-3 p-4 border-t border-white/10 flex-wrap">
-        <p className="text-xs text-white/30 mr-auto hidden sm:block">{t.edContinueHint}</p>
+        <p
+          className="text-lg leading-tight text-nim-yellow hidden sm:block"
+          style={{ fontFamily: "'Caveat', cursive" }}
+        >
+          {t.edContinueHint}
+        </p>
         <button onClick={handleContinue} disabled={!canContinue} className="nim-btn-yellow w-full sm:w-auto">
           {isFlattening ? t.edPreparing : `${t.edContinue} →`}
         </button>
