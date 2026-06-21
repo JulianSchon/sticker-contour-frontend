@@ -178,29 +178,39 @@ export default function App() {
           </div>
         )}
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6">
-      <div className="flex flex-col gap-4">
-        <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
-          <div className="px-5 pt-5 pb-2"><StepLabel n="01" label={t.step02} /></div>
-          <div className="px-5 pb-5">
-            {/* Cut mode hidden for now — perf-cut only (DEFAULT_PARAMS.cutMode='perf').
-                Remove hideCutMode to bring kiss/perf/both back. */}
-            <ParameterPanel params={params} onChange={setParams} hideCutMode />
-          </div>
-        </div>
-        {IS_WORDPRESS && (
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[360px_1fr] lg:gap-x-6 lg:gap-y-4 lg:items-start">
+        {/* Cut params (01) + material & finish (02) */}
+        <div className="order-1 lg:col-start-1 lg:row-start-1 flex flex-col gap-4">
           <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
-            <div className="px-5 pt-5 pb-2"><StepLabel n="02" label={t.stepMaterial} /></div>
+            <div className="px-5 pt-5 pb-2"><StepLabel n="01" label={t.step02} /></div>
             <div className="px-5 pb-5">
-              <MaterialFinishPicker
-                material={material} finish={finish}
-                onMaterialChange={setMaterial} onFinishChange={setFinish}
-                hideMaterialOnMobile
-              />
+              {/* Cut mode hidden for now — perf-cut only (DEFAULT_PARAMS.cutMode='perf').
+                  Remove hideCutMode to bring kiss/perf/both back. */}
+              <ParameterPanel params={params} onChange={setParams} hideCutMode />
             </div>
           </div>
-        )}
-        <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
+          {IS_WORDPRESS && (
+            <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
+              <div className="px-5 pt-5 pb-2"><StepLabel n="02" label={t.stepMaterial} /></div>
+              <div className="px-5 pb-5">
+                <MaterialFinishPicker
+                  material={material} finish={finish}
+                  onMaterialChange={setMaterial} onFinishChange={setFinish}
+                  hideMaterialOnMobile
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Live preview / canvas */}
+        <div className="order-2 lg:col-start-2 lg:row-start-1 lg:row-span-2">
+          {previewColumn}
+        </div>
+
+        {/* Save design / Send to sheet (03) — below the canvas on mobile, under
+            the controls on desktop. */}
+        <div className="order-3 lg:col-start-1 lg:row-start-2 bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
           <div className="px-5 pt-5 pb-2"><StepLabel n={IS_WORDPRESS ? '03' : '02'} label={IS_WORDPRESS ? t.step03wp : t.step03} /></div>
           <div className="px-5 pb-5 flex flex-col gap-3">
             {IS_WORDPRESS
@@ -222,8 +232,6 @@ export default function App() {
             )}
           </div>
         </div>
-      </div>
-      {previewColumn}
       </div>
     </div>
   );
