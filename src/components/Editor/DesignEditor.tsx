@@ -140,12 +140,15 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
         onUndo={editor.undo}
         onRedo={editor.redo}
       />
-      <div className="flex">
-        <ToolRail active={tool} onChange={setTool} />
+      <div className="flex flex-col lg:flex-row">
+        <div className="order-1">
+          <ToolRail active={tool} onChange={setTool} />
+        </div>
 
-        {/* Left column: tool content on top, Layers beneath (frees canvas width) */}
-        <div className="w-56 bg-nim-black border-r border-white/10 flex flex-col overflow-hidden">
-          <div className="p-3 flex-1 overflow-y-auto">
+        {/* Tool content + Layers. On desktop this is the 224px left column; on
+            mobile it drops below the canvas as a full-width stacked section. */}
+        <div className="order-3 lg:order-2 w-full lg:w-56 bg-nim-black border-t lg:border-t-0 lg:border-r border-white/10 flex flex-col overflow-hidden">
+          <div className="p-3 flex-1 overflow-y-auto max-h-[45vh] lg:max-h-none">
             {tool === 'uploads' && <UploadPanel onImage={f => void editor.addImageFromFile(f)} />}
             {tool === 'text' && (
               <TextPanel
@@ -191,7 +194,7 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
 
         <div
           ref={frameRef}
-          className="relative flex-1 flex items-center justify-center bg-[#0a0a0a] p-6 h-[70vh] min-h-[420px] overflow-hidden"
+          className="order-2 lg:order-3 relative w-full lg:w-auto lg:flex-1 flex items-center justify-center bg-[#0a0a0a] p-3 lg:p-6 h-[420px] min-h-[300px] lg:h-[70vh] lg:min-h-[420px] overflow-hidden"
         >
           <EditorCanvas
             canvasElRef={editor.canvasElRef}
@@ -208,9 +211,9 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-3 p-4 border-t border-white/10">
-        <p className="text-xs text-white/30 mr-auto">{t.edContinueHint}</p>
-        <button onClick={handleContinue} disabled={!canContinue} className="nim-btn-yellow">
+      <div className="flex items-center justify-end gap-3 p-4 border-t border-white/10 flex-wrap">
+        <p className="text-xs text-white/30 mr-auto hidden sm:block">{t.edContinueHint}</p>
+        <button onClick={handleContinue} disabled={!canContinue} className="nim-btn-yellow w-full sm:w-auto">
           {isFlattening ? t.edPreparing : `${t.edContinue} →`}
         </button>
       </div>

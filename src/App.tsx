@@ -274,10 +274,10 @@ export default function App() {
 
       {/* ── Header ── */}
       <header className="bg-nim-darker border-b-2 border-nim-yellow/80 sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between gap-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex items-center justify-between gap-3 sm:gap-6 flex-wrap">
 
           {/* Logo + back button (WP mode with a chosen mode) */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             {IS_WORDPRESS && wpMode !== null && (
               <button
                 onClick={() => setWpMode(null)}
@@ -297,11 +297,11 @@ export default function App() {
             <div className="h-6 w-px bg-white/10" />
             <div>
               <p className="text-white font-bold text-sm tracking-widest uppercase leading-none">CUTZ</p>
-              <p className="text-white/30 text-xs tracking-wider mt-0.5">{headerTagline}</p>
+              <p className="hidden sm:block text-white/30 text-xs tracking-wider mt-0.5">{headerTagline}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap justify-end">
             {IS_WORDPRESS && sheetItems.length > 0 && (
               <button
                 onClick={() => setWpMode('sheet')}
@@ -371,7 +371,7 @@ export default function App() {
       </header>
 
       {/* ── Main ── */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-8">
 
         {/* Design editor — always mounted (hidden when inactive) so the design
             persists when you go to the cut dialog and back to keep editing. */}

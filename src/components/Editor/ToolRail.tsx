@@ -18,7 +18,7 @@ export function ToolRail({ active, onChange }: Props) {
     { tool: 'shape', label: t.edToolShape, tip: t.edTipShape },
   ];
   return (
-    <div className="w-20 bg-nim-darker border-r border-white/10 flex flex-col items-center gap-1 py-3">
+    <div className="flex flex-row lg:flex-col items-stretch lg:items-center gap-1 w-full lg:w-20 bg-nim-darker border-b lg:border-b-0 lg:border-r border-white/10 px-2 lg:px-0 py-2 lg:py-3 overflow-x-auto lg:overflow-visible">
       {items.map(it => {
         const enabled = ENABLED.includes(it.tool);
         return (
@@ -27,7 +27,7 @@ export function ToolRail({ active, onChange }: Props) {
             disabled={!enabled}
             onClick={() => enabled && onChange(it.tool)}
             title={it.tip}
-            className={`w-16 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wide transition-colors ${
+            className={`flex-shrink-0 flex-1 lg:flex-none min-w-16 lg:w-16 py-2 px-1 rounded-lg text-[10px] font-bold uppercase tracking-wide transition-colors ${
               active === it.tool ? 'bg-nim-yellow text-nim-black'
               : enabled ? 'text-white/50 hover:text-white/80' : 'text-white/15 cursor-not-allowed'
             }`}
