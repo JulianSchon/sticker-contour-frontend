@@ -1,9 +1,7 @@
 import { useLang } from '../lib/LangContext.ts';
 
 export const MATERIALS = [
-  { value: 'vinyl',     labelKey: 'matVinyl'    },
   { value: 'laminerad', labelKey: 'matLaminerad' },
-  { value: 'reflex',    labelKey: 'matReflex'    },
 ] as const;
 
 export const FINISHES = [
