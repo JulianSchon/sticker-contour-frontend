@@ -25,7 +25,13 @@ export function EditorToolbar({ size, onSizeChange, canUndo, canRedo, onUndo, on
         </button>
       </div>
 
-      <div className="flex items-center gap-2.5 ml-auto rounded-xl bg-nim-yellow/10 border border-nim-yellow/30 pl-3 pr-2 py-1.5">
+      {/* Playful build hint — desktop only */}
+      <span className="hidden lg:inline font-hand text-xl leading-none text-nim-yellow">{t.edBuildHint}</span>
+
+      <div className="flex items-center gap-2.5 ml-auto">
+      {/* Playful size hint — desktop only, sits just left of the size chip */}
+      <span className="hidden lg:inline font-hand text-xl leading-none text-nim-yellow">{t.edSizeHint}</span>
+      <div className="flex items-center gap-2.5 rounded-xl bg-nim-yellow/10 border border-nim-yellow/30 pl-3 pr-2 py-1.5">
         {/* Ruler icon */}
         <svg className="w-5 h-5 text-nim-yellow flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 8l4-4 14 14-4 4L3 8z" />
@@ -50,6 +56,7 @@ export function EditorToolbar({ size, onSizeChange, canUndo, canRedo, onUndo, on
             </option>
           ))}
         </select>
+      </div>
       </div>
     </div>
   );
