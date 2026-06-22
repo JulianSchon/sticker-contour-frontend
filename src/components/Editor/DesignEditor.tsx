@@ -189,6 +189,9 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
             onForward={() => { editor.bringForward(); }}
             onBackward={() => { editor.sendBackward(); }}
             onUpdate={editor.updateSelected}
+            onRemoveBg={() => { void editor.removeBackgroundSelected(); }}
+            removingBg={editor.removingBg}
+            bgError={editor.bgError}
           />
         </div>
 

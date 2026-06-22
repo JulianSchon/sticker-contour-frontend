@@ -11,9 +11,12 @@ interface Props {
   onForward: () => void;
   onBackward: () => void;
   onUpdate: (patch: Record<string, unknown>) => void;
+  onRemoveBg: () => void;
+  removingBg: boolean;
+  bgError: string | null;
 }
 
-export function LayersPanel({ layers, selectedId, selected, onSelect, onDelete, onDuplicate, onForward, onBackward, onUpdate }: Props) {
+export function LayersPanel({ layers, selectedId, selected, onSelect, onDelete, onDuplicate, onForward, onBackward, onUpdate, onRemoveBg, removingBg, bgError }: Props) {
   const { t } = useLang();
   return (
     <div className="shrink-0 bg-nim-darker border-t border-white/10 p-3 flex flex-col gap-2">
@@ -48,6 +51,20 @@ export function LayersPanel({ layers, selectedId, selected, onSelect, onDelete, 
           <button onClick={onDuplicate} title={t.edDuplicate} className="py-1.5 rounded-lg border border-white/10 text-white/60 text-xs hover:text-white hover:border-white/30">
             ⧉ {t.edDuplicate}
           </button>
+          {/* Background removal — images only */}
+          {selected.kind === 'image' && (
+            <>
+              <button
+                onClick={onRemoveBg}
+                disabled={removingBg}
+                title={t.edRemoveBg}
+                className="py-1.5 rounded-lg border border-nim-yellow/40 text-nim-yellow text-xs hover:bg-nim-yellow/10 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {removingBg ? t.edRemovingBg : `✂ ${t.edRemoveBg}`}
+              </button>
+              {bgError && <p className="text-[10px] text-red-400 leading-tight">{bgError}</p>}
+            </>
+          )}
         </div>
       )}
 
