@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { renderSticker } from '../lib/renderSticker.ts';
-import { cornerPin } from '../lib/cornerPin.ts';
+import { cornerPin, fitRectInQuad } from '../lib/cornerPin.ts';
 import { MOCKUP_SCENES, type MockupScene } from '../lib/mockupScenes.ts';
 import { useLang } from '../lib/LangContext.ts';
 import type { ContourPreviewResponse, ContourParams } from '../types/contour.ts';
@@ -70,7 +70,8 @@ export function MockupCarousel({ imageDataUrl, contour, params, finish, scenes =
   // bitmapSize is tracked via state so it is reactive (refs are not).
   const transform = useMemo(() => {
     if (!scene) return 'none';
-    return cornerPin(bitmapSize.w, bitmapSize.h, scene.corners);
+    const fitted = fitRectInQuad(scene.corners, bitmapSize.w / bitmapSize.h);
+    return cornerPin(bitmapSize.w, bitmapSize.h, fitted);
   }, [scene, bitmapSize]);
 
   if (!imageDataUrl || !contour || !scene) return null;

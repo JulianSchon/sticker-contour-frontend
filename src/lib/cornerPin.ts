@@ -90,3 +90,34 @@ export function cornerPin(w: number, h: number, corners: [Pt, Pt, Pt, Pt]): stri
   ].map(fmt);
   return `matrix3d(${m.join(',')})`;
 }
+
+function lerpPt(a: Pt, b: Pt, t: number): Pt {
+  return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
+}
+
+function dist(a: Pt, b: Pt): number {
+  return Math.hypot(b.x - a.x, b.y - a.y);
+}
+
+/**
+ * Centered sub-quad of `quad` ([TL, TR, BR, BL]) whose proportions match
+ * `aspect` (width / height), so a sticker of that aspect fills it without
+ * distortion. Uses bilinear interpolation in the quad's UV space, so it works
+ * for perspective (non-rectangular) quads too.
+ */
+export function fitRectInQuad(quad: [Pt, Pt, Pt, Pt], aspect: number): [Pt, Pt, Pt, Pt] {
+  const [tl, tr, br, bl] = quad;
+  const w = (dist(tl, tr) + dist(bl, br)) / 2;
+  const h = (dist(tl, bl) + dist(tr, br)) / 2;
+  const quadAspect = w / h;
+  let fw = 1;
+  let fh = 1;
+  if (aspect > quadAspect) fh = quadAspect / aspect; // sticker wider → limit height
+  else fw = aspect / quadAspect;                     // sticker taller → limit width
+  const u0 = (1 - fw) / 2;
+  const u1 = (1 + fw) / 2;
+  const v0 = (1 - fh) / 2;
+  const v1 = (1 + fh) / 2;
+  const at = (u: number, v: number): Pt => lerpPt(lerpPt(tl, tr, u), lerpPt(bl, br, u), v);
+  return [at(u0, v0), at(u1, v0), at(u1, v1), at(u0, v1)];
+}
