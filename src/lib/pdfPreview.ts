@@ -29,6 +29,20 @@ export async function renderPdfFirstPage(file: File, scale = 2): Promise<string>
 }
 
 /**
+ * Reads the first page's physical size in millimetres. The backend crops the
+ * CutContour PDF to the cut-contour bounding box, so this is the real sticker
+ * size — used to pack sheet items tightly instead of by the (larger) artboard.
+ */
+export async function getPdfPageSizeMm(file: File): Promise<{ widthMm: number; heightMm: number }> {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const page = await pdf.getPage(1);
+  const { width, height } = page.getViewport({ scale: 1 }); // PDF points (1/72")
+  const PT_TO_MM = 25.4 / 72;
+  return { widthMm: width * PT_TO_MM, heightMm: height * PT_TO_MM };
+}
+
+/**
  * Renders the first page of a PDF file to a PNG Blob (for upload, not display).
  * @param file  The PDF File object
  * @param scale Resolution multiplier

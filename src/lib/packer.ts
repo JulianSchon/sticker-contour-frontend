@@ -14,7 +14,7 @@
 
 import type { PlannedFile, PackedCopy, PackResult } from '../types/printPlanning.ts';
 
-export const GAP_MM = 5;
+export const GAP_MM = 4;
 
 interface Todo {
   fileId: string;
