@@ -1,5 +1,5 @@
 import { generatePdfBlob } from './api.ts';
-import { renderPdfFirstPage } from './pdfPreview.ts';
+import { renderPdfFirstPage, getPdfPageSizeMm } from './pdfPreview.ts';
 import type { ContourParams } from '../types/contour.ts';
 import type { PlannedFile } from '../types/printPlanning.ts';
 
@@ -21,12 +21,16 @@ export async function buildSheetItem(
   const baseName = file.name.replace(/\.[^.]+$/, '');
   const pdfFile = new File([pdfBlob], `${baseName}.pdf`, { type: 'application/pdf' });
   const previewUrl = await renderPdfFirstPage(pdfFile).catch(() => undefined);
+  // Size the sheet item by the cut-contour PDF (already cropped to the sticker)
+  // so it packs by the real sticker size, not the larger artboard. Fall back to
+  // the artboard size if the PDF can't be measured.
+  const size = await getPdfPageSizeMm(pdfFile).catch(() => null);
   return {
     id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
     file: pdfFile,
     name: baseName,
-    widthMm: wCm * 10,
-    heightMm: hCm * 10,
+    widthMm: size ? size.widthMm : wCm * 10,
+    heightMm: size ? size.heightMm : hCm * 10,
     quantity: 1,
     color: SHEET_COLORS[colorIndex % SHEET_COLORS.length],
     previewUrl,

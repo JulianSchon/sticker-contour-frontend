@@ -5,6 +5,7 @@ vi.mock('./api.ts', () => ({
 }));
 vi.mock('./pdfPreview.ts', () => ({
   renderPdfFirstPage: vi.fn(async () => 'data:image/png;base64,AAAA'),
+  getPdfPageSizeMm: vi.fn(async () => ({ widthMm: 55, heightMm: 80 })),
 }));
 
 import { buildSheetItem, SHEET_COLORS } from './sheetItem.ts';
@@ -19,11 +20,12 @@ const PARAMS: ContourParams = {
 beforeEach(() => vi.clearAllMocks());
 
 describe('buildSheetItem', () => {
-  it('builds a kiss-cut PlannedFile with mm dims and quantity 1', async () => {
+  it('builds a kiss-cut PlannedFile sized by the trimmed PDF, quantity 1', async () => {
     const src = new File(['x'], 'cowgirl.png', { type: 'image/png' });
     const item = await buildSheetItem(src, PARAMS, 7, 5, 0);
-    expect(item.widthMm).toBe(70);
-    expect(item.heightMm).toBe(50);
+    // dims come from the cut-contour PDF (getPdfPageSizeMm), not the artboard
+    expect(item.widthMm).toBe(55);
+    expect(item.heightMm).toBe(80);
     expect(item.quantity).toBe(1);
     expect(item.name).toBe('cowgirl');
     expect(item.file.type).toBe('application/pdf');
@@ -40,5 +42,13 @@ describe('buildSheetItem', () => {
     const item = await buildSheetItem(new File(['x'], 'a.png'), PARAMS, 5, 5, SHEET_COLORS.length);
     expect(item.color).toBe(SHEET_COLORS[0]);
     expect(item.previewUrl).toBeUndefined();
+  });
+
+  it('falls back to the artboard size if the PDF size cannot be read', async () => {
+    const { getPdfPageSizeMm } = await import('./pdfPreview.ts');
+    (getPdfPageSizeMm as unknown as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('bad pdf'));
+    const item = await buildSheetItem(new File(['x'], 'a.png'), PARAMS, 7, 7, 0);
+    expect(item.widthMm).toBe(70);
+    expect(item.heightMm).toBe(70);
   });
 });
