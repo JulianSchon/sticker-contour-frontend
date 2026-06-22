@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { scalePath } from '../lib/pathTransforms.ts';
+import { renderSticker } from '../lib/renderSticker.ts';
 import { useLang } from '../lib/LangContext.ts';
 import type { ContourPreviewResponse, ContourParams } from '../types/contour.ts';
 import type { Finish } from './MaterialFinishPicker.tsx';
@@ -13,7 +13,6 @@ interface Props {
   finish?: Finish;
 }
 
-const CANVAS_MAX = 600;
 const MAX_TILT = 14; // degrees
 
 // A recessed "well": vignette that darkens toward the edges + a deep inset
@@ -57,81 +56,7 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading, finish
 
     const img = new Image();
     img.onload = () => {
-      // The contour path can extend `pad` pixels beyond the image on all sides.
-      const pad = contour?.pad ?? 0;
-      const totalW = img.naturalWidth + pad * 2;
-      const totalH = img.naturalHeight + pad * 2;
-
-      const scale = Math.min(CANVAS_MAX / totalW, CANVAS_MAX / totalH, 1);
-      const canvasW = Math.round(totalW * scale);
-      const canvasH = Math.round(totalH * scale);
-      const padPx = Math.round(pad * scale);
-
-      canvas.width = canvasW;
-      canvas.height = canvasH;
-
-      ctx.clearRect(0, 0, canvasW, canvasH);
-
-      const showKiss = params.cutMode === 'kiss' || params.cutMode === 'both';
-      const showPerf = (params.cutMode === 'perf' || params.cutMode === 'both') && !!contour?.perfSvgPath;
-
-      if (contour) {
-        const scaleX = (img.naturalWidth * scale) / contour.width;
-        const scaleY = (img.naturalHeight * scale) / contour.height;
-
-        // Fill the sticker body white — the real die-cut look. The cut outline is
-        // the sticker edge; with an offset > 0 this shows as a white margin/border.
-        const bodySvg = showPerf && contour.perfSvgPath ? contour.perfSvgPath : contour.kissSvgPath;
-        const bodyPath = new Path2D(scalePath(bodySvg, scaleX, scaleY, padPx, padPx));
-        ctx.fillStyle = '#ffffff';
-        ctx.fill(bodyPath);
-
-        // Artwork on top of the white body.
-        ctx.drawImage(img, padPx, padPx, Math.round(img.naturalWidth * scale), Math.round(img.naturalHeight * scale));
-
-        // Cut outlines.
-        if (showKiss) {
-          const kissPath = new Path2D(scalePath(contour.kissSvgPath, scaleX, scaleY, padPx, padPx));
-          ctx.save();
-          ctx.strokeStyle = '#ec4899';
-          ctx.lineWidth = 1.5;
-          ctx.setLineDash([]);
-          ctx.stroke(kissPath);
-          ctx.restore();
-        }
-        if (showPerf && contour.perfSvgPath) {
-          const perfPath = new Path2D(scalePath(contour.perfSvgPath, scaleX, scaleY, padPx, padPx));
-          ctx.save();
-          ctx.strokeStyle = '#f97316';
-          ctx.lineWidth = 1.5;
-          ctx.setLineDash([]);
-          ctx.stroke(perfPath);
-          ctx.restore();
-        }
-
-        // Surface finish over the sticker body (clipped). Preview only — the
-        // print file is generated server-side and never includes this.
-        ctx.save();
-        ctx.clip(bodyPath);
-        if (finish === 'matte') {
-          // Matte: a soft, uniform grey haze — no shine, slightly flattened.
-          ctx.fillStyle = 'rgba(150,150,150,0.22)';
-          ctx.fillRect(0, 0, canvasW, canvasH);
-        } else {
-          // Glossy laminate sheen across the sticker surface.
-          const sheen = ctx.createLinearGradient(0, 0, canvasW * 0.7, canvasH);
-          sheen.addColorStop(0, 'rgba(255,255,255,0.30)');
-          sheen.addColorStop(0.22, 'rgba(255,255,255,0.07)');
-          sheen.addColorStop(0.5, 'rgba(255,255,255,0)');
-          sheen.addColorStop(1, 'rgba(0,0,0,0.12)');
-          ctx.fillStyle = sheen;
-          ctx.fillRect(0, 0, canvasW, canvasH);
-        }
-        ctx.restore();
-      } else {
-        // No contour yet — just show the artwork.
-        ctx.drawImage(img, padPx, padPx, Math.round(img.naturalWidth * scale), Math.round(img.naturalHeight * scale));
-      }
+      renderSticker(canvas, img, contour, params, finish, { showCutLines: true });
     };
     img.src = imageDataUrl;
   }, [imageDataUrl, contour, params.cutMode, finish]);
