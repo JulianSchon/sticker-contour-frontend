@@ -43,10 +43,14 @@ export async function fetchContourPreview(
   return res.json() as Promise<ContourPreviewResponse>;
 }
 
-export async function generatePdfBlob(file: File, params: ContourParams): Promise<Blob> {
+export async function generatePdfBlob(file: File, params: ContourParams, bleed = true): Promise<Blob> {
+  const fd = buildFormData(file, params);
+  // Bleed extends colours past the cut (production only). Single stickers want
+  // it; the kiss-cut sheet opts out so items stay trimmed tight.
+  if (!bleed) fd.append('bleed', 'false');
   const res = await fetch(`${BASE}/generate`, {
     method: 'POST',
-    body: buildFormData(file, params),
+    body: fd,
   });
 
   if (!res.ok) {
