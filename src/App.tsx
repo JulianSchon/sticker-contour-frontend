@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ParameterPanel } from './components/ParameterPanel.tsx';
 import { CanvasPreview } from './components/CanvasPreview.tsx';
+import { MockupCarousel } from './components/MockupCarousel.tsx';
 import { DownloadButton } from './components/DownloadButton.tsx';
 import { PrintPlanningTab } from './components/PrintPlanning/PrintPlanningTab.tsx';
 import { WordpressPrintPlanningTab } from './components/PrintPlanning/WordpressPrintPlanningTab.tsx';
@@ -143,6 +144,7 @@ export default function App() {
       <div className="flex-1 rounded-2xl overflow-hidden border border-white/10" style={{ minHeight: '500px' }}>
         <CanvasPreview imageDataUrl={imageDataUrl} contour={contour ?? null} params={params} isLoading={isLoading} finish={finish} />
       </div>
+      <MockupCarousel imageDataUrl={imageDataUrl} contour={contour ?? null} params={params} finish={finish} />
     </div>
   );
 
