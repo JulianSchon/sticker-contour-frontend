@@ -34,6 +34,9 @@ describe('solveHomography', () => {
       { x: 0, y: 0 }, { x: 10, y: 0 }, { x: 20, y: 0 }, { x: 30, y: 0 },
     ];
     expect(() => solveHomography(RECT, RECT, collinear)).not.toThrow();
+    const css = cornerPin(RECT, RECT, collinear);
+    expect(css).not.toContain('NaN');
+    expect(css).not.toContain('Infinity');
   });
 });
 

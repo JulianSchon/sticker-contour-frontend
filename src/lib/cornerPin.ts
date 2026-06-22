@@ -4,7 +4,7 @@ export interface Pt {
 }
 
 // 3x3 matrices are stored row-major as length-9 arrays.
-type Mat3 = number[];
+type Mat3 = [number, number, number, number, number, number, number, number, number];
 
 function adjugate(m: Mat3): Mat3 {
   return [
@@ -23,7 +23,7 @@ function multMat(a: Mat3, b: Mat3): Mat3 {
       c[3 * i + j] = sum;
     }
   }
-  return c;
+  return c as Mat3;
 }
 
 function multVec(m: Mat3, v: [number, number, number]): [number, number, number] {
@@ -61,7 +61,7 @@ export function solveHomography(w: number, h: number, dst: [Pt, Pt, Pt, Pt]): Ma
   const d = basisToPoints(dst);
   const H = multMat(d, adjugate(s));
   const k = H[8] || 1; // avoid divide-by-zero on degenerate input
-  return H.map((n) => n / k);
+  return H.map((n) => n / k) as Mat3;
 }
 
 /** Apply a row-major 3x3 homography to a point, returning [x, y]. */
@@ -74,7 +74,7 @@ export function projectPoint(H: Mat3, x: number, y: number): [number, number] {
 }
 
 // Trim floating-point fuzz so identity renders as clean integers.
-const fmt = (n: number): number => Number(n.toFixed(6));
+const fmt = (n: number): number => (Number.isFinite(n) ? Number(n.toFixed(6)) : 0);
 
 /**
  * CSS `matrix3d(...)` (column-major) that warps an element's own box
