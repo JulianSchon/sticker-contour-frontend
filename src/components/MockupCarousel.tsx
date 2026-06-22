@@ -53,7 +53,7 @@ export function MockupCarousel({ imageDataUrl, contour, params, finish, scenes =
       setBitmapSize({ w: canvas.width, h: canvas.height });
     };
     img.src = imageDataUrl;
-  }, [imageDataUrl, contour, params.cutMode, params.kissOffset, params.perfOffset, finish, scene]);
+  }, [imageDataUrl, contour, params.cutMode, finish]);
 
   // Auto-rotate (unless paused or reduced-motion).
   useEffect(() => {
