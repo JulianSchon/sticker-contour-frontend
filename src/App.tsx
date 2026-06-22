@@ -16,7 +16,7 @@ import { buildSheetItem, SHEET_COLORS } from './lib/sheetItem.ts';
 const DEFAULT_PARAMS: ContourParams = {
   threshold: 128,
   kissOffset: 0,
-  perfOffset: 0,
+  perfOffset: 2,
   smoothing: 4,
   enclose: true,
   cutMode: 'perf',
