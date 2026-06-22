@@ -104,6 +104,27 @@ export async function enhanceImage(file: File): Promise<{ file: File; dataUrl: s
   return { file: enhancedFile, dataUrl };
 }
 
+export async function removeBackground(file: File): Promise<{ file: File; dataUrl: string }> {
+  const fd = new FormData();
+  fd.append('image', file);
+
+  const res = await fetch(`${BASE}/remove-bg`, { method: 'POST', body: fd });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error((err as { error?: string }).error ?? 'Background removal failed');
+  }
+
+  const blob = await res.blob();
+  const cutoutFile = new File([blob], 'no-bg.png', { type: 'image/png' });
+  const dataUrl = await new Promise<string>((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target?.result as string);
+    reader.readAsDataURL(blob);
+  });
+
+  return { file: cutoutFile, dataUrl };
+}
+
 export async function fetchPdfDimensions(
   file: File
 ): Promise<{ widthMm: number; heightMm: number }> {

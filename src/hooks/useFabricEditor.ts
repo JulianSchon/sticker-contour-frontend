@@ -4,6 +4,7 @@ import type { FabricObject } from 'fabric';
 import { DEFAULT_FONT } from '../lib/editorFonts.ts';
 import type { ShapeKind } from '../types/editor.ts';
 import { applyTemplateToCanvas } from '../lib/templateObjects.ts';
+import { removeBackground } from '../lib/api.ts';
 import type { Template } from '../types/content.ts';
 
 export interface FabricLayer {
@@ -59,6 +60,10 @@ interface UseFabricEditor {
   clear: () => void;
   /** Live centering guides shown while dragging (canvas h/v center). */
   guides: { v: boolean; h: boolean };
+  /** Replace the selected image with a background-removed cutout. */
+  removeBackgroundSelected: () => Promise<void>;
+  removingBg: boolean;
+  bgError: string | null;
   bringForward: () => void;
   sendBackward: () => void;
   selectLayer: (id: string) => void;
@@ -82,6 +87,8 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
   const [guides, setGuides] = useState<{ v: boolean; h: boolean }>({ v: false, h: false });
+  const [removingBg, setRemovingBg] = useState(false);
+  const [bgError, setBgError] = useState<string | null>(null);
 
   const prevDimsRef = useRef({ w: displayWidth, h: displayHeight });
   const historyRef = useRef<{ stack: string[]; index: number }>({ stack: [], index: -1 });
@@ -327,6 +334,30 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
     pushHistory(canvas);
   }, [canvas, rebuildLayers, pushHistory]);
 
+  // Replace the selected image's pixels with a background-removed cutout.
+  const removeBackgroundSelected = useCallback(async () => {
+    if (!canvas || removingBg) return;
+    const obj = canvas.getActiveObject();
+    if (!obj || !(obj instanceof FabricImage)) return;
+    setRemovingBg(true);
+    setBgError(null);
+    try {
+      const src = obj.getSrc();
+      const blob = await (await fetch(src)).blob();
+      const inFile = new File([blob], 'image.png', { type: blob.type || 'image/png' });
+      const { dataUrl } = await removeBackground(inFile);
+      await obj.setSrc(dataUrl);
+      obj.setCoords();
+      canvas.renderAll();
+      rebuildLayers(canvas);
+      pushHistory(canvas);
+    } catch (err) {
+      setBgError(err instanceof Error ? err.message : 'Background removal failed');
+    } finally {
+      setRemovingBg(false);
+    }
+  }, [canvas, removingBg, rebuildLayers, pushHistory]);
+
   const addShape = useCallback((kind: ShapeKind, color: string) => {
     if (!canvas) return;
     const cw = canvas.getWidth();
@@ -425,5 +456,6 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
     canvasElRef, canvas, layers, selectedId, selected, canUndo, canRedo,
     addText, addImageFromFile, addImageFromUrl, applyTemplate, addShape, updateSelected, duplicateSelected,
     deleteSelected, clear, bringForward, sendBackward, selectLayer, undo, redo, guides,
+    removeBackgroundSelected, removingBg, bgError,
   };
 }
