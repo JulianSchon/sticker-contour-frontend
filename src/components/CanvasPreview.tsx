@@ -46,11 +46,9 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading, finish
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
 
     if (!imageDataUrl) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      canvas.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height);
       return;
     }
 

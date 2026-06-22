@@ -21,7 +21,7 @@ export function renderSticker(
   img: HTMLImageElement,
   contour: ContourPreviewResponse | null,
   params: ContourParams,
-  finish: Finish,
+  finish: Finish = 'glossy',
   opts: RenderStickerOpts,
 ): void {
   const ctx = canvas.getContext('2d');
@@ -40,9 +40,11 @@ export function renderSticker(
   canvas.height = canvasH;
   ctx.clearRect(0, 0, canvasW, canvasH);
 
-  const showKiss = opts.showCutLines && (params.cutMode === 'kiss' || params.cutMode === 'both');
-  const showPerf =
-    (params.cutMode === 'perf' || params.cutMode === 'both') && !!contour?.perfSvgPath;
+  // Use the perf (outer) path for the sticker BODY shape — independent of whether
+  // we draw its colored guide stroke. Mockups want the real body shape, no stroke.
+  const usePerf = (params.cutMode === 'perf' || params.cutMode === 'both') && !!contour?.perfSvgPath;
+  const showKissStroke = opts.showCutLines && (params.cutMode === 'kiss' || params.cutMode === 'both');
+  const showPerfStroke = opts.showCutLines && usePerf;
 
   if (!contour) {
     ctx.drawImage(img, padPx, padPx, Math.round(img.naturalWidth * scale), Math.round(img.naturalHeight * scale));
@@ -53,7 +55,7 @@ export function renderSticker(
   const scaleY = (img.naturalHeight * scale) / contour.height;
 
   // White sticker body clipped to the cut path (the die-cut look).
-  const bodySvg = showPerf && contour.perfSvgPath ? contour.perfSvgPath : contour.kissSvgPath;
+  const bodySvg = usePerf && contour.perfSvgPath ? contour.perfSvgPath : contour.kissSvgPath;
   const bodyPath = new Path2D(scalePath(bodySvg, scaleX, scaleY, padPx, padPx));
   ctx.fillStyle = '#ffffff';
   ctx.fill(bodyPath);
@@ -62,7 +64,7 @@ export function renderSticker(
   ctx.drawImage(img, padPx, padPx, Math.round(img.naturalWidth * scale), Math.round(img.naturalHeight * scale));
 
   // Cut-line guides (preview only; never the real product).
-  if (showKiss) {
+  if (showKissStroke) {
     const kissPath = new Path2D(scalePath(contour.kissSvgPath, scaleX, scaleY, padPx, padPx));
     ctx.save();
     ctx.strokeStyle = '#ec4899';
@@ -71,7 +73,7 @@ export function renderSticker(
     ctx.stroke(kissPath);
     ctx.restore();
   }
-  if (showPerf && contour.perfSvgPath && opts.showCutLines) {
+  if (showPerfStroke && contour.perfSvgPath) {
     const perfPath = new Path2D(scalePath(contour.perfSvgPath, scaleX, scaleY, padPx, padPx));
     ctx.save();
     ctx.strokeStyle = '#f97316';
