@@ -24,8 +24,10 @@ describe('MOCKUP_SCENES', () => {
     }
   });
 
-  it('any scene declaring a foreground overlay is the hand scene', () => {
-    const withFg = MOCKUP_SCENES.filter((s) => s.foreground);
-    withFg.forEach((s) => expect(s.id).toBe('hand'));
+  it('no scene currently uses a foreground overlay (hand quad sits clear of the thumb)', () => {
+    // The hand photo is framed so the placement quad lies entirely above the
+    // thumb; the sticker never overlaps it, so no thumb cutout is needed. The
+    // optional `foreground` field stays supported for future scenes.
+    expect(MOCKUP_SCENES.some((s) => s.foreground)).toBe(false);
   });
 });

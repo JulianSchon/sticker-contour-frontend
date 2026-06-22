@@ -25,6 +25,8 @@ export const MOCKUP_SCENES: MockupScene[] = [
     photo: '/mockups/hand.jpg',
     photoW: 1024,
     photoH: 1024,
+    // Quad sits on the upper, clear part of the card — above the thumb — so the
+    // sticker never overlaps it and no foreground thumb cutout is needed.
     corners: [{ x: 350, y: 155 }, { x: 635, y: 162 }, { x: 632, y: 495 }, { x: 350, y: 490 }],
   },
   {
