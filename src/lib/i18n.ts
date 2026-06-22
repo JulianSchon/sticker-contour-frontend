@@ -135,6 +135,12 @@ export const translations = {
 
     // Preview
     livePreview: 'Live Preview',
+    mockHeading: 'See it for real',
+    mockHand: 'In hand',
+    mockLaptop: 'On a laptop',
+    mockBottle: 'On a bottle',
+    mockNotebook: 'On a notebook',
+    mockWindow: 'On glass',
     detectingContour: 'Detecting contour…',
     detectionFailed: 'Detection failed',
 
@@ -275,6 +281,12 @@ export const translations = {
 
     // Preview
     livePreview: 'Liveförhandsvisning',
+    mockHeading: 'Se den på riktigt',
+    mockHand: 'I handen',
+    mockLaptop: 'På en laptop',
+    mockBottle: 'På en flaska',
+    mockNotebook: 'På ett block',
+    mockWindow: 'På glas',
     detectingContour: 'Identifierar kontur…',
     detectionFailed: 'Identifiering misslyckades',
 
