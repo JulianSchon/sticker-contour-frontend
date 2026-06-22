@@ -202,6 +202,7 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
             displayHeight={displayHeight}
             widthCm={size.wCm}
             heightCm={size.hCm}
+            guides={editor.guides}
           />
           {isEmpty && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
