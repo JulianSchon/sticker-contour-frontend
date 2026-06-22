@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Canvas, FabricImage, IText, Rect, Circle, Ellipse, Triangle, loadSVGFromURL, util } from 'fabric';
+import { Canvas, FabricImage, IText, Rect, Circle, Ellipse, Triangle, Point, loadSVGFromURL, util } from 'fabric';
 import type { FabricObject } from 'fabric';
 import { DEFAULT_FONT } from '../lib/editorFonts.ts';
 import type { ShapeKind } from '../types/editor.ts';
@@ -57,6 +57,8 @@ interface UseFabricEditor {
   duplicateSelected: () => Promise<void>;
   deleteSelected: () => void;
   clear: () => void;
+  /** Live centering guides shown while dragging (canvas h/v center). */
+  guides: { v: boolean; h: boolean };
   bringForward: () => void;
   sendBackward: () => void;
   selectLayer: (id: string) => void;
@@ -79,6 +81,7 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
   const [selected, setSelected] = useState<SelectedProps | null>(null);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
+  const [guides, setGuides] = useState<{ v: boolean; h: boolean }>({ v: false, h: false });
 
   const prevDimsRef = useRef({ w: displayWidth, h: displayHeight });
   const historyRef = useRef<{ stack: string[]; index: number }>({ stack: [], index: -1 });
@@ -216,6 +219,36 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
       canvas.off('object:modified', onModified);
     };
   }, [canvas, refreshSelected, rebuildLayers, pushHistory]);
+
+  // Centering guides: while dragging, snap an object's center to the canvas
+  // centre (within a small threshold) and surface h/v indicator lines.
+  useEffect(() => {
+    if (!canvas) return;
+    const SNAP = 6; // px
+    const onMoving = (e: { target?: FabricObject }) => {
+      const obj = e.target;
+      if (!obj) return;
+      const c = obj.getCenterPoint();
+      const cx = canvas.getWidth() / 2;
+      const cy = canvas.getHeight() / 2;
+      const v = Math.abs(c.x - cx) < SNAP;
+      const h = Math.abs(c.y - cy) < SNAP;
+      if (v || h) {
+        obj.setPositionByOrigin(new Point(v ? cx : c.x, h ? cy : c.y), 'center', 'center');
+        obj.setCoords();
+      }
+      setGuides(prev => (prev.v === v && prev.h === h ? prev : { v, h }));
+    };
+    const clearGuides = () => setGuides(prev => (prev.v || prev.h ? { v: false, h: false } : prev));
+    canvas.on('object:moving', onMoving);
+    canvas.on('mouse:up', clearGuides);
+    canvas.on('selection:cleared', clearGuides);
+    return () => {
+      canvas.off('object:moving', onMoving);
+      canvas.off('mouse:up', clearGuides);
+      canvas.off('selection:cleared', clearGuides);
+    };
+  }, [canvas]);
 
   const addText = useCallback((value: string) => {
     if (!canvas) return;
@@ -391,6 +424,6 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
   return {
     canvasElRef, canvas, layers, selectedId, selected, canUndo, canRedo,
     addText, addImageFromFile, addImageFromUrl, applyTemplate, addShape, updateSelected, duplicateSelected,
-    deleteSelected, clear, bringForward, sendBackward, selectLayer, undo, redo,
+    deleteSelected, clear, bringForward, sendBackward, selectLayer, undo, redo, guides,
   };
 }
