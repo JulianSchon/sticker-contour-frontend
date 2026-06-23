@@ -80,7 +80,9 @@ export function CanvasPreview({ imageDataUrl, contour, params, isLoading, finish
         style={{
           transform: `rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) scale(${tilting ? 1.03 : 1})`,
           filter: `drop-shadow(${-tilt.ry * 0.7}px ${18 - tilt.rx * 0.7}px 26px rgba(0,0,0,${theme === 'light' ? 0.3 : 0.6}))`,
-          transition: tilting ? 'filter 0.08s linear' : 'transform 0.5s ease, filter 0.5s ease',
+          transition: tilting
+            ? 'transform 0.18s ease-out, filter 0.18s ease-out'
+            : 'transform 0.5s ease, filter 0.5s ease',
           transformStyle: 'preserve-3d',
           willChange: 'transform, filter',
         }}
