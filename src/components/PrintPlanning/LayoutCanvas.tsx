@@ -21,6 +21,12 @@ import {
   ROLAND_WORK_CLEARANCE_MM,
   getRolandCorners,
 } from '../../lib/rolandMarks.ts';
+import {
+  GRAPHTEC_MARGIN_MM,
+  GRAPHTEC_MARK_LEN_MM,
+  GRAPHTEC_MARK_W_MM,
+  getGraphtecCorners,
+} from '../../lib/graphtecMarks.ts';
 
 interface Props {
   foilWidthMm: number;
@@ -227,6 +233,39 @@ function RolandLayer({
   );
 }
 
+// ─── Graphtec CE8000 ARMS mark layer ─────────────────────────────────────────
+function GraphtecLayer({
+  foilWidthMm, totalH, strokeW,
+}: { foilWidthMm: number; totalH: number; zoom: number; strokeW: number }) {
+  const marks = foilWidthMm > 0 ? getGraphtecCorners(foilWidthMm, totalH) : [];
+  const len = GRAPHTEC_MARK_LEN_MM;
+  const w   = GRAPHTEC_MARK_W_MM;
+  return (
+    <g>
+      {/* reserved margin bands (visual quiet zone) */}
+      <rect x={0} y={-GRAPHTEC_MARGIN_MM} width={foilWidthMm} height={GRAPHTEC_MARGIN_MM}
+        fill="rgba(34,197,94,0.06)" stroke="rgba(34,197,94,0.4)" strokeWidth={strokeW} />
+      <rect x={0} y={totalH} width={foilWidthMm} height={GRAPHTEC_MARGIN_MM}
+        fill="rgba(34,197,94,0.06)" stroke="rgba(34,197,94,0.4)" strokeWidth={strokeW} />
+      {/* four Type 1 L-marks (y DOWN convention; dirY +1 = down) */}
+      {marks.map((m, i) => (
+        <g key={i} fill="#000">
+          <rect
+            x={m.dirX > 0 ? m.x : m.x - w}
+            y={m.dirY > 0 ? m.y : m.y - len}
+            width={w} height={len}
+          />
+          <rect
+            x={m.dirX > 0 ? m.x : m.x - len}
+            y={m.dirY > 0 ? m.y : m.y - w}
+            width={len} height={w}
+          />
+        </g>
+      ))}
+    </g>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export function LayoutCanvas({ foilWidthMm, totalLengthMm, copies, files, regmarkType, onCopiesChange, pageLengthMm }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -246,6 +285,7 @@ export function LayoutCanvas({ foilWidthMm, totalLengthMm, copies, files, regmar
   const panStart = useRef({ x: 0, y: 0 });
 
   const marginMm = regmarkType === 'roland' ? ROLAND_MARGIN_MM
+    : regmarkType === 'graphtec' ? GRAPHTEC_MARGIN_MM
     : regmarkType === 'none' ? 0
     : OPOS_MARGIN_MM;
 
@@ -419,6 +459,9 @@ export function LayoutCanvas({ foilWidthMm, totalLengthMm, copies, files, regmar
           )}
           {regmarkType === 'roland' && (
             <RolandLayer foilWidthMm={foilWidthMm} totalH={totalH} zoom={zoom} strokeW={strokeW} />
+          )}
+          {regmarkType === 'graphtec' && (
+            <GraphtecLayer foilWidthMm={foilWidthMm} totalH={totalH} zoom={zoom} strokeW={strokeW} />
           )}
 
           {/* ── Foil body ── */}
