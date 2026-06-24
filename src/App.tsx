@@ -35,6 +35,9 @@ const IS_WORDPRESS = import.meta.env.VITE_MODE === 'wordpress';
 export default function App() {
   const [tab, setTab] = useState<Tab>('design');
   const [wpMode, setWpMode] = useState<WpMode>('design');
+  // Single vs sheet INTENT, chosen on the WP start page. Separate from wpMode
+  // (which only routes views): flow === 'single' hides ALL sheet/ARK UI.
+  const [flow, setFlow] = useState<'single' | 'sheet'>('single');
   const [file, setFile] = useState<File | null>(null);
   const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
   const [params, setParams] = useState<ContourParams>(DEFAULT_PARAMS);
@@ -230,7 +233,7 @@ export default function App() {
             {IS_WORDPRESS
               ? <DownloadButton file={file} params={params} widthCm={stickerWidthCm} heightCm={stickerHeightCm} material={material} finish={finish} />
               : <DownloadButton file={file} params={params} widthCm={stickerWidthCm} heightCm={stickerHeightCm} />}
-            {IS_WORDPRESS && (
+            {IS_WORDPRESS && flow === 'sheet' && (
               <>
                 <button
                   onClick={handleSendToSheet}
@@ -257,7 +260,7 @@ export default function App() {
     <div className="min-h-screen bg-nim-black flex flex-col">
 
       {/* ── "Sent to sheet" prompt — add another design or go to the sheet? ── */}
-      {IS_WORDPRESS && showSheetPrompt && (
+      {IS_WORDPRESS && flow === 'sheet' && showSheetPrompt && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
           role="dialog"
@@ -329,7 +332,7 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap justify-end">
-            {IS_WORDPRESS && sheetItems.length > 0 && (
+            {IS_WORDPRESS && flow === 'sheet' && sheetItems.length > 0 && (
               <button
                 onClick={() => setWpMode('sheet')}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-nim-yellow/15 border border-nim-yellow/40 text-xs font-bold uppercase tracking-widest text-nim-yellow hover:bg-nim-yellow/25 transition-all"
@@ -415,7 +418,7 @@ export default function App() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-2xl">
               {/* Design your own */}
               <button
-                onClick={() => setWpMode('design')}
+                onClick={() => { setFlow('single'); setWpMode('design'); }}
                 className="group flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-white/10 bg-nim-darker hover:border-nim-yellow hover:bg-nim-yellow/5 transition-all text-left"
               >
                 <div className="w-16 h-16 rounded-xl bg-nim-yellow/10 border border-nim-yellow/20 flex items-center justify-center group-hover:bg-nim-yellow/20 transition-colors">
@@ -425,8 +428,8 @@ export default function App() {
                   </svg>
                 </div>
                 <div className="w-full">
-                  <p className="text-base font-black text-white uppercase tracking-wider group-hover:text-nim-yellow transition-colors">{t.modeDesign}</p>
-                  <p className="text-xs text-white/40 mt-1 leading-relaxed">{t.modeDesignDesc}</p>
+                  <p className="text-base font-black text-white uppercase tracking-wider group-hover:text-nim-yellow transition-colors">{t.modeSingle}</p>
+                  <p className="text-xs text-white/40 mt-1 leading-relaxed">{t.modeSingleDesc}</p>
                 </div>
                 <div className="w-full flex justify-end">
                   <svg className="w-5 h-5 text-white/20 group-hover:text-nim-yellow transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -437,7 +440,7 @@ export default function App() {
 
               {/* Kiss cut sheet */}
               <button
-                onClick={() => setWpMode('sheet')}
+                onClick={() => { setFlow('sheet'); setWpMode('design'); }}
                 className="group flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-white/10 bg-nim-darker hover:border-pink-400 hover:bg-pink-500/5 transition-all text-left"
               >
                 <div className="w-16 h-16 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center group-hover:bg-pink-500/20 transition-colors">
@@ -464,7 +467,7 @@ export default function App() {
         {IS_WORDPRESS && wpMode === 'single' && cutDialog}
 
         {/* ── WordPress: sheet mode ── */}
-        {IS_WORDPRESS && wpMode === 'sheet' && (
+        {IS_WORDPRESS && flow === 'sheet' && wpMode === 'sheet' && (
           <WordpressPrintPlanningTab
             items={sheetItems}
             onItemsChange={setSheetItems}
