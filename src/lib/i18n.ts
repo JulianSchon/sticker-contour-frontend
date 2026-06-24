@@ -10,8 +10,8 @@ export const translations = {
     modeSelectTitle: 'What do you want to create?',
     modeSingle: 'Single Sticker',
     modeSingleDesc: 'Design a single sticker with a custom cut path and save it to your cart.',
-    modeSheet: 'Kiss Cut Sheet',
-    modeSheetDesc: 'Fill an A4 or A5 sheet with multiple stickers for efficient production.',
+    modeSheet: 'Sticker Sheet',
+    modeSheetDesc: 'Build your own sheet of stickers you design or upload yourself! A4 or A5 format.',
 
     // Material & Finish
     stepMaterial: 'Material & Finish',
@@ -156,8 +156,8 @@ export const translations = {
     modeSelectTitle: 'Vad vill du skapa?',
     modeSingle: 'Enstaka klistermärke',
     modeSingleDesc: 'Designa ett klistermärke med anpassad skärväg och spara det i varukorgen.',
-    modeSheet: 'Kiss Cut Ark',
-    modeSheetDesc: 'Fyll ett A4- eller A5-ark med flera klistermärken för effektiv produktion.',
+    modeSheet: 'Klistermärkesark',
+    modeSheetDesc: 'Bygg ditt egna ark med klistermärken som du designar eller laddar upp själv! Format A4 eller A5.',
 
     // Material & Finish
     stepMaterial: 'Material & Finish',
