@@ -60,7 +60,7 @@ export const translations = {
     edOutline: 'Outline',
     edSelected: 'Selected',
     edSelectHint: 'Select an object to edit it',
-    edEmptyCanvas: 'Pick a shape if you want a specific outline — or skip it and upload images and text to build your own sticker, which we contour-cut.',
+    edEmptyCanvas: 'Go for it! Upload images, add text and build your own sticker — we contour-cut around your design. Want a specific shape? Pick one under Shape.',
     // Tooltips
     edTipUploads: 'Upload your own image (PNG, JPEG, WEBP)',
     edTipText: 'Add and style text',
@@ -206,7 +206,7 @@ export const translations = {
     edOutline: 'Kontur',
     edSelected: 'Markerat',
     edSelectHint: 'Välj ett objekt för att redigera',
-    edEmptyCanvas: 'Välj form om du vill ha en specifik form eller låt bli och ladda upp bilder, texter och bygg ihop ditt egna klistermärke som konturskärs',
+    edEmptyCanvas: 'Kör loss! Ladda upp bilder, peppa med text och bygg din egen klibba – vi konturskär runt din design. Vill du ha en speciell form? Välj en under Form.',
     // Tooltips
     edTipUploads: 'Ladda upp din egen bild (PNG, JPEG, WEBP)',
     edTipText: 'Lägg till och styla text',
