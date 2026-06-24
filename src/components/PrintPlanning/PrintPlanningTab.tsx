@@ -80,7 +80,7 @@ export function PrintPlanningTab() {
           {/* Regmark switcher */}
           <div>
             <p className="nim-label mb-3">Registration Marks</p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {([
                 {
                   id: 'opos' as RegmarkType,
@@ -108,6 +108,19 @@ export function PrintPlanningTab() {
                       <circle cx="5" cy="19" r="3" />
                       <circle cx="19" cy="19" r="3" />
                       <rect x="9" y="19" width="6" height="2" />
+                    </svg>
+                  ),
+                },
+                {
+                  id: 'graphtec' as RegmarkType,
+                  label: 'Graphtec',
+                  sub: 'CE8000 ARMS',
+                  icon: (
+                    <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <path d="M3 9V3h6" />
+                      <path d="M21 9V3h-6" />
+                      <path d="M3 15v6h6" />
+                      <path d="M21 15v6h-6" />
                     </svg>
                   ),
                 },
