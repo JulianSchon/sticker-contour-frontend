@@ -16,7 +16,8 @@
 
 export const GRAPHTEC_MARK_LEN_MM = 20;   // L arm length (max of 4–20 for reliable sensing)
 export const GRAPHTEC_MARK_W_MM   = 1.0;  // line thickness (max of 0.3–1.0)
-export const GRAPHTEC_MARGIN_MM   = 25;   // band added at TOP and BOTTOM for marks + quiet zone
+export const GRAPHTEC_MARGIN_MM   = 30;   // band at TOP+BOTTOM = inset_y(7)+arm(20)+3mm gap,
+                                          // so the full L-mark stays out of the content area
 export const GRAPHTEC_INSET_X_MM  = 10;   // L corner inset from foil left/right edge
 export const GRAPHTEC_INSET_Y_MM  = 7;    // L corner inset from the outer edge of the band
 

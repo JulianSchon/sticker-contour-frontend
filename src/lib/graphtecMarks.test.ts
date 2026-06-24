@@ -13,8 +13,9 @@ describe('graphtec mark constants', () => {
     expect(GRAPHTEC_MARK_W_MM).toBeGreaterThanOrEqual(0.3);
     expect(GRAPHTEC_MARK_W_MM).toBeLessThanOrEqual(1.0);
   });
-  it('margin band leaves room for a mark plus clearance', () => {
-    expect(GRAPHTEC_MARGIN_MM).toBeGreaterThanOrEqual(GRAPHTEC_INSET_Y_MM + GRAPHTEC_MARK_LEN_MM / 2);
+  it('band fits the full L-mark (no intrusion into the content area)', () => {
+    // inset from outer edge + full arm length must stay within the band
+    expect(GRAPHTEC_MARGIN_MM).toBeGreaterThanOrEqual(GRAPHTEC_INSET_Y_MM + GRAPHTEC_MARK_LEN_MM);
   });
 });
 
