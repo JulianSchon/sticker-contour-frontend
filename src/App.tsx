@@ -34,7 +34,9 @@ const IS_WORDPRESS = import.meta.env.VITE_MODE === 'wordpress';
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('design');
-  const [wpMode, setWpMode] = useState<WpMode>('design');
+  // WordPress opens on the mode-select start page (single vs sheet); standalone
+  // goes straight to the editor (it uses `tab`, not `wpMode`).
+  const [wpMode, setWpMode] = useState<WpMode>(IS_WORDPRESS ? null : 'design');
   // Single vs sheet INTENT, chosen on the WP start page. Separate from wpMode
   // (which only routes views): flow === 'single' hides ALL sheet/ARK UI.
   const [flow, setFlow] = useState<'single' | 'sheet'>('single');
