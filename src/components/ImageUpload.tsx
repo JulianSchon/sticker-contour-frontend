@@ -64,6 +64,7 @@ export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [enhanceError, setEnhanceError] = useState<string | null>(null);
   const [currentFile, setCurrentFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const evaluate = useCallback((
     imgW: number, imgH: number,
@@ -83,6 +84,7 @@ export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataUrl = e.target?.result as string;
+      setPreviewUrl(dataUrl);
       const img = new Image();
       img.onload = () => {
         const w = img.naturalWidth;
@@ -102,6 +104,7 @@ export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
     try {
       const { file: enhanced, dataUrl } = await enhanceImage(currentFile);
       setCurrentFile(enhanced);
+      setPreviewUrl(dataUrl);
       const img = new Image();
       img.onload = () => {
         const w = img.naturalWidth;
@@ -195,6 +198,16 @@ export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
             </svg>
             <p className="text-sm font-bold text-nim-yellow uppercase tracking-wider">{t.dropIt}</p>
+          </>
+        ) : previewUrl ? (
+          <>
+            <img src={previewUrl} alt="" className="max-h-full max-w-full object-contain rounded-lg p-2" />
+            <div className="absolute bottom-1.5 right-2 flex items-center gap-1 bg-black/65 text-white/80 text-xs px-2 py-0.5 rounded-full">
+              <svg className="w-3.5 h-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              {t.imageUploadedChange}
+            </div>
           </>
         ) : (
           <>
