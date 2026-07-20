@@ -12,6 +12,8 @@ export const translations = {
     modeSingleDesc: 'Design a single sticker with a custom cut path and save it to your cart.',
     modeSheet: 'Sticker Sheet',
     modeSheetDesc: 'Build your own sheet of stickers you design or upload yourself! A4 or A5 format.',
+    modeUpload: 'Upload & Cut',
+    modeUploadDesc: 'Upload your own image, pick a cutline and size, and add it to the cart.',
 
     // Material & Finish
     stepMaterial: 'Material & Finish',
@@ -77,6 +79,7 @@ export const translations = {
     cutEmptyHint: 'Create your sticker in the Design tab, then continue here to set up the cut.',
     cutGoToDesign: 'Go to Design',
     cutEditDesign: 'Edit design',
+    cutChangeImage: 'Change image',
     sendToSheet: 'Send to sheet',
     sentToSheet: 'Added to sheet ✓',
     arkBadge: 'Sheet',
@@ -158,6 +161,8 @@ export const translations = {
     modeSingleDesc: 'Designa ett klistermärke med anpassad skärväg och spara det i varukorgen.',
     modeSheet: 'Klistermärkesark',
     modeSheetDesc: 'Bygg ditt egna ark med klistermärken som du designar eller laddar upp själv! Format A4 eller A5.',
+    modeUpload: 'Ladda upp & skär',
+    modeUploadDesc: 'Ladda upp din egen bild, välj skärlinje och storlek och lägg i varukorgen.',
 
     // Material & Finish
     stepMaterial: 'Material & Finish',
@@ -223,6 +228,7 @@ export const translations = {
     cutEmptyHint: 'Skapa din dekal i Design-fliken, fortsätt sedan hit för att ställa in skäret.',
     cutGoToDesign: 'Gå till Design',
     cutEditDesign: 'Redigera design',
+    cutChangeImage: 'Byt bild',
     sendToSheet: 'Skicka till ark',
     sentToSheet: 'Tillagd på arket ✓',
     arkBadge: 'Ark',
