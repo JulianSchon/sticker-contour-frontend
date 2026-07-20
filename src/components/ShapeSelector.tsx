@@ -34,6 +34,16 @@ const SHAPES: { value: ShapeType; labelEn: string; labelSv: string; icon: React.
     ),
   },
   {
+    value: 'oval',
+    labelEn: 'Oval',
+    labelSv: 'Oval',
+    icon: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2">
+        <ellipse cx="20" cy="20" rx="15" ry="10" />
+      </svg>
+    ),
+  },
+  {
     value: 'square',
     labelEn: 'Square',
     labelSv: 'Kvadrat',
@@ -63,7 +73,7 @@ export function ShapeSelector({ value, onChange, shapeSize, onSizeChange, shapeO
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-5 gap-2">
         {SHAPES.map(shape => (
           <button
             key={shape.value}
