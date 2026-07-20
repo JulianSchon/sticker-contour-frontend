@@ -18,8 +18,11 @@ const SHAPES: { value: ShapeType; labelEn: string; labelSv: string; icon: React.
     labelSv: 'Kontur',
     icon: (
       <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M20 6 C10 6 6 12 6 20 C6 30 12 34 20 34 C30 34 34 28 34 20 C34 10 28 6 20 6 Z" strokeDasharray="none" />
-        <path d="M20 10 C13 10 10 14 10 20 C10 27 14 30 20 30 C27 30 30 26 30 20 C30 13 26 10 20 10 Z" opacity="0.3" />
+        {/* dashed cut-line hugging an irregular (non-circular) silhouette */}
+        <path d="M14 6 C22 4 27 8 31 11 C36 15 37 22 33 27 C30 31 31 36 25 36 C19 36 15 33 10 31 C4 28 3 21 6 16 C8 12 9 8 14 6 Z"
+          strokeDasharray="3 2.5" strokeLinejoin="round" />
+        {/* image hint inside */}
+        <rect x="15" y="16" width="11" height="9" rx="1.5" opacity="0.35" />
       </svg>
     ),
   },
