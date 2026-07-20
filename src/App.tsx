@@ -122,7 +122,7 @@ export default function App() {
 
   // ── Header tagline ──────────────────────────────────────────────────────────
   const headerTagline = IS_WORDPRESS
-    ? (wpMode === 'single' ? t.taglineContour : wpMode === 'sheet' ? t.taglinePrint : wpMode === 'design' ? t.modeDesign : 'CUTZ')
+    ? (wpMode === 'single' ? t.taglineContour : wpMode === 'sheet' ? t.taglinePrint : wpMode === 'design' ? t.modeDesign : wpMode === 'upload' ? t.modeUpload : 'CUTZ')
     : (tab === 'print-planning' ? t.taglinePrint : tab === 'contour' ? t.taglineContour : t.modeDesign);
 
   // Shared preview column for the cut dialog.
@@ -168,13 +168,13 @@ export default function App() {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <button
-          onClick={goToDesign}
+          onClick={() => { if (flow === 'upload') setWpMode('upload'); else goToDesign(); }}
           className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-white/50 hover:text-white transition-colors"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          {t.cutEditDesign}
+          {flow === 'upload' ? t.cutChangeImage : t.cutEditDesign}
         </button>
         {stickerWidthCm && stickerHeightCm && (
           <div className="flex items-center gap-2 rounded-xl bg-nim-yellow/10 border border-nim-yellow/30 px-3 py-1.5">
@@ -386,7 +386,7 @@ export default function App() {
             {IS_WORDPRESS && wpMode !== null && (
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-nim-yellow/10 border border-nim-yellow/30">
                 <span className="text-xs font-bold uppercase tracking-widest text-nim-yellow">
-                  {wpMode === 'single' ? t.modeSingle : wpMode === 'sheet' ? t.modeSheet : t.modeDesign}
+                  {wpMode === 'single' ? t.modeSingle : wpMode === 'sheet' ? t.modeSheet : wpMode === 'upload' ? t.modeUpload : t.modeDesign}
                 </span>
               </div>
             )}
