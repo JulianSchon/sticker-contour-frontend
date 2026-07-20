@@ -13,6 +13,8 @@ import { translations, type Lang } from './lib/i18n.ts';
 import { MaterialFinishPicker, type Material, type Finish } from './components/MaterialFinishPicker.tsx';
 import type { PlannedFile } from './types/printPlanning.ts';
 import { buildSheetItem, SHEET_COLORS } from './lib/sheetItem.ts';
+import { UploadStart } from './components/UploadStart.tsx';
+import { ShapeSelector } from './components/ShapeSelector.tsx';
 
 const DEFAULT_PARAMS: ContourParams = {
   threshold: 128,
@@ -28,7 +30,7 @@ const DEFAULT_PARAMS: ContourParams = {
 };
 
 type Tab = 'design' | 'contour' | 'print-planning';
-type WpMode = null | 'single' | 'sheet' | 'design';
+type WpMode = null | 'single' | 'sheet' | 'design' | 'upload';
 
 const IS_WORDPRESS = import.meta.env.VITE_MODE === 'wordpress';
 
@@ -39,7 +41,7 @@ export default function App() {
   const [wpMode, setWpMode] = useState<WpMode>(IS_WORDPRESS ? null : 'design');
   // Single vs sheet INTENT, chosen on the WP start page. Separate from wpMode
   // (which only routes views): flow === 'single' hides ALL sheet/ARK UI.
-  const [flow, setFlow] = useState<'single' | 'sheet'>('single');
+  const [flow, setFlow] = useState<'single' | 'sheet' | 'upload'>('single');
   const [file, setFile] = useState<File | null>(null);
   const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
   const [params, setParams] = useState<ContourParams>(DEFAULT_PARAMS);
@@ -202,8 +204,20 @@ export default function App() {
               </div>
             </div>
             <div className="px-5 pb-5">
-              {/* Cut mode hidden for now — perf-cut only (DEFAULT_PARAMS.cutMode='perf').
-                  Remove hideCutMode to bring kiss/perf/both back. */}
+              {flow === 'upload' && (
+                <div className="mb-4">
+                  <ShapeSelector
+                    value={params.shapeType}
+                    onChange={(s) => setParams(p => ({ ...p, shapeType: s }))}
+                    shapeSize={params.shapeSize}
+                    onSizeChange={(size) => setParams(p => ({ ...p, shapeSize: size }))}
+                    shapeOffsetX={params.shapeOffsetX}
+                    shapeOffsetY={params.shapeOffsetY}
+                    onOffsetChange={(x, y) => setParams(p => ({ ...p, shapeOffsetX: x, shapeOffsetY: y }))}
+                  />
+                </div>
+              )}
+              {/* Cut mode hidden for now — perf-cut only (DEFAULT_PARAMS.cutMode='perf'). */}
               <ParameterPanel params={params} onChange={setParams} hideCutMode />
             </div>
           </div>
@@ -417,7 +431,7 @@ export default function App() {
             <div className="text-center">
               <h1 className="text-2xl font-black text-white uppercase tracking-widest">{t.modeSelectTitle}</h1>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-2xl">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 w-full max-w-4xl">
               {/* Design your own */}
               <button
                 onClick={() => { setFlow('single'); setWpMode('design'); }}
@@ -461,7 +475,36 @@ export default function App() {
                   </svg>
                 </div>
               </button>
+
+              {/* Upload & cut */}
+              <button
+                onClick={() => { setFlow('upload'); setWpMode('upload'); }}
+                className="group flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-white/10 bg-nim-darker hover:border-nim-yellow hover:bg-nim-yellow/5 transition-all text-left"
+              >
+                <div className="w-16 h-16 rounded-xl bg-nim-yellow/10 border border-nim-yellow/20 flex items-center justify-center group-hover:bg-nim-yellow/20 transition-colors">
+                  <svg className="w-8 h-8 text-nim-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                  </svg>
+                </div>
+                <div className="w-full">
+                  <p className="text-base font-black text-white uppercase tracking-wider group-hover:text-nim-yellow transition-colors">{t.modeUpload}</p>
+                  <p className="text-xs text-white/40 mt-1 leading-relaxed">{t.modeUploadDesc}</p>
+                </div>
+                <div className="w-full flex justify-end">
+                  <svg className="w-5 h-5 text-white/20 group-hover:text-nim-yellow transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </button>
             </div>
+          </div>
+        )}
+
+        {/* ── WordPress: upload-only entry (upload → cut, no editor) ── */}
+        {IS_WORDPRESS && wpMode === 'upload' && (
+          <div className="p-4 sm:p-6">
+            <UploadStart onReady={handleDesignComplete} />
           </div>
         )}
 
