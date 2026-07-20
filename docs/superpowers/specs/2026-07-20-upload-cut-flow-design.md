@@ -11,16 +11,16 @@ Add a **third WordPress start-page flow**: the customer uploads their own image,
 ## Context (current state)
 
 - WP start page (`App.tsx`, `wpMode === null`) has two cards after the earlier split: **Designa själv** (`flow='single'`, editor → cut) and **Klistermärkesark** (`flow='sheet'`). `flow: 'single' | 'sheet'` gates all sheet/ARK UI.
-- The **cut page** (`cutDialog`) already has `ShapeSelector` (Kontur/Cirkel/Kvadrat/Triangel + a size slider for shapes), the contour **offset** in `ParameterPanel`, live preview, material/finish, and **add-to-cart** (`DownloadButton`; in WP mode it routes through the configurator's save→cart path).
+- The **cut page** (`cutDialog`) has live preview, material/finish, and **add-to-cart** (`DownloadButton`; in WP mode it routes through the configurator's save→cart path), and shows `ParameterPanel` (the contour **offset**, etc.). **`ShapeSelector` exists as a component but is NOT currently rendered** — so today `shapeType` is fixed to `'contour'`. This flow must render `ShapeSelector` so the customer can pick the cutline.
 - Physical size (`stickerWidthCm/Height`) is currently set **only** by the editor's artboard (`handleDesignComplete`). A direct-upload flow must set it itself (CPO pricing = area).
 - Backend `buildGeometricPath` (`src/services/geometricPaths.ts`) supports `circle` (arcs), `square` (hard rect), `triangle`. `ShapeType = 'contour'|'circle'|'square'|'triangle'` in both repos.
 
 ## Design
 
 ### Entry & flow (frontend)
-- **Third start-page card** "Ladda upp & skär" (en: "Upload & Cut"): `onClick` sets `flow='single'` and `wpMode='upload'`.
-- **New `wpMode` view `'upload'`** — an **upload screen** = `ImageUpload` + a **size picker** (reuse the editor's cm size presets + a custom W×H entry). On confirm it calls the existing `handleDesignComplete(file, dataUrl, widthCm, heightCm)` (same entry point the editor uses), which sets state and routes to the cut view (`wpMode='single'`).
-- **Cut page reused as-is.** Because `flow='single'`, no sheet UI shows. Add-to-cart works unchanged (WP save path is triggered by the shared `DownloadButton`). Back-arrow → start page.
+- **Third start-page card** "Ladda upp & skär" (en: "Upload & Cut"): `onClick` sets a **new `flow` value `'upload'`** and `wpMode='upload'`. `flow` becomes `'single' | 'sheet' | 'upload'`; sheet UI still shows only for `flow==='sheet'`, so `'upload'` hides it (same as `'single'`). The distinct value lets the cut page show the shape picker only for this flow.
+- **New `wpMode` view `'upload'`** — an **upload screen** = `ImageUpload` (which already includes W×H cm inputs + DPI check). On confirm it calls the existing `handleDesignComplete(file, dataUrl, widthCm, heightCm)` (same entry point the editor uses), which sets state and routes to the cut view (`wpMode='single'`).
+- **Cut page reused**, with one addition: render `ShapeSelector` (wired to `params.shapeType/shapeSize/shapeOffsetX/Y`) **only when `flow==='upload'`**, above the existing `ParameterPanel`. Contour → offset (ParameterPanel); shapes → size (ShapeSelector). No sheet UI (flow≠sheet). Add-to-cart unchanged. Back-arrow → start page.
 - Encapsulate the upload screen in a small component `src/components/UploadStart.tsx` (props: `onReady(file, dataUrl, widthCm, heightCm)`) so `App.tsx` stays lean.
 
 ### Shapes
