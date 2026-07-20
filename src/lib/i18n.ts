@@ -8,11 +8,11 @@ export const translations = {
     tabContour: 'Contour Generator',
     tabPrint: 'Sheet',
     modeSelectTitle: 'What do you want to create?',
-    modeSingle: 'Single Sticker',
+    modeSingle: 'Design your own',
     modeSingleDesc: 'Design a single sticker with a custom cut path and save it to your cart.',
     modeSheet: 'Sticker Sheet',
     modeSheetDesc: 'Build your own sheet of stickers you design or upload yourself! A4 or A5 format.',
-    modeUpload: 'Upload & Cut',
+    modeUpload: 'Upload your own image',
     modeUploadDesc: 'Upload your own image, pick a cutline and size, and add it to the cart.',
 
     // Material & Finish
@@ -157,11 +157,11 @@ export const translations = {
     tabContour: 'Kontur-generator',
     tabPrint: 'Ark',
     modeSelectTitle: 'Vad vill du skapa?',
-    modeSingle: 'Enstaka klistermärke',
+    modeSingle: 'Designa eget',
     modeSingleDesc: 'Designa ett klistermärke med anpassad skärväg och spara det i varukorgen.',
     modeSheet: 'Klistermärkesark',
     modeSheetDesc: 'Bygg ditt egna ark med klistermärken som du designar eller laddar upp själv! Format A4 eller A5.',
-    modeUpload: 'Ladda upp & skär',
+    modeUpload: 'Ladda upp egen bild',
     modeUploadDesc: 'Ladda upp din egen bild, välj skärlinje och storlek och lägg i varukorgen.',
 
     // Material & Finish
