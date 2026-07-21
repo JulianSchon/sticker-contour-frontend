@@ -1,4 +1,5 @@
 import { scalePath } from './pathTransforms.ts';
+import { edgeColorFromImage } from './edgeColor.ts';
 import type { ContourPreviewResponse, ContourParams } from '../types/contour.ts';
 import type { Finish } from '../components/MaterialFinishPicker.tsx';
 
@@ -54,10 +55,17 @@ export function renderSticker(
   const scaleX = (img.naturalWidth * scale) / contour.width;
   const scaleY = (img.naturalHeight * scale) / contour.height;
 
-  // White sticker body clipped to the cut path (the die-cut look).
+  // Sticker body clipped to the cut path (the die-cut look). For geometric shapes
+  // the cut can extend past the artwork, so fill the body with the image's sampled
+  // edge color (background continues to the edge). Contour hugs the art → white.
   const bodySvg = usePerf && contour.perfSvgPath ? contour.perfSvgPath : contour.kissSvgPath;
   const bodyPath = new Path2D(scalePath(bodySvg, scaleX, scaleY, padPx, padPx));
-  ctx.fillStyle = '#ffffff';
+  if (params.shapeType !== 'contour') {
+    const c = edgeColorFromImage(img);
+    ctx.fillStyle = `rgb(${c.r}, ${c.g}, ${c.b})`;
+  } else {
+    ctx.fillStyle = '#ffffff';
+  }
   ctx.fill(bodyPath);
 
   // Artwork on the white body.
