@@ -68,8 +68,14 @@ export function renderSticker(
   }
   ctx.fill(bodyPath);
 
-  // Artwork on the white body.
+  // Artwork on the body — CLIPPED to the cut path so only what's inside the cut
+  // line shows (the real die-cut result). Without this, a rectangular image whose
+  // corners fall outside a geometric cut (e.g. a square image in an oval) would
+  // poke past the cutline and look wrong.
+  ctx.save();
+  ctx.clip(bodyPath);
   ctx.drawImage(img, padPx, padPx, Math.round(img.naturalWidth * scale), Math.round(img.naturalHeight * scale));
+  ctx.restore();
 
   // Cut-line guides (preview only; never the real product).
   if (showKissStroke) {
