@@ -148,7 +148,7 @@ export default function App() {
           <span><strong>{t.detectionFailed}:</strong> {error.message}</span>
         </div>
       )}
-      <div className="flex-1 rounded-2xl overflow-hidden border border-white/10" style={{ minHeight: '500px' }}>
+      <div className="flex-1 rounded-2xl overflow-hidden border border-white/10" style={{ minHeight: '500px' }} data-tour="preview">
         <CanvasPreview imageDataUrl={imageDataUrl} contour={contour ?? null} params={params} isLoading={isLoading} finish={finish} />
       </div>
       <MockupCarousel imageDataUrl={imageDataUrl} contour={contour ?? null} params={params} finish={finish} />
@@ -205,7 +205,7 @@ export default function App() {
             </div>
             <div className="px-5 pb-5">
               {flow === 'upload' && (
-                <div className="mb-4">
+                <div className="mb-4" data-tour="shape">
                   <ShapeSelector
                     value={params.shapeType}
                     onChange={(s) => setParams(p => ({ ...p, shapeType: s }))}
@@ -222,7 +222,7 @@ export default function App() {
             </div>
           </div>
           {IS_WORDPRESS && (
-            <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
+            <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden" data-tour="finish">
               {/* Only Finish is shown (single material), so the title is "Finish". */}
               <div className="px-5 pt-5 pb-2"><StepLabel n="02" label={t.finish} /></div>
               <div className="px-5 pb-5">
@@ -243,7 +243,7 @@ export default function App() {
 
         {/* Save design / Send to sheet (03) — below the canvas on mobile, under
             the controls on desktop. */}
-        <div className="order-3 lg:col-start-1 lg:row-start-2 bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
+        <div className="order-3 lg:col-start-1 lg:row-start-2 bg-nim-darker rounded-2xl border border-white/10 overflow-hidden" data-tour="save">
           <div className="px-5 pt-5 pb-2"><StepLabel n={IS_WORDPRESS ? '03' : '02'} label={IS_WORDPRESS ? t.step03wp : t.step03} /></div>
           <div className="px-5 pb-5 flex flex-col gap-3">
             {IS_WORDPRESS

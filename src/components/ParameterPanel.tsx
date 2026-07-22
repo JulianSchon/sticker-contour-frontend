@@ -125,7 +125,7 @@ export function ParameterPanel({ params, onChange, hideCutMode = false, hideThre
       {/* Perf offset — on mobile the label + value live in the step title, so we
           drop the heading/value row and the decorative border here. */}
       {showPerf && !hideOffsets && (
-        <div className="space-y-2 sm:pl-3 sm:border-l-2 sm:border-orange-500/60">
+        <div className="space-y-2 sm:pl-3 sm:border-l-2 sm:border-orange-500/60" data-tour="offset">
           <div className="hidden sm:flex items-center gap-2">
             <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">{t.perfCutOffset}</span>
           </div>
