@@ -150,6 +150,24 @@ export const translations = {
 
     // Footer
     footerLabel: 'Nimstick Cutz — Internal Print Tool',
+
+    // Cut-page tour
+    tourPreviewTitle: 'Live preview',
+    tourPreviewBody: 'This is your sticker, updated in real time as you adjust the cut.',
+    tourShapeTitle: 'Choose the cut line',
+    tourShapeBody: 'Contour follows your artwork; or pick a circle, oval, square or triangle.',
+    tourSizeTitle: 'Size & position',
+    tourSizeBody: 'Resize the shape and move it over your image.',
+    tourOffsetTitle: 'Cut-line margin',
+    tourOffsetBody: 'Set how far the cut sits from your artwork — a bigger margin adds a border.',
+    tourFinishTitle: 'Finish',
+    tourFinishBody: 'Pick a glossy or matte surface.',
+    tourSaveTitle: 'Save your design',
+    tourSaveBody: 'Save the design and add it to your cart.',
+    tourNext: 'Next',
+    tourPrev: 'Back',
+    tourDone: 'Done',
+    tourReplay: 'Show guide',
   },
   sv: {
     // Header
@@ -300,6 +318,24 @@ export const translations = {
 
     // Footer
     footerLabel: 'Nimstick Cutz — Internt utskriftsverktyg',
+
+    // Cut-page tour
+    tourPreviewTitle: 'Förhandsvisning',
+    tourPreviewBody: 'Här ser du din klistermärke i realtid medan du justerar skärlinjen.',
+    tourShapeTitle: 'Välj skärlinje',
+    tourShapeBody: 'Kontur följer ditt motiv – eller välj cirkel, oval, kvadrat eller triangel.',
+    tourSizeTitle: 'Storlek & placering',
+    tourSizeBody: 'Ändra storlek på formen och flytta den över din bild.',
+    tourOffsetTitle: 'Skärlinjens marginal',
+    tourOffsetBody: 'Ställ in hur långt skärlinjen ligger från motivet — större marginal ger en kant.',
+    tourFinishTitle: 'Yta',
+    tourFinishBody: 'Välj blank eller matt yta.',
+    tourSaveTitle: 'Spara din design',
+    tourSaveBody: 'Spara designen och lägg den i varukorgen.',
+    tourNext: 'Nästa',
+    tourPrev: 'Bak',
+    tourDone: 'Klar',
+    tourReplay: 'Visa guide',
   },
 } satisfies Record<Lang, Record<string, string>>;
 
