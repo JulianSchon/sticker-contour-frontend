@@ -15,6 +15,7 @@ import type { PlannedFile } from './types/printPlanning.ts';
 import { buildSheetItem, SHEET_COLORS } from './lib/sheetItem.ts';
 import { UploadStart } from './components/UploadStart.tsx';
 import { ShapeSelector } from './components/ShapeSelector.tsx';
+import { useTour } from './hooks/useTour.ts';
 
 const DEFAULT_PARAMS: ContourParams = {
   threshold: 128,
@@ -59,6 +60,7 @@ export default function App() {
     return saved === 'light' ? 'light' : 'dark';
   });
   const t = translations[lang];
+  const { autoStartOnce, start: startTour } = useTour(flow, lang);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -66,6 +68,14 @@ export default function App() {
   }, [theme]);
 
   const { data: contour, isLoading, error } = useContour(file, params);
+
+  const cutActive = IS_WORDPRESS ? wpMode === 'single' : tab === 'contour';
+  useEffect(() => {
+    if (!cutActive || !file) return;
+    // Wait a frame so the cut-page controls (data-tour anchors) are laid out.
+    const id = window.setTimeout(() => autoStartOnce(), 350);
+    return () => window.clearTimeout(id);
+  }, [cutActive, file, autoStartOnce]);
 
   // Editor hands its flattened design off to the cut dialog for cut refinement.
   const handleDesignComplete = (f: File, dataUrl: string, widthCm: number, heightCm: number) => {
@@ -148,7 +158,7 @@ export default function App() {
           <span><strong>{t.detectionFailed}:</strong> {error.message}</span>
         </div>
       )}
-      <div className="flex-1 rounded-2xl overflow-hidden border border-white/10" style={{ minHeight: '500px' }}>
+      <div className="flex-1 rounded-2xl overflow-hidden border border-white/10" style={{ minHeight: '500px' }} data-tour="preview">
         <CanvasPreview imageDataUrl={imageDataUrl} contour={contour ?? null} params={params} isLoading={isLoading} finish={finish} />
       </div>
       <MockupCarousel imageDataUrl={imageDataUrl} contour={contour ?? null} params={params} finish={finish} />
@@ -186,6 +196,15 @@ export default function App() {
             <span className="text-sm font-black text-white tabular-nums">{stickerWidthCm} × {stickerHeightCm} cm</span>
           </div>
         )}
+        <button
+          onClick={startTour}
+          className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-white/50 hover:text-white transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {t.tourReplay}
+        </button>
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[360px_1fr] lg:gap-x-6 lg:gap-y-4 lg:items-start">
         {/* Cut params (01) + material & finish (02) */}
@@ -205,7 +224,7 @@ export default function App() {
             </div>
             <div className="px-5 pb-5">
               {flow === 'upload' && (
-                <div className="mb-4">
+                <div className="mb-4" data-tour="shape">
                   <ShapeSelector
                     value={params.shapeType}
                     onChange={(s) => setParams(p => ({ ...p, shapeType: s }))}
@@ -222,7 +241,7 @@ export default function App() {
             </div>
           </div>
           {IS_WORDPRESS && (
-            <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
+            <div className="bg-nim-darker rounded-2xl border border-white/10 overflow-hidden" data-tour="finish">
               {/* Only Finish is shown (single material), so the title is "Finish". */}
               <div className="px-5 pt-5 pb-2"><StepLabel n="02" label={t.finish} /></div>
               <div className="px-5 pb-5">
@@ -243,7 +262,7 @@ export default function App() {
 
         {/* Save design / Send to sheet (03) — below the canvas on mobile, under
             the controls on desktop. */}
-        <div className="order-3 lg:col-start-1 lg:row-start-2 bg-nim-darker rounded-2xl border border-white/10 overflow-hidden">
+        <div className="order-3 lg:col-start-1 lg:row-start-2 bg-nim-darker rounded-2xl border border-white/10 overflow-hidden" data-tour="save">
           <div className="px-5 pt-5 pb-2"><StepLabel n={IS_WORDPRESS ? '03' : '02'} label={IS_WORDPRESS ? t.step03wp : t.step03} /></div>
           <div className="px-5 pb-5 flex flex-col gap-3">
             {IS_WORDPRESS

@@ -97,7 +97,7 @@ export function ShapeSelector({ value, onChange, shapeSize, onSizeChange, shapeO
 
       {/* Size slider — only for geometric shapes */}
       {value !== 'contour' && (
-        <div className="space-y-4">
+        <div className="space-y-4" data-tour="size">
         <div className="space-y-2">
           <div className="flex justify-between items-baseline">
             <span className="text-xs font-semibold text-white">{lang === 'sv' ? 'Storlek' : 'Size'}</span>
