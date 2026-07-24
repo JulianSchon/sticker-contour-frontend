@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createInputState, setAxis, press, consumePress } from "./input";
+import { createInputState, setAxis, press, consumePress, setCrouch, setAimUp } from "./input";
 
 describe("input state", () => {
   it("starts neutral", () => {
@@ -31,5 +31,29 @@ describe("input state", () => {
     press(s, "throw");
     expect(consumePress(s, "throw")).toBe(true);
     expect(consumePress(s, "throw")).toBe(false);
+  });
+});
+
+describe("shinobi input additions", () => {
+  it("starts with crouch/aimUp false and magic unqueued", () => {
+    const s = createInputState();
+    expect(s.crouch).toBe(false);
+    expect(s.aimUp).toBe(false);
+    expect(consumePress(s, "magic")).toBe(false);
+  });
+
+  it("setCrouch / setAimUp store held booleans", () => {
+    const s = createInputState();
+    setCrouch(s, true);
+    setAimUp(s, true);
+    expect(s.crouch).toBe(true);
+    expect(s.aimUp).toBe(true);
+  });
+
+  it("magic is edge-triggered like other actions", () => {
+    const s = createInputState();
+    press(s, "magic");
+    expect(consumePress(s, "magic")).toBe(true);
+    expect(consumePress(s, "magic")).toBe(false);
   });
 });
