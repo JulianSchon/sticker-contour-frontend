@@ -11,7 +11,6 @@ export const PLAYER = {
   coyoteTime: 0.1,     // seconds after leaving ground you can still jump
   throwCooldown: 0.35, // seconds between throws
   startHearts: 3,
-  ammoMax: 3,          // sticker shots; pickups replenish, capped here
   groundAccel: 40,     // approach-rate of vx toward target on normal ground (high = snappy)
   slipAccel: 3.5,      // approach-rate of vx toward target on ice/puddle (low = slippery)
 };
@@ -31,10 +30,18 @@ export const ENEMY = {
   grannyShotLifetime: 3.5,    // seconds before the dust ball despawns
   stompBounce: 600,
   janitorPuddleInterval: 2.0, // seconds between puddle drops
+  janitorChaseSpeed: 85,   // rusher advance speed toward player
+  grannyThrowRange: 340,   // stop-and-throw distance
+  ambushSpeed: 110,        // speed of ambush rushers entering from screen edges
 };
 
 export const BOSS = {
   hits: 8,
   chargeSpeed: 520,
   bubbleSpeed: 260,
+};
+
+export const MAGIC = {
+  startCharges: 2,
+  maxCharges: 3,
 };
