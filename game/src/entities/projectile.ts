@@ -4,8 +4,8 @@ import { PROJECTILE } from "../config";
 export interface ProjectileOpts {
   x: number;
   y: number;
-  dir: number;   // -1 or 1
-  speed: number;
+  vx: number;   // px/s horizontal
+  vy: number;   // px/s vertical (negative = up); no gravity applied
 }
 
 export function makeProjectile(k: KAPLAYCtx, opts: ProjectileOpts): GameObj {
@@ -23,7 +23,7 @@ export function makeProjectile(k: KAPLAYCtx, opts: ProjectileOpts): GameObj {
   ]);
 
   proj.onUpdate(() => {
-    proj.move(opts.dir * opts.speed, 0);
+    proj.move(opts.vx, opts.vy);
   });
 
   proj.onCollide("enemy", () => k.destroy(proj));
