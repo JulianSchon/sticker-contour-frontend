@@ -2,6 +2,7 @@ import type { KAPLAYCtx, GameObj } from "kaplay";
 import { RunState, useMagic } from "./progress";
 import { defeatEnemy } from "../entities/enemies";
 import { play } from "./audio";
+import { GAME_WIDTH } from "../config";
 
 /**
  * Cast the "Sticker Storm": if a charge is available, flash the screen, shake,
@@ -22,7 +23,10 @@ export function castStickerStorm(k: KAPLAYCtx, run: RunState): boolean {
   k.shake(12);
   play("stomp");
 
+  const camX = k.camPos().x;
+  const halfW = GAME_WIDTH / 2 + 80; // small margin beyond the visible edge
   k.get("enemy").forEach((e: GameObj) => {
+    if (Math.abs(e.pos.x - camX) > halfW) return; // off-screen: leave it
     if (e.is("boss")) {
       (e as unknown as { takeHit?: () => void }).takeHit?.();
     } else {

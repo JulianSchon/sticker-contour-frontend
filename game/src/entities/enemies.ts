@@ -45,7 +45,7 @@ export function makeMopJanitor(k: KAPLAYCtx, at: SpawnAt, targetX: () => number)
   ]) as unknown as EnemyObj;
 
   e.onUpdate(() => {
-    const d = chaseDir(e.pos.x, targetX(), 8);
+    const d = chaseDir(e.pos.x, targetX(), ENEMY.chaseDeadzone);
     if (d !== 0) {
       e.dir = d;
       e.move(e.dir * ENEMY.janitorChaseSpeed, 0);

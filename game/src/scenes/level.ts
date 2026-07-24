@@ -150,22 +150,22 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
       if (consumePress(input, "magic")) castStickerStorm(k, run);
     });
 
-    // Open the boss gate once every hostage is freed.
+    // Open the boss gate once every hostage is freed (runs once).
+    let gateOpened = false;
     p.onUpdate(() => {
-      if (allHostagesFreed(run)) {
-        const gates = k.get("gate");
-        if (gates.length > 0) {
-          gates.forEach((gate: GameObj) => {
-            k.add([
-              k.text("GATE OPEN", { size: 24 }),
-              k.pos(gate.pos.x, gate.pos.y - TILE_SIZE - 20),
-              k.anchor("center"), k.color(80, 255, 120),
-              k.opacity(1), k.lifespan(1, { fade: 0.5 }), k.z(30),
-            ]);
-            k.destroy(gate);
-          });
-        }
-      }
+      if (gateOpened || !allHostagesFreed(run)) return;
+      const gates = k.get("gate", { recursive: true });
+      if (gates.length === 0) return;
+      gateOpened = true;
+      gates.forEach((gate: GameObj) => {
+        k.add([
+          k.text("GATE OPEN", { size: 24 }),
+          k.pos(gate.pos.x, gate.pos.y - TILE_SIZE - 20),
+          k.anchor("center"), k.color(80, 255, 120),
+          k.opacity(1), k.lifespan(1, { fade: 0.5 }), k.z(30),
+        ]);
+        k.destroy(gate);
+      });
     });
 
     // Safety net: falling out of the level costs a heart and respawns.

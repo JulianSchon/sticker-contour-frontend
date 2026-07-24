@@ -21,7 +21,7 @@ export function makeHostage(k: KAPLAYCtx, at: SpawnAt, onFree: () => void): Game
     "hostage",
     "hostagezone",
   ]);
-  k.add([
+  const label = k.add([
     k.text("?", { size: 30 }),
     k.pos(at.x, at.y - 30),
     k.anchor("center"),
@@ -44,6 +44,7 @@ export function makeHostage(k: KAPLAYCtx, at: SpawnAt, onFree: () => void): Game
       k.z(20),
     ]);
     k.destroy(cage);
+    k.destroy(label);
     onFree();
   };
 

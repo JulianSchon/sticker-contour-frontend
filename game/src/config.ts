@@ -23,16 +23,14 @@ export const PROJECTILE = {
 };
 
 export const ENEMY = {
-  janitorSpeed: 70,
   grannySpeed: 45,
   grannySwipeInterval: 2.4,   // seconds between granny dust-ball shots
   grannyShotSpeed: 230,       // px/s horizontal speed of the dust ball
   grannyShotLifetime: 3.5,    // seconds before the dust ball despawns
   stompBounce: 600,
-  janitorPuddleInterval: 2.0, // seconds between puddle drops
   janitorChaseSpeed: 85,   // rusher advance speed toward player
   grannyThrowRange: 340,   // stop-and-throw distance
-  ambushSpeed: 110,        // speed of ambush rushers entering from screen edges
+  chaseDeadzone: 8,        // px
 };
 
 export const BOSS = {
