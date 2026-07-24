@@ -19,7 +19,7 @@ export async function buildSheetItem(
   const kissParams: ContourParams = { ...params, cutMode: 'kiss', kissOffset: params.perfOffset };
   // No bleed for sheet items — they pack tight by the cut and the sheet backing
   // absorbs miscuts (bleed would re-inflate each item + show a fringe).
-  const pdfBlob = await generatePdfBlob(file, kissParams, false);
+  const pdfBlob = await generatePdfBlob(file, kissParams, false, { widthCm: wCm, heightCm: hCm });
   const baseName = file.name.replace(/\.[^.]+$/, '');
   const pdfFile = new File([pdfBlob], `${baseName}.pdf`, { type: 'application/pdf' });
   const previewUrl = await renderPdfFirstPage(pdfFile).catch(() => undefined);

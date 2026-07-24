@@ -10,9 +10,11 @@ const BASE = buildBase();
 
 const MM_TO_PX = 300 / 25.4; // offsets stored in mm, backend expects px at 300 DPI
 
-function buildFormData(file: File, params: ContourParams): FormData {
+function buildFormData(file: File, params: ContourParams, sizeCm?: { widthCm?: number | null; heightCm?: number | null }): FormData {
   const fd = new FormData();
   fd.append('image', file);
+  if (sizeCm?.widthCm && sizeCm.widthCm > 0) fd.append('widthCm', String(sizeCm.widthCm));
+  if (sizeCm?.heightCm && sizeCm.heightCm > 0) fd.append('heightCm', String(sizeCm.heightCm));
   fd.append('threshold', String(params.threshold));
   fd.append('kissOffset', String(Math.round(params.kissOffset * MM_TO_PX)));
   fd.append('perfOffset', String(Math.round(params.perfOffset * MM_TO_PX)));
@@ -43,8 +45,8 @@ export async function fetchContourPreview(
   return res.json() as Promise<ContourPreviewResponse>;
 }
 
-export async function generatePdfBlob(file: File, params: ContourParams, bleed = true): Promise<Blob> {
-  const fd = buildFormData(file, params);
+export async function generatePdfBlob(file: File, params: ContourParams, bleed = true, sizeCm?: { widthCm?: number | null; heightCm?: number | null }): Promise<Blob> {
+  const fd = buildFormData(file, params, sizeCm);
   // Bleed extends colours past the cut (production only). Single stickers want
   // it; the kiss-cut sheet opts out so items stay trimmed tight.
   if (!bleed) fd.append('bleed', 'false');
@@ -61,10 +63,10 @@ export async function generatePdfBlob(file: File, params: ContourParams, bleed =
   return res.blob();
 }
 
-export async function downloadPdf(file: File, params: ContourParams, filename = 'sticker-cutcontour.pdf'): Promise<void> {
+export async function downloadPdf(file: File, params: ContourParams, filename = 'sticker-cutcontour.pdf', sizeCm?: { widthCm?: number | null; heightCm?: number | null }): Promise<void> {
   const res = await fetch(`${BASE}/generate`, {
     method: 'POST',
-    body: buildFormData(file, params),
+    body: buildFormData(file, params, sizeCm),
   });
 
   if (!res.ok) {

@@ -35,13 +35,13 @@ export function DownloadButton({ file, params, disabled, widthCm, heightCm, mate
     setSuccess(false);
     try {
       if (IS_WORDPRESS) {
-        const pdfBlob = await generatePdfBlob(file, params);
+        const pdfBlob = await generatePdfBlob(file, params, true, { widthCm, heightCm });
         window.parent.postMessage(
           { type: 'nimstick_save_design', pdf: pdfBlob, image: file, filename: buildFilename(), width: widthCm, height: heightCm, cutMode: params.cutMode, material, finish },
           '*'
         );
       } else {
-        await downloadPdf(file, params, buildFilename());
+        await downloadPdf(file, params, buildFilename(), { widthCm, heightCm });
       }
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
