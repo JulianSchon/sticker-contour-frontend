@@ -1,7 +1,7 @@
 import type { LevelDef } from "../types";
 
 export const LEGAL_TILES = new Set<string>([
-  "=", "|", "^", "j", "g", "c", "s", "@", ">", "B", "H", "G", " ",
+  "=", "|", "^", "j", "g", "f", "c", "s", "@", ">", "B", "H", "G", " ",
 ]);
 
 function countChar(map: string[], ch: string): number {

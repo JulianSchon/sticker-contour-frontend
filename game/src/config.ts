@@ -31,6 +31,8 @@ export const ENEMY = {
   janitorChaseSpeed: 85,   // rusher advance speed toward player
   grannyThrowRange: 340,   // stop-and-throw distance
   chaseDeadzone: 8,        // px
+  flyerSpeed: 60,          // horizontal drift speed of the flying drone
+  flyerBob: 20,            // vertical sine-bob amplitude (px)
 };
 
 export const BOSS = {

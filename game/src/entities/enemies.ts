@@ -133,6 +133,59 @@ export function makeBroomGranny(k: KAPLAYCtx, at: SpawnAt, targetX: () => number
   return e;
 }
 
+/**
+ * A flying cleaning-drone: hovers above head height, bobbing on a sine wave and
+ * drifting toward the player. Because it sits above the standing throw line, the
+ * player must aim UP (or jump-throw) to hit it. One hp; hurts on contact (it's
+ * tagged "enemy", so the scene's enemy handler applies damage/stomp).
+ */
+export function makeFlyingEnemy(k: KAPLAYCtx, at: SpawnAt, targetX: () => number): GameObj {
+  const e = k.add([
+    k.circle(18),
+    k.color(150, 160, 180),
+    k.outline(3, k.rgb(30, 30, 40)),
+    k.pos(at.x, at.y),
+    k.anchor("center"),
+    k.area({ scale: 1.15 }),
+    k.z(8),
+    "enemy",
+    "flyer",
+    { dir: -1, hp: 1, t: 0, baseY: at.y },
+  ]) as unknown as GameObj & { dir: number; hp: number; t: number; baseY: number };
+
+  // Spinning rotor on top (sells the "flying").
+  const rotor = e.add([
+    k.rect(52, 5, { radius: 2 }),
+    k.color(70, 70, 90),
+    k.outline(2, k.rgb(20, 20, 30)),
+    k.pos(0, -22),
+    k.anchor("center"),
+    k.rotate(0),
+  ]) as unknown as GameObj & { angle: number };
+  rotor.onUpdate(() => { rotor.angle += 900 * k.dt(); });
+
+  e.add([k.circle(4), k.color(20, 20, 30), k.pos(7, -2), k.anchor("center")]); // eye
+  e.add([ // feather duster it carries
+    k.rect(7, 18, { radius: 3 }),
+    k.color(240, 210, 90),
+    k.outline(2, k.rgb(30, 30, 40)),
+    k.pos(-15, 12),
+    k.anchor("center"),
+    k.rotate(20),
+  ]);
+
+  e.onUpdate(() => {
+    e.t += k.dt();
+    const d = chaseDir(e.pos.x, targetX(), 60);
+    if (d !== 0) e.dir = d;
+    e.pos.x += e.dir * ENEMY.flyerSpeed * k.dt();
+    e.pos.y = e.baseY + Math.sin(e.t * 2) * ENEMY.flyerBob;
+  });
+
+  e.onCollide("projectile", () => defeatEnemy(k, e));
+  return e;
+}
+
 /** Shared defeat burst + cleanup. */
 export function defeatEnemy(k: KAPLAYCtx, e: GameObj): void {
   if (e.exists()) {

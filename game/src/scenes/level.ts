@@ -6,7 +6,7 @@ import {
 } from "../systems/progress";
 import { getLevel } from "../levels";
 import { makePlayer } from "../entities/player";
-import { makeMopJanitor, makeBroomGranny, defeatEnemy } from "../entities/enemies";
+import { makeMopJanitor, makeBroomGranny, makeFlyingEnemy, defeatEnemy } from "../entities/enemies";
 import { makeBoss } from "../entities/boss";
 import { makeStickerCoin } from "../entities/props";
 import { makeHostage } from "../entities/hostage";
@@ -42,6 +42,7 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
         "@": () => [k.anchor("botleft"), "spawnmark"],
         "j": () => [k.anchor("botleft"), "janimark"],
         "g": () => [k.anchor("botleft"), "granmark"],
+        "f": () => [k.anchor("center"), "flymark"],
         "H": () => [k.anchor("bot"), "hostmark"],
         "G": () => [k.rect(TILE_SIZE, TILE_SIZE), k.color(150, 40, 200), k.opacity(0.9), k.outline(3, k.rgb(255, 255, 255)), k.area(), k.body({ isStatic: true }), k.anchor("botleft"), "gate"],
         "B": () => [k.anchor("botleft"), "bossmark"],
@@ -55,6 +56,7 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
     k.get("spawnmark", { recursive: true }).forEach((o: GameObj) => { respawn = { x: o.pos.x, y: o.pos.y - 6 }; });
     k.get("janimark", { recursive: true }).forEach((o: GameObj) => makeMopJanitor(k, at(o), targetX));
     k.get("granmark", { recursive: true }).forEach((o: GameObj) => makeBroomGranny(k, at(o), targetX));
+    k.get("flymark", { recursive: true }).forEach((o: GameObj) => makeFlyingEnemy(k, at(o), targetX));
     k.get("coinmark", { recursive: true }).forEach((o: GameObj) => makeStickerCoin(k, at(o)));
 
     const hostmarks = k.get("hostmark", { recursive: true });
