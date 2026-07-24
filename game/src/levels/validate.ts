@@ -1,7 +1,7 @@
 import type { LevelDef } from "../types";
 
 export const LEGAL_TILES = new Set<string>([
-  "=", "|", "^", "j", "g", "c", "s", "@", ">", "B", " ",
+  "=", "|", "^", "j", "g", "f", "c", "s", "@", ">", "B", "H", "G", " ",
 ]);
 
 function countChar(map: string[], ch: string): number {
@@ -31,12 +31,16 @@ export function validateLevel(level: LevelDef): string[] {
 
   if (level.isBoss) {
     if (countChar(level.map, "B") !== 1) {
-      errors.push("boss level needs exactly one boss spawn 'B'");
+      errors.push("boss mission needs exactly one boss spawn 'B'");
     }
-  } else {
-    if (countChar(level.map, ">") !== 1) {
-      errors.push("non-boss level needs exactly one goal '>'");
+    if (countChar(level.map, "G") < 1) {
+      errors.push("boss mission needs a boss gate 'G'");
     }
+    if (countChar(level.map, "H") < 1) {
+      errors.push("boss mission needs at least one hostage 'H'");
+    }
+  } else if (countChar(level.map, ">") !== 1) {
+    errors.push("non-boss level needs exactly one goal '>'");
   }
 
   return errors;

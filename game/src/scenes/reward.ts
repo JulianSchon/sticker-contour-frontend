@@ -1,7 +1,7 @@
 import type { KAPLAYCtx, GameObj, Vec2 } from "kaplay";
-import { RunState, advanceLevel } from "../systems/progress";
+import { RunState } from "../systems/progress";
 import { onAnyProceed } from "./sceneUtils";
-import { getLevel, LEVELS } from "../levels";
+import { getLevel } from "../levels";
 import { getSticker } from "../data/stickers";
 import { unlock } from "../systems/save";
 import { play } from "../systems/audio";
@@ -18,7 +18,7 @@ export function registerRewardScene(k: KAPLAYCtx, getRun: () => RunState): void 
     play("peel");
 
     k.add([k.rect(k.width(), k.height()), k.color(20, 20, 30)]);
-    k.add([k.text(`Level ${def.id} complete!`, { size: 40 }), k.pos(k.center().x, 140), k.anchor("center")]);
+    k.add([k.text("Mission complete!", { size: 40 }), k.pos(k.center().x, 140), k.anchor("center")]);
     k.add([k.text("You earned a sticker:", { size: 26 }), k.pos(k.center().x, 210), k.anchor("center")]);
 
     const badge = k.add([
@@ -43,15 +43,7 @@ export function registerRewardScene(k: KAPLAYCtx, getRun: () => RunState): void 
       art.scale = k.vec2(v * 0.66);
     }, k.easings.easeOutBack);
 
-    const isLast = run.levelId >= LEVELS.length;
-    const prompt = isLast ? "Press SPACE / tap to finish" : "Press SPACE / tap for next level";
-    k.add([k.text(prompt, { size: 22 }), k.pos(k.center().x, k.height() - 80), k.anchor("center")]);
-
-    const proceed = () => {
-      if (isLast) { k.go("win"); return; }
-      advanceLevel(run);
-      k.go("level");
-    };
-    onAnyProceed(k, proceed);
+    k.add([k.text("Press SPACE / tap to finish", { size: 22 }), k.pos(k.center().x, k.height() - 80), k.anchor("center")]);
+    onAnyProceed(k, () => k.go("win"));
   });
 }

@@ -1,34 +1,34 @@
 import type { KAPLAYCtx, GameObj, Vec2 } from "kaplay";
-import { TILE_SIZE, ENEMY, GAME_HEIGHT, GRAVITY } from "../config";
-import { InputState } from "../systems/input";
-import { RunState, loseHeart, addScore, isGameOver, addAmmo } from "../systems/progress";
+import { TILE_SIZE, ENEMY, GAME_WIDTH, GAME_HEIGHT, GRAVITY } from "../config";
+import { InputState, consumePress } from "../systems/input";
+import {
+  RunState, loseHeart, addScore, isGameOver, addMagic, freeHostage, allHostagesFreed,
+} from "../systems/progress";
 import { getLevel } from "../levels";
 import { makePlayer } from "../entities/player";
-import { makeMopJanitor, makeBroomGranny, defeatEnemy } from "../entities/enemies";
+import { makeMopJanitor, makeBroomGranny, makeFlyingEnemy, defeatEnemy } from "../entities/enemies";
 import { makeBoss } from "../entities/boss";
-import { makeStickerCoin, makeCheckpoint, makeGoal } from "../entities/props";
+import { makeStickerCoin } from "../entities/props";
+import { makeHostage } from "../entities/hostage";
+import { castStickerStorm } from "../systems/magic";
 import { addHud } from "../ui/hud";
 import { play } from "../systems/audio";
 import { GROUND_TILE_COUNT } from "../assets";
 
-// Augment GameObj with physics body fields accessed in this scene.
 type BodyObj = GameObj & { vel: Vec2; jump: (force?: number) => void };
-// Augment GameObj with ScaleComp + ColorComp fields accessed in this scene.
-type ScaleColorObj = GameObj & { scale: Vec2; color: ReturnType<KAPLAYCtx["rgb"]> };
 
 export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () => RunState): void {
   k.scene("level", () => {
     const run = getRun();
     const def = getLevel(run.levelId);
     k.setGravity(GRAVITY);
+    run.hostagesFreed = 0;
 
-    // Fixed full-screen city backdrop (screen-space, behind everything).
     k.add([k.sprite("bg-city"), k.pos(0, 0), k.fixed(), k.z(-100)]);
 
-    // Levels are short; keep the camera Y fixed so the ground sits near the
-    // bottom of the viewport with sky above. Only X follows the player.
     const bottomY = def.map.length * TILE_SIZE;
     const camY = bottomY - GAME_HEIGHT / 2;
+    const levelWidth = Math.max(...def.map.map((r) => r.length)) * TILE_SIZE;
 
     let respawn = { x: 100, y: 100 };
 
@@ -37,127 +37,142 @@ export function registerLevelScene(k: KAPLAYCtx, input: InputState, getRun: () =
       tileHeight: TILE_SIZE,
       tiles: {
         "=": () => [k.sprite(`ground-${Math.floor(Math.random() * GROUND_TILE_COUNT)}`), k.area(), k.body({ isStatic: true }), k.anchor("botleft"), "ground"],
-        "|": () => [k.rect(TILE_SIZE, TILE_SIZE), k.color(70, 55, 40), k.area(), k.body({ isStatic: true }), k.anchor("botleft"), "wall"],
         "^": () => [k.rect(TILE_SIZE, 8), k.color(200, 40, 40), k.opacity(0), k.area(), k.anchor("botleft"), "pit"],
         "s": () => [k.anchor("center"), "coinmark"],
-        "c": () => [k.anchor("botleft"), "checkmark"],
         "@": () => [k.anchor("botleft"), "spawnmark"],
-        ">": () => [k.anchor("botleft"), "goalmark"],
         "j": () => [k.anchor("botleft"), "janimark"],
         "g": () => [k.anchor("botleft"), "granmark"],
+        "f": () => [k.anchor("center"), "flymark"],
+        "H": () => [k.anchor("bot"), "hostmark"],
+        "G": () => [k.rect(TILE_SIZE, TILE_SIZE), k.color(150, 40, 200), k.opacity(0.9), k.outline(3, k.rgb(255, 255, 255)), k.area(), k.body({ isStatic: true }), k.anchor("botleft"), "gate"],
         "B": () => [k.anchor("botleft"), "bossmark"],
       },
     });
 
-    // Tile objects are children of the level GameObj; use recursive get to find them.
+    const player = { obj: null as unknown as GameObj };
+    const targetX = () => (player.obj ? player.obj.pos.x : 0);
+
     const at = (o: GameObj) => ({ x: o.pos.x, y: o.pos.y });
     k.get("spawnmark", { recursive: true }).forEach((o: GameObj) => { respawn = { x: o.pos.x, y: o.pos.y - 6 }; });
-    k.get("janimark", { recursive: true }).forEach((o: GameObj) => makeMopJanitor(k, at(o)));
-    k.get("granmark", { recursive: true }).forEach((o: GameObj) => makeBroomGranny(k, at(o)));
+    k.get("janimark", { recursive: true }).forEach((o: GameObj) => makeMopJanitor(k, at(o), targetX));
+    k.get("granmark", { recursive: true }).forEach((o: GameObj) => makeBroomGranny(k, at(o), targetX));
+    k.get("flymark", { recursive: true }).forEach((o: GameObj) => makeFlyingEnemy(k, at(o), targetX));
     k.get("coinmark", { recursive: true }).forEach((o: GameObj) => makeStickerCoin(k, at(o)));
-    k.get("checkmark", { recursive: true }).forEach((o: GameObj) => makeCheckpoint(k, at(o)));
-    k.get("goalmark", { recursive: true }).forEach((o: GameObj) => makeGoal(k, at(o)));
+
+    const hostmarks = k.get("hostmark", { recursive: true });
+    run.hostagesTotal = hostmarks.length;
+    hostmarks.forEach((o: GameObj) => makeHostage(k, at(o), () => {
+      freeHostage(run);
+      addScore(run, 200);
+      addMagic(run);
+      play("peel");
+    }));
+
     k.get("bossmark", { recursive: true }).forEach((o: GameObj) =>
       makeBoss(k, at(o), () => k.wait(0.6, () => k.go("reward"))),
     );
 
-    const player = makePlayer(k, input, respawn, run).obj;
+    player.obj = makePlayer(k, input, respawn, run).obj;
+    const p = player.obj;
     k.setCamScale(1);
-    player.onUpdate(() => k.setCamPos(player.pos.x, camY));
+    p.onUpdate(() => {
+      const half = GAME_WIDTH / 2;
+      const cx = Math.max(half, Math.min(levelWidth - half, p.pos.x));
+      k.setCamPos(cx, camY);
+    });
 
     addHud(k, run);
 
-    // Anything that falls below this Y has left the level entirely.
     const killY = bottomY + 140;
 
     const hurtPlayer = () => {
-      // player.invuln is a custom field typed on PlayerObj internally.
-      const p = player as unknown as GameObj & { invuln: number };
-      if (p.invuln > 0) return;
-      p.invuln = 1.5;
+      const pl = p as unknown as GameObj & { invuln: number };
+      if (pl.invuln > 0) return;
+      pl.invuln = 1.5;
       loseHeart(run);
       play("hurt");
       k.shake(8);
-      if (isGameOver(run)) {
-        k.wait(0.4, () => k.go("gameover"));
-      }
+      if (isGameOver(run)) k.wait(0.4, () => k.go("gameover"));
     };
 
     const respawnPlayer = () => {
-      const pb = player as unknown as BodyObj;
-      player.pos = k.vec2(respawn.x, respawn.y);
+      const pb = p as unknown as BodyObj;
+      p.pos = k.vec2(respawn.x, respawn.y);
       pb.vel.y = 0;
       pb.vel.x = 0;
-      (player as unknown as { vx: number }).vx = 0;
+      (p as unknown as { vx: number }).vx = 0;
     };
 
-    player.onCollide("enemy", (e: GameObj) => {
-      const pb = player as unknown as BodyObj;
+    p.onCollide("enemy", (e: GameObj) => {
+      const pb = p as unknown as BodyObj;
       const falling = pb.vel.y > 0;
-      const above = player.pos.y < e.pos.y - 10;
+      const above = p.pos.y < e.pos.y - 10;
       if (falling && above) {
         if (e.is("boss")) {
           const b = e as unknown as GameObj & { charging: boolean; takeHit: () => void };
-          if (!b.charging) {
-            b.takeHit();
-            pb.jump(ENEMY.stompBounce);
-            play("stomp");
-          } else {
-            hurtPlayer();
-          }
+          if (!b.charging) { b.takeHit(); pb.jump(ENEMY.stompBounce); play("stomp"); }
+          else hurtPlayer();
         } else {
-          defeatEnemy(k, e);
-          pb.jump(ENEMY.stompBounce);
-          play("stomp");
-          addScore(run, 100);
+          defeatEnemy(k, e); pb.jump(ENEMY.stompBounce); play("stomp"); addScore(run, 100);
         }
       } else {
         hurtPlayer();
       }
     });
 
-    player.onCollide("hazard", (h: GameObj) => {
-      const p = player as unknown as GameObj & { invuln: number };
-      if (p.invuln <= 0) {
-        const pb = player as unknown as BodyObj;
-        const dir = Math.sign(player.pos.x - h.pos.x) || 1;
+    p.onCollide("hazard", (h: GameObj) => {
+      const pl = p as unknown as GameObj & { invuln: number };
+      if (pl.invuln <= 0) {
+        const pb = p as unknown as BodyObj;
+        const dir = Math.sign(p.pos.x - h.pos.x) || 1;
         pb.vel.y = -300;
-        player.pos.x += dir * 24;
-        (player as unknown as { vx: number }).vx = 0;
+        p.pos.x += dir * 24;
+        (p as unknown as { vx: number }).vx = 0;
       }
       hurtPlayer();
-    });
-    player.onCollide("pit", () => {
-      hurtPlayer();
-      if (!isGameOver(run)) respawnPlayer();
-    });
-    player.onCollide("coin", (c: GameObj) => {
-      k.destroy(c);
-      addScore(run, 50);
-      addAmmo(run); // pickups replenish a sticker shot
-      play("coin");
-    });
-    player.onCollide("checkpoint", (cp: GameObj) => {
-      const c = cp as GameObj & { active: boolean };
-      if (!c.active) {
-        c.active = true;
-        (cp as unknown as ScaleColorObj).color = k.rgb(255, 212, 0);
-      }
-      respawn = { x: cp.pos.x, y: cp.pos.y - 6 };
-    });
-    player.onCollide("goal", () => k.go("reward"));
-    player.onCollideUpdate("puddle", () => {
-      (player as unknown as { slip: number }).slip = 0.4;
     });
 
-    // Safety net: if the player falls off the level entirely (e.g. jumping past
-    // the goal or off an edge with no pit below), treat it as a fall — lose a
-    // heart and respawn, or end the run if it was the last heart.
-    player.onUpdate(() => {
-      if (player.pos.y > killY) {
-        hurtPlayer();
-        respawnPlayer();
-      }
+    p.onCollide("pit", () => { hurtPlayer(); if (!isGameOver(run)) respawnPlayer(); });
+
+    p.onCollide("coin", (c: GameObj) => {
+      k.destroy(c); addScore(run, 50); addMagic(run); play("coin");
+    });
+
+    // Touch a caged hostage to free it (throwing at it also works, below).
+    p.onCollide("hostagezone", (cage: GameObj) => cage.trigger("free"));
+
+    // Free hostages by hitting the cage with a thrown sticker.
+    k.onCollide("projectile", "hostage", (proj: GameObj, cage: GameObj) => {
+      cage.trigger("free");
+      k.destroy(proj);
+    });
+
+    // Ninja magic (screen clear) on the magic button.
+    p.onUpdate(() => {
+      if (consumePress(input, "magic")) castStickerStorm(k, run);
+    });
+
+    // Open the boss gate once every hostage is freed (runs once).
+    let gateOpened = false;
+    p.onUpdate(() => {
+      if (gateOpened || !allHostagesFreed(run)) return;
+      const gates = k.get("gate", { recursive: true });
+      if (gates.length === 0) return;
+      gateOpened = true;
+      gates.forEach((gate: GameObj) => {
+        k.add([
+          k.text("GATE OPEN", { size: 24 }),
+          k.pos(gate.pos.x, gate.pos.y - TILE_SIZE - 20),
+          k.anchor("center"), k.color(80, 255, 120),
+          k.opacity(1), k.lifespan(1, { fade: 0.5 }), k.z(30),
+        ]);
+        k.destroy(gate);
+      });
+    });
+
+    // Safety net: falling out of the level costs a heart and respawns.
+    p.onUpdate(() => {
+      if (p.pos.y > killY) { hurtPlayer(); respawnPlayer(); }
     });
   });
 }

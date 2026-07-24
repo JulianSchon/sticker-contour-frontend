@@ -1,8 +1,10 @@
 import type { GameObj, KAPLAYCtx } from "kaplay";
 import { PLAYER, PROJECTILE } from "../config";
 import { InputState, consumePress } from "../systems/input";
-import { RunState, useAmmo } from "../systems/progress";
+import { RunState } from "../systems/progress";
 import { makeProjectile } from "./projectile";
+import { selectThrowMode, throwVector } from "../systems/throwAim";
+import { play } from "../systems/audio";
 
 type PlayerObj = GameObj & {
   facing: number;
@@ -12,6 +14,7 @@ type PlayerObj = GameObj & {
   currentAnim: string;
   vx: number;
   slip: number;
+  crouching: boolean;
 };
 
 export interface PlayerHandle {
@@ -24,7 +27,7 @@ export function makePlayer(
   k: KAPLAYCtx,
   input: InputState,
   spawn: { x: number; y: number },
-  run: RunState,
+  _run: RunState,
 ): PlayerHandle {
   const player = k.add([
     k.sprite("stickan", { anim: "idle" }),
@@ -36,9 +39,7 @@ export function makePlayer(
     k.opacity(1),
     k.z(10),
     "player",
-    // currentAnim starts empty so the state machine's first tick explicitly
-    // play()s an anim (otherwise the sprite cycles through ALL sheet frames).
-    { facing: 1, coyote: 0, throwTimer: 0, invuln: 0, currentAnim: "", vx: 0, slip: 0 },
+    { facing: 1, coyote: 0, throwTimer: 0, invuln: 0, currentAnim: "", vx: 0, slip: 0, crouching: false },
   ]) as unknown as PlayerObj;
 
   const playAnim = (name: string) => {
@@ -52,16 +53,17 @@ export function makePlayer(
   player.onUpdate(() => {
     const dt = k.dt();
 
-    // Momentum-based horizontal movement (slippery on puddles).
-    const targetVX = input.moveX * PLAYER.speed;
+    // Crouch halts horizontal movement (plant-and-throw), like Shinobi.
+    player.crouching = input.crouch && player.isGrounded();
+
+    const targetVX = player.crouching ? 0 : input.moveX * PLAYER.speed;
     const accel = player.slip > 0 ? PLAYER.slipAccel : PLAYER.groundAccel;
     player.vx += (targetVX - player.vx) * Math.min(1, accel * dt);
     player.move(player.vx, 0);
     player.slip = Math.max(0, player.slip - dt);
-    if (input.moveX !== 0) {
+    if (input.moveX !== 0 && !player.crouching) {
       player.facing = input.moveX > 0 ? 1 : -1;
-      // Art is drawn facing LEFT, so mirror when moving right.
-      player.flipX = player.facing > 0;
+      player.flipX = player.facing > 0; // art faces LEFT; mirror when moving right
     }
 
     if (player.isGrounded()) player.coyote = PLAYER.coyoteTime;
@@ -70,28 +72,34 @@ export function makePlayer(
     if (consumePress(input, "jump") && player.coyote > 0) {
       player.jump(PLAYER.jumpForce);
       player.coyote = 0;
+      play("jump");
     }
 
+    // Unlimited aimed throw (mode from held aim inputs + grounded state).
     player.throwTimer = Math.max(0, player.throwTimer - dt);
-    if (consumePress(input, "throw") && player.throwTimer === 0 && useAmmo(run)) {
+    if (consumePress(input, "throw") && player.throwTimer === 0) {
       player.throwTimer = PLAYER.throwCooldown;
+      const mode = selectThrowMode(input, player.isGrounded());
+      const v = throwVector(player.facing, mode, PROJECTILE.speed);
       makeProjectile(k, {
         x: player.pos.x + player.facing * 30,
-        y: player.pos.y - 40,
-        dir: player.facing,
-        speed: PROJECTILE.speed,
+        y: player.pos.y + v.dy,
+        vx: v.vx,
+        vy: v.vy,
       });
+      play("throw");
     }
 
     player.invuln = Math.max(0, player.invuln - dt);
     player.opacity = player.invuln > 0 ? 0.5 : 1;
 
     // Animation state machine (priority: hurt > throw > jump > run > idle).
+    // No crouch frame yet — reuse idle while crouching.
     let anim = "idle";
     if (player.invuln > 1.0) anim = "hurt";
     else if (player.throwTimer > PLAYER.throwCooldown - 0.25) anim = "throw";
     else if (!player.isGrounded()) anim = "jump";
-    else if (input.moveX !== 0) anim = "run";
+    else if (player.vx !== 0 && Math.abs(player.vx) > 5 && !player.crouching) anim = "run";
     playAnim(anim);
   });
 
