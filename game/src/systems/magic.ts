@@ -23,7 +23,7 @@ export function castStickerStorm(k: KAPLAYCtx, run: RunState): boolean {
   k.shake(12);
   play("stomp");
 
-  const camX = k.camPos().x;
+  const camX = k.getCamPos().x;
   const halfW = GAME_WIDTH / 2 + 80; // small margin beyond the visible edge
   k.get("enemy").forEach((e: GameObj) => {
     if (Math.abs(e.pos.x - camX) > halfW) return; // off-screen: leave it
