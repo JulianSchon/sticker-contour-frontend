@@ -14,6 +14,9 @@ import { flattenCanvas } from '../../lib/flatten.ts';
 import { exportDimensions } from '../../lib/printSize.ts';
 import { useLang } from '../../lib/LangContext.ts';
 import { DEFAULT_ARTBOARD, type ArtboardSize, type EditorTool } from '../../types/editor.ts';
+import type { StickerTemplate } from '../../types/template.ts';
+import { TemplateGuide } from './TemplateGuide.tsx';
+import { BgColorControl } from './BgColorControl.tsx';
 
 const MIN_DISPLAY = 280;
 const FRAME_PAD = 48; // p-6 on the frame container (24px each side)
@@ -21,6 +24,10 @@ const FRAME_PAD = 48; // p-6 on the frame container (24px each side)
 interface Props {
   /** Hand the flattened design off to the contour page for cut refinement. */
   onComplete: (file: File, dataUrl: string, widthCm: number, heightCm: number) => void;
+  template?: StickerTemplate;
+  bgColor?: string;
+  onBgColorChange?: (hex: string) => void;
+  onSaveTemplate?: (file: File, dataUrl: string) => Promise<void>;
 }
 
 export interface FlattenedDesign {
@@ -37,11 +44,15 @@ export interface DesignEditorHandle {
   clear: () => void;
 }
 
-export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function DesignEditor({ onComplete }, ref) {
+export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function DesignEditor({ onComplete, template, bgColor, onBgColorChange, onSaveTemplate }, ref) {
   const { t } = useLang();
   const [size, setSize] = useState<ArtboardSize>(DEFAULT_ARTBOARD);
   const [tool, setTool] = useState<EditorTool>('uploads');
   const [isFlattening, setIsFlattening] = useState(false);
+
+  useEffect(() => {
+    if (template) setSize({ wCm: template.widthMm / 10, hCm: template.heightMm / 10 });
+  }, [template]);
 
   // Measure the available frame area and size the canvas to fill it, growing
   // with the window while preserving the artboard aspect ratio.
@@ -127,6 +138,18 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
     }
   };
 
+  const [isSaving, setIsSaving] = useState(false);
+  const handleSaveTemplate = async () => {
+    if (!onSaveTemplate) return;
+    setIsSaving(true);
+    try {
+      const result = await flatten();
+      if (result) await onSaveTemplate(result.file, result.dataUrl);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const canContinue = editor.canvas !== null && editor.layers.length > 0 && !isFlattening;
   const isEmpty = editor.layers.length === 0;
 
@@ -139,6 +162,7 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
         canRedo={editor.canRedo}
         onUndo={editor.undo}
         onRedo={editor.redo}
+        hideSize={!!template}
       />
       <div className="flex flex-col lg:flex-row">
         <div className="order-1">
@@ -206,6 +230,7 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
             widthCm={size.wCm}
             heightCm={size.hCm}
             guides={editor.guides}
+            overlay={template ? <TemplateGuide template={template} width={displayWidth} height={displayHeight} /> : undefined}
           />
           {isEmpty && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -216,15 +241,24 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
       </div>
 
       <div className="flex items-center justify-end gap-3 p-4 border-t border-white/10 flex-wrap">
+        {template && bgColor && onBgColorChange && (
+          <div className="mr-auto"><BgColorControl value={bgColor} onChange={onBgColorChange} label={t.peltorBg} /></div>
+        )}
         <p
           className="text-lg leading-tight text-nim-yellow hidden sm:block"
           style={{ fontFamily: "'Caveat', cursive" }}
         >
           {t.edContinueHint}
         </p>
-        <button onClick={handleContinue} disabled={!canContinue} className="nim-btn-yellow w-full sm:w-auto">
-          {isFlattening ? t.edPreparing : `${t.edContinue} →`}
-        </button>
+        {template ? (
+          <button onClick={handleSaveTemplate} disabled={!canContinue || isSaving} className="nim-btn-yellow w-full sm:w-auto">
+            {isSaving ? t.edPreparing : t.peltorSave}
+          </button>
+        ) : (
+          <button onClick={handleContinue} disabled={!canContinue} className="nim-btn-yellow w-full sm:w-auto">
+            {isFlattening ? t.edPreparing : `${t.edContinue} →`}
+          </button>
+        )}
       </div>
     </div>
   );

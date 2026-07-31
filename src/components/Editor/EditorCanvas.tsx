@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { useLang } from '../../lib/LangContext.ts';
 
 export const RULER = 22; // px gutter for the rulers
@@ -17,11 +17,13 @@ interface Props {
   heightCm: number;
   /** Centering guides to overlay while dragging (canvas h/v center). */
   guides?: { v: boolean; h: boolean };
+  /** Non-interactive overlay drawn over the design canvas (e.g. a template guide). */
+  overlay?: ReactNode;
 }
 
 /** Renders the Fabric design canvas with cm rulers (0.5 cm ticks) along the
  *  top and left edges. Cut-contour refinement happens on the contour page. */
-export function EditorCanvas({ canvasElRef, displayWidth, displayHeight, widthCm, heightCm, guides }: Props) {
+export function EditorCanvas({ canvasElRef, displayWidth, displayHeight, widthCm, heightCm, guides, overlay }: Props) {
   const { theme } = useLang();
   const topRef = useRef<HTMLCanvasElement>(null);
   const leftRef = useRef<HTMLCanvasElement>(null);
@@ -47,6 +49,9 @@ export function EditorCanvas({ canvasElRef, displayWidth, displayHeight, widthCm
       {/* design canvas */}
       <div className="absolute" style={{ left: RULER, top: RULER, width: displayWidth, height: displayHeight }}>
         <canvas ref={canvasElRef} width={displayWidth} height={displayHeight} className="absolute inset-0" />
+        {overlay && (
+          <div className="pointer-events-none absolute inset-0" style={{ zIndex: 15 }}>{overlay}</div>
+        )}
         {/* Centering guides (overlay; non-interactive) */}
         {guides?.v && (
           <div
