@@ -16,6 +16,8 @@ import { buildSheetItem, SHEET_COLORS } from './lib/sheetItem.ts';
 import { UploadStart } from './components/UploadStart.tsx';
 import { ShapeSelector } from './components/ShapeSelector.tsx';
 import { useTour } from './hooks/useTour.ts';
+import { fetchTemplate, generateTemplatePdfBlob } from './lib/api.ts';
+import type { StickerTemplate } from './types/template.ts';
 
 const DEFAULT_PARAMS: ContourParams = {
   threshold: 128,
@@ -31,7 +33,7 @@ const DEFAULT_PARAMS: ContourParams = {
 };
 
 type Tab = 'design' | 'contour' | 'print-planning';
-type WpMode = null | 'single' | 'sheet' | 'design' | 'upload';
+type WpMode = null | 'single' | 'sheet' | 'design' | 'upload' | 'peltor';
 
 const IS_WORDPRESS = import.meta.env.VITE_MODE === 'wordpress';
 
@@ -39,7 +41,12 @@ export default function App() {
   const [tab, setTab] = useState<Tab>('design');
   // WordPress opens on the mode-select start page (single vs sheet); standalone
   // goes straight to the editor (it uses `tab`, not `wpMode`).
-  const [wpMode, setWpMode] = useState<WpMode>(IS_WORDPRESS ? null : 'design');
+  const initialTool = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('tool') : null;
+  const [wpMode, setWpMode] = useState<WpMode>(
+    IS_WORDPRESS ? (initialTool === 'peltor' ? 'peltor' : null) : 'design',
+  );
+  const [template, setTemplate] = useState<StickerTemplate | null>(null);
+  const [bgColor, setBgColor] = useState('#f3e627');
   // Single vs sheet INTENT, chosen on the WP start page. Separate from wpMode
   // (which only routes views): flow === 'single' hides ALL sheet/ARK UI.
   const [flow, setFlow] = useState<'single' | 'sheet' | 'upload'>('single');
@@ -67,6 +74,12 @@ export default function App() {
     try { localStorage.setItem('cutz-theme', theme); } catch { /* ignore */ }
   }, [theme]);
 
+  useEffect(() => {
+    if (wpMode === 'peltor' && !template) {
+      fetchTemplate('peltor').then(setTemplate).catch(() => setTemplate(null));
+    }
+  }, [wpMode, template]);
+
   const { data: contour, isLoading, error } = useContour(file, params);
 
   const cutActive = IS_WORDPRESS ? wpMode === 'single' : tab === 'contour';
@@ -85,6 +98,22 @@ export default function App() {
     setStickerHeightCm(heightCm);
     if (IS_WORDPRESS) setWpMode('single');
     else setTab('contour');
+  };
+
+  const handleSaveTemplate = async (file: File, _dataUrl: string): Promise<void> => {
+    const pdf = await generateTemplatePdfBlob(file, 'peltor', bgColor);
+    if (IS_WORDPRESS) {
+      const wCm = template ? template.widthMm / 10 : 0;
+      const hCm = template ? template.heightMm / 10 : 0;
+      window.parent.postMessage(
+        { type: 'nimstick_save_design', pdf, image: file, filename: `peltor-${bgColor.replace('#', '')}.pdf`, width: wCm, height: hCm, bgColor },
+        '*',
+      );
+    } else {
+      const url = URL.createObjectURL(pdf);
+      const a = document.createElement('a'); a.href = url; a.download = 'peltor.pdf';
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
   };
 
   const designRef = useRef<DesignEditorHandle>(null);
@@ -132,7 +161,7 @@ export default function App() {
 
   // ── Header tagline ──────────────────────────────────────────────────────────
   const headerTagline = IS_WORDPRESS
-    ? (wpMode === 'single' ? t.taglineContour : wpMode === 'sheet' ? t.taglinePrint : wpMode === 'design' ? t.modeDesign : wpMode === 'upload' ? t.modeUpload : 'CUTZ')
+    ? (wpMode === 'single' ? t.taglineContour : wpMode === 'sheet' ? t.taglinePrint : wpMode === 'design' ? t.modeDesign : wpMode === 'upload' ? t.modeUpload : wpMode === 'peltor' ? (template?.name ?? 'Peltor') : 'CUTZ')
     : (tab === 'print-planning' ? t.taglinePrint : tab === 'contour' ? t.taglineContour : t.modeDesign);
 
   // Shared preview column for the cut dialog.
@@ -288,7 +317,7 @@ export default function App() {
     </div>
   );
 
-  const designActive = IS_WORDPRESS ? wpMode === 'design' : tab === 'design';
+  const designActive = IS_WORDPRESS ? (wpMode === 'design' || wpMode === 'peltor') : tab === 'design';
 
   return (
     <LangContext.Provider value={{ lang, t, setLang, theme, setTheme }}>
@@ -441,7 +470,14 @@ export default function App() {
         {/* Design editor — always mounted (hidden when inactive) so the design
             persists when you go to the cut dialog and back to keep editing. */}
         <div className={designActive ? '' : 'hidden'}>
-          <DesignEditor ref={designRef} onComplete={handleDesignComplete} />
+          <DesignEditor
+            ref={designRef}
+            onComplete={handleDesignComplete}
+            template={wpMode === 'peltor' && template ? template : undefined}
+            bgColor={bgColor}
+            onBgColorChange={setBgColor}
+            onSaveTemplate={handleSaveTemplate}
+          />
         </div>
 
         {/* ── WordPress: mode selection landing (reached via back arrow) ── */}
