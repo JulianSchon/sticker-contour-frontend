@@ -46,7 +46,7 @@ export default function App() {
     IS_WORDPRESS ? (initialTool === 'peltor' ? 'peltor' : null) : 'design',
   );
   const [template, setTemplate] = useState<StickerTemplate | null>(null);
-  const [bgColor, setBgColor] = useState('#f3e627');
+  const [bgColor, setBgColor] = useState('#000000');
   // Single vs sheet INTENT, chosen on the WP start page. Separate from wpMode
   // (which only routes views): flow === 'single' hides ALL sheet/ARK UI.
   const [flow, setFlow] = useState<'single' | 'sheet' | 'upload'>('single');
