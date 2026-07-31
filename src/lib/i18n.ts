@@ -168,6 +168,9 @@ export const translations = {
     tourPrev: 'Back',
     tourDone: 'Done',
     tourReplay: 'Show guide',
+    peltorTitle: 'Design your own Peltor',
+    peltorBg: 'Sheet colour',
+    peltorSave: 'Save design',
   },
   sv: {
     // Header
@@ -336,6 +339,9 @@ export const translations = {
     tourPrev: 'Bak',
     tourDone: 'Klar',
     tourReplay: 'Visa guide',
+    peltorTitle: 'Designa egen Peltor',
+    peltorBg: 'Arkfärg',
+    peltorSave: 'Spara design',
   },
 } satisfies Record<Lang, Record<string, string>>;
 

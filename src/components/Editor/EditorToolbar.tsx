@@ -9,9 +9,11 @@ interface Props {
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
+  /** Hide the artboard-size selector (e.g. in template mode, where size is locked). */
+  hideSize?: boolean;
 }
 
-export function EditorToolbar({ size, onSizeChange, canUndo, canRedo, onUndo, onRedo }: Props) {
+export function EditorToolbar({ size, onSizeChange, canUndo, canRedo, onUndo, onRedo, hideSize }: Props) {
   const { t, lang } = useLang();
   const btn = 'w-8 h-8 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center';
   return (
@@ -41,21 +43,23 @@ export function EditorToolbar({ size, onSizeChange, canUndo, canRedo, onUndo, on
           <span className="text-[10px] font-bold uppercase tracking-widest text-nim-yellow/70">{t.edSize}</span>
           <span className="text-sm font-black text-white tabular-nums">{size.wCm} × {size.hCm} cm</span>
         </div>
-        <select
-          value={`${size.wCm}x${size.hCm}`}
-          onChange={e => {
-            const [w, h] = e.target.value.split('x').map(Number);
-            onSizeChange({ wCm: w, hCm: h });
-          }}
-          aria-label={t.edSize}
-          className="bg-nim-black border border-nim-yellow/40 rounded-lg px-2.5 py-1.5 text-sm font-bold text-white hover:border-nim-yellow/70 focus:outline-none focus:border-nim-yellow cursor-pointer"
-        >
-          {SIZE_PRESETS.map(p => (
-            <option key={`${p.wCm}x${p.hCm}`} value={`${p.wCm}x${p.hCm}`}>
-              {lang === 'sv' ? p.labelSv : p.labelEn}
-            </option>
-          ))}
-        </select>
+        {!hideSize && (
+          <select
+            value={`${size.wCm}x${size.hCm}`}
+            onChange={e => {
+              const [w, h] = e.target.value.split('x').map(Number);
+              onSizeChange({ wCm: w, hCm: h });
+            }}
+            aria-label={t.edSize}
+            className="bg-nim-black border border-nim-yellow/40 rounded-lg px-2.5 py-1.5 text-sm font-bold text-white hover:border-nim-yellow/70 focus:outline-none focus:border-nim-yellow cursor-pointer"
+          >
+            {SIZE_PRESETS.map(p => (
+              <option key={`${p.wCm}x${p.hCm}`} value={`${p.wCm}x${p.hCm}`}>
+                {lang === 'sv' ? p.labelSv : p.labelEn}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
       </div>
     </div>

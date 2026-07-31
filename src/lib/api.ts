@@ -1,5 +1,6 @@
 import type { ContourParams, ContourPreviewResponse } from '../types/contour.ts';
 import type { ExportCopy, RegmarkType } from '../types/printPlanning.ts';
+import type { StickerTemplate } from '../types/template.ts';
 
 function buildBase(): string {
   let url = import.meta.env.VITE_API_URL ?? '';
@@ -151,6 +152,29 @@ export async function exportPrintLayoutBlob(
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error((err as { error?: string }).error ?? 'Export failed');
+  }
+  return res.blob();
+}
+
+export async function fetchTemplate(id: string): Promise<StickerTemplate> {
+  const res = await fetch(`${BASE}/templates/${encodeURIComponent(id)}`);
+  if (!res.ok) throw new Error(`Template ${id} not found`);
+  return res.json() as Promise<StickerTemplate>;
+}
+
+export async function generateTemplatePdfBlob(
+  design: File | Blob,
+  templateId: string,
+  bgColor: string,
+): Promise<Blob> {
+  const fd = new FormData();
+  fd.append('image', design, 'design.png');
+  fd.append('templateId', templateId);
+  fd.append('bgColor', bgColor);
+  const res = await fetch(`${BASE}/template-generate`, { method: 'POST', body: fd });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error((err as { error?: string }).error ?? 'Template PDF generation failed');
   }
   return res.blob();
 }
