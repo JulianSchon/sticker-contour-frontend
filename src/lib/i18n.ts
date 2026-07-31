@@ -169,7 +169,7 @@ export const translations = {
     tourDone: 'Done',
     tourReplay: 'Show guide',
     peltorTitle: 'Design your own Peltor',
-    peltorBg: 'Sheet colour',
+    peltorBg: 'Background colour',
     peltorSave: 'Save design',
   },
   sv: {
@@ -340,7 +340,7 @@ export const translations = {
     tourDone: 'Klar',
     tourReplay: 'Visa guide',
     peltorTitle: 'Designa egen Peltor',
-    peltorBg: 'Arkfärg',
+    peltorBg: 'Bakgrundsfärg',
     peltorSave: 'Spara design',
   },
 } satisfies Record<Lang, Record<string, string>>;

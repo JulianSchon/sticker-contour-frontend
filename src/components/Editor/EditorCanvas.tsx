@@ -19,11 +19,14 @@ interface Props {
   guides?: { v: boolean; h: boolean };
   /** Non-interactive overlay drawn over the design canvas (e.g. a template guide). */
   overlay?: ReactNode;
+  /** Non-interactive layer drawn UNDER the (transparent) design canvas (e.g. a
+   *  template's coloured shield fill), so the artwork appears to sit on it. */
+  underlay?: ReactNode;
 }
 
 /** Renders the Fabric design canvas with cm rulers (0.5 cm ticks) along the
  *  top and left edges. Cut-contour refinement happens on the contour page. */
-export function EditorCanvas({ canvasElRef, displayWidth, displayHeight, widthCm, heightCm, guides, overlay }: Props) {
+export function EditorCanvas({ canvasElRef, displayWidth, displayHeight, widthCm, heightCm, guides, overlay, underlay }: Props) {
   const { theme } = useLang();
   const topRef = useRef<HTMLCanvasElement>(null);
   const leftRef = useRef<HTMLCanvasElement>(null);
@@ -46,8 +49,17 @@ export function EditorCanvas({ canvasElRef, displayWidth, displayHeight, widthCm
       <canvas ref={topRef} className="absolute top-0" style={{ left: RULER }} />
       {/* left ruler */}
       <canvas ref={leftRef} className="absolute left-0" style={{ top: RULER }} />
+      {/* Under-layer (e.g. template colour fill) — a SEPARATE div outside the
+          Fabric-managed canvas div, since Fabric restructures its own container and
+          React can't insert siblings before the <canvas>. Sits behind the design. */}
+      {underlay && (
+        <div
+          className="pointer-events-none absolute"
+          style={{ left: RULER, top: RULER, width: displayWidth, height: displayHeight, zIndex: 0 }}
+        >{underlay}</div>
+      )}
       {/* design canvas */}
-      <div className="absolute" style={{ left: RULER, top: RULER, width: displayWidth, height: displayHeight }}>
+      <div className="absolute" style={{ left: RULER, top: RULER, width: displayWidth, height: displayHeight, zIndex: 1 }}>
         <canvas ref={canvasElRef} width={displayWidth} height={displayHeight} className="absolute inset-0" />
         {overlay && (
           <div className="pointer-events-none absolute inset-0" style={{ zIndex: 15 }}>{overlay}</div>

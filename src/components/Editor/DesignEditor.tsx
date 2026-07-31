@@ -16,6 +16,7 @@ import { useLang } from '../../lib/LangContext.ts';
 import { DEFAULT_ARTBOARD, type ArtboardSize, type EditorTool } from '../../types/editor.ts';
 import type { StickerTemplate } from '../../types/template.ts';
 import { TemplateGuide } from './TemplateGuide.tsx';
+import { TemplateFill } from './TemplateFill.tsx';
 import { BgColorControl } from './BgColorControl.tsx';
 
 const MIN_DISPLAY = 280;
@@ -231,6 +232,7 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
             heightCm={size.hCm}
             guides={editor.guides}
             overlay={template ? <TemplateGuide template={template} width={displayWidth} height={displayHeight} /> : undefined}
+            underlay={template && bgColor ? <TemplateFill template={template} bgColor={bgColor} width={displayWidth} height={displayHeight} /> : undefined}
           />
           {isEmpty && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
