@@ -18,6 +18,9 @@ import type { StickerTemplate } from '../../types/template.ts';
 import { TemplateGuide } from './TemplateGuide.tsx';
 import { TemplateFill } from './TemplateFill.tsx';
 import { BgColorControl } from './BgColorControl.tsx';
+import { ShieldMirror } from './ShieldMirror.tsx';
+import { shieldBBoxes } from '../../lib/shieldBBox.ts';
+import { replicateLeftToRight } from '../../lib/shieldReplicate.ts';
 
 const MIN_DISPLAY = 280;
 const FRAME_PAD = 48; // p-6 on the frame container (24px each side)
@@ -29,6 +32,8 @@ interface Props {
   bgColor?: string;
   onBgColorChange?: (hex: string) => void;
   onSaveTemplate?: (file: File, dataUrl: string) => Promise<void>;
+  pairMode?: 'identical' | 'different';
+  onPairModeChange?: (m: 'identical' | 'different') => void;
 }
 
 export interface FlattenedDesign {
@@ -45,7 +50,7 @@ export interface DesignEditorHandle {
   clear: () => void;
 }
 
-export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function DesignEditor({ onComplete, template, bgColor, onBgColorChange, onSaveTemplate }, ref) {
+export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function DesignEditor({ onComplete, template, bgColor, onBgColorChange, onSaveTemplate, pairMode, onPairModeChange }, ref) {
   const { t } = useLang();
   const [size, setSize] = useState<ArtboardSize>(DEFAULT_ARTBOARD);
   const [tool, setTool] = useState<EditorTool>('uploads');
@@ -54,6 +59,8 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
   useEffect(() => {
     if (template) setSize({ wCm: template.widthMm / 10, hCm: template.heightMm / 10 });
   }, [template]);
+
+  const shieldBoxes = useMemo(() => (template ? shieldBBoxes(template) : []), [template]);
 
   // Measure the available frame area and size the canvas to fill it, growing
   // with the window while preserving the artboard aspect ratio.
@@ -145,7 +152,14 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
     setIsSaving(true);
     try {
       const result = await flatten();
-      if (result) await onSaveTemplate(result.file, result.dataUrl);
+      if (!result) return;
+      let file = result.file;
+      let dataUrl = result.dataUrl;
+      if (template && pairMode === 'identical' && shieldBoxes.length === 2) {
+        const rep = await replicateLeftToRight(result.dataUrl, template.widthMm, shieldBoxes[0], shieldBoxes[1]);
+        file = rep.file; dataUrl = rep.dataUrl;
+      }
+      await onSaveTemplate(file, dataUrl);
     } finally {
       setIsSaving(false);
     }
@@ -233,6 +247,9 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
             guides={editor.guides}
             overlay={template ? <TemplateGuide template={template} width={displayWidth} height={displayHeight} /> : undefined}
             underlay={template && bgColor ? <TemplateFill template={template} bgColor={bgColor} width={displayWidth} height={displayHeight} /> : undefined}
+            midlay={template && pairMode === 'identical' && shieldBoxes.length === 2
+              ? <ShieldMirror fabricCanvas={editor.canvas} widthMm={template.widthMm} leftMm={shieldBoxes[0]} rightMm={shieldBoxes[1]} displayWidth={displayWidth} displayHeight={displayHeight} />
+              : undefined}
           />
           {isEmpty && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -243,8 +260,22 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
       </div>
 
       <div className="flex items-center justify-end gap-3 p-4 border-t border-white/10 flex-wrap">
-        {template && bgColor && onBgColorChange && (
-          <div className="mr-auto"><BgColorControl value={bgColor} onChange={onBgColorChange} label={t.peltorBg} /></div>
+        {template && (
+          <div className="mr-auto flex items-center gap-3 flex-wrap">
+            {pairMode && onPairModeChange && (
+              <div className="flex rounded-lg overflow-hidden border border-white/15 text-xs font-bold">
+                {(['identical', 'different'] as const).map((m) => (
+                  <button key={m} onClick={() => onPairModeChange(m)}
+                    className={`px-3 py-1.5 transition ${pairMode === m ? 'bg-nim-yellow text-black' : 'text-white/60 hover:text-white'}`}>
+                    {m === 'identical' ? t.peltorPairIdentical : t.peltorPairDifferent}
+                  </button>
+                ))}
+              </div>
+            )}
+            {bgColor && onBgColorChange && (
+              <BgColorControl value={bgColor} onChange={onBgColorChange} label={t.peltorBg} />
+            )}
+          </div>
         )}
         <p
           className="text-lg leading-tight text-nim-yellow hidden sm:block"
