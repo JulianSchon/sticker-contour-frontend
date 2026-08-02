@@ -22,11 +22,13 @@ interface Props {
   /** Non-interactive layer drawn UNDER the (transparent) design canvas (e.g. a
    *  template's coloured shield fill), so the artwork appears to sit on it. */
   underlay?: ReactNode;
+  /** Layer above the design canvas but below the guide overlay (e.g. the live shield copy). */
+  midlay?: ReactNode;
 }
 
 /** Renders the Fabric design canvas with cm rulers (0.5 cm ticks) along the
  *  top and left edges. Cut-contour refinement happens on the contour page. */
-export function EditorCanvas({ canvasElRef, displayWidth, displayHeight, widthCm, heightCm, guides, overlay, underlay }: Props) {
+export function EditorCanvas({ canvasElRef, displayWidth, displayHeight, widthCm, heightCm, guides, overlay, underlay, midlay }: Props) {
   const { theme } = useLang();
   const topRef = useRef<HTMLCanvasElement>(null);
   const leftRef = useRef<HTMLCanvasElement>(null);
@@ -61,6 +63,7 @@ export function EditorCanvas({ canvasElRef, displayWidth, displayHeight, widthCm
       {/* design canvas */}
       <div className="absolute" style={{ left: RULER, top: RULER, width: displayWidth, height: displayHeight, zIndex: 1 }}>
         <canvas ref={canvasElRef} width={displayWidth} height={displayHeight} className="absolute inset-0" />
+        {midlay}
         {overlay && (
           <div className="pointer-events-none absolute inset-0" style={{ zIndex: 15 }}>{overlay}</div>
         )}

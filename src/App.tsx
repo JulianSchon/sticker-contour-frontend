@@ -47,6 +47,7 @@ export default function App() {
   );
   const [template, setTemplate] = useState<StickerTemplate | null>(null);
   const [bgColor, setBgColor] = useState('#000000');
+  const [pairMode, setPairMode] = useState<'identical' | 'different'>('identical');
   // Single vs sheet INTENT, chosen on the WP start page. Separate from wpMode
   // (which only routes views): flow === 'single' hides ALL sheet/ARK UI.
   const [flow, setFlow] = useState<'single' | 'sheet' | 'upload'>('single');
@@ -477,6 +478,8 @@ export default function App() {
             bgColor={bgColor}
             onBgColorChange={setBgColor}
             onSaveTemplate={handleSaveTemplate}
+            pairMode={wpMode === 'peltor' ? pairMode : undefined}
+            onPairModeChange={setPairMode}
           />
         </div>
 

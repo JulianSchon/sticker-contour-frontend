@@ -171,6 +171,8 @@ export const translations = {
     peltorTitle: 'Design your own Peltor',
     peltorBg: 'Background colour',
     peltorSave: 'Save design',
+    peltorPairIdentical: '2 identical',
+    peltorPairDifferent: '2 different',
   },
   sv: {
     // Header
@@ -342,6 +344,8 @@ export const translations = {
     peltorTitle: 'Designa egen Peltor',
     peltorBg: 'Bakgrundsfärg',
     peltorSave: 'Spara design',
+    peltorPairIdentical: '2 identiska',
+    peltorPairDifferent: '2 olika',
   },
 } satisfies Record<Lang, Record<string, string>>;
 
