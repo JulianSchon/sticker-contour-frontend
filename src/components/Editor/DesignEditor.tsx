@@ -256,25 +256,27 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
               <p className="text-sm text-white/25 text-center max-w-xs px-6">{t.edEmptyCanvas}</p>
             </div>
           )}
-        </div>
-      </div>
-
-      <div className="flex items-center justify-end gap-3 p-4 border-t border-white/10 flex-wrap">
-        {template && (
-          <div className="mr-auto flex items-center gap-3 flex-wrap">
-            {pairMode && onPairModeChange && (
-              <div className="flex rounded-lg overflow-hidden border border-white/15 text-xs font-bold">
+          {/* Pair-mode toggle — floats at the top-centre of the artboard, the first
+              choice before designing (identical = design one shield, mirror the other). */}
+          {template && pairMode && onPairModeChange && (
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30">
+              <div className="flex rounded-full overflow-hidden border border-white/20 bg-black/80 backdrop-blur shadow-lg text-xs font-bold">
                 {(['identical', 'different'] as const).map((m) => (
                   <button key={m} onClick={() => onPairModeChange(m)}
-                    className={`px-3 py-1.5 transition ${pairMode === m ? 'bg-nim-yellow text-black' : 'text-white/60 hover:text-white'}`}>
+                    className={`px-4 py-1.5 transition ${pairMode === m ? 'bg-nim-yellow text-black' : 'text-white/70 hover:text-white'}`}>
                     {m === 'identical' ? t.peltorPairIdentical : t.peltorPairDifferent}
                   </button>
                 ))}
               </div>
-            )}
-            {bgColor && onBgColorChange && (
-              <BgColorControl value={bgColor} onChange={onBgColorChange} label={t.peltorBg} />
-            )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center justify-end gap-3 p-4 border-t border-white/10 flex-wrap">
+        {template && bgColor && onBgColorChange && (
+          <div className="mr-auto">
+            <BgColorControl value={bgColor} onChange={onBgColorChange} label={t.peltorBg} />
           </div>
         )}
         <p
