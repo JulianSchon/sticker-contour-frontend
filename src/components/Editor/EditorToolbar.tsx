@@ -2,6 +2,12 @@ import type { ArtboardSize } from '../../types/editor.ts';
 import { SIZE_PRESETS } from '../../lib/printSize.ts';
 import { useLang } from '../../lib/LangContext.ts';
 
+/** Format a cm value for display: round to ≤2 decimals and strip trailing zeros
+ *  (e.g. 7.034000000000001 → "7.03", 8.39 → "8.39", 5 → "5"). */
+function fmtCm(n: number): string {
+  return String(Number(n.toFixed(2)));
+}
+
 interface Props {
   size: ArtboardSize;
   onSizeChange: (size: ArtboardSize) => void;
@@ -41,7 +47,7 @@ export function EditorToolbar({ size, onSizeChange, canUndo, canRedo, onUndo, on
         </svg>
         <div className="flex flex-col leading-none">
           <span className="text-[10px] font-bold uppercase tracking-widest text-nim-yellow/70">{t.edSize}</span>
-          <span className="text-sm font-black text-white tabular-nums">{size.wCm} × {size.hCm} cm</span>
+          <span className="text-sm font-black text-white tabular-nums">{fmtCm(size.wCm)} × {fmtCm(size.hCm)} cm</span>
         </div>
         {!hideSize && (
           <select
