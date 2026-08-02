@@ -29,8 +29,13 @@ export function ShieldMirror({ fabricCanvas, widthMm, leftMm, rightMm, displayWi
     const paint = () => {
       const src = fabricCanvas.lowerCanvasEl;
       if (!src) return;
+      // Fabric renders into a device-pixel backing store (lowerCanvasEl.width =
+      // displayWidth × retina/devicePixelRatio), but L/R are in CSS/display px.
+      // Scale the SOURCE rect by the backing-store ratio so the copy matches the
+      // original's position and size (otherwise it's offset and scaled by DPR).
+      const s = out.width > 0 ? src.width / out.width : 1;
       ctx.clearRect(0, 0, out.width, out.height);
-      ctx.drawImage(src, L.x, L.y, L.w, L.h, R.x, R.y, R.w, R.h);
+      ctx.drawImage(src, L.x * s, L.y * s, L.w * s, L.h * s, R.x, R.y, R.w, R.h);
     };
     paint();
     fabricCanvas.on('after:render', paint);
