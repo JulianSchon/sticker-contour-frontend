@@ -14,6 +14,8 @@ export const translations = {
     modeSheetDesc: 'Build your own sheet of stickers you design or upload yourself! A4 or A5 format.',
     modeUpload: 'Upload your own image',
     modeUploadDesc: 'Upload your own image, pick a cutline and size, and add it to the cart.',
+    modePeltor: 'Custom Peltor design',
+    modePeltorDesc: 'Design a matching pair of decals for your Peltor ear defenders.',
 
     // Material & Finish
     stepMaterial: 'Material & Finish',
@@ -187,6 +189,8 @@ export const translations = {
     modeSheetDesc: 'Bygg ditt egna ark med klistermärken som du designar eller laddar upp själv! Format A4 eller A5.',
     modeUpload: 'Ladda upp egen bild',
     modeUploadDesc: 'Ladda upp din egen bild, välj skärlinje och storlek och lägg i varukorgen.',
+    modePeltor: 'Egen Peltor-design',
+    modePeltorDesc: 'Designa ett matchande par dekaler till dina Peltor-hörselkåpor.',
 
     // Material & Finish
     stepMaterial: 'Material & Finish',
