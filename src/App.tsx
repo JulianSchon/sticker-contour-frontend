@@ -37,6 +37,12 @@ type WpMode = null | 'single' | 'sheet' | 'design' | 'upload' | 'peltor';
 
 const IS_WORDPRESS = import.meta.env.VITE_MODE === 'wordpress';
 
+// The "Custom Peltor design" shortcut links to the dedicated Peltor product page
+// (its own product/price; its iframe boots straight into the Peltor editor via
+// ?tool=peltor). Navigating there — rather than switching mode inside this iframe —
+// keeps the design attached to the correct WooCommerce product & cart.
+const PELTOR_PRODUCT_URL = 'https://nimstick.se/product/egen-design-peltor/';
+
 export default function App() {
   const [tab, setTab] = useState<Tab>('design');
   // WordPress opens on the mode-select start page (single vs sheet); standalone
@@ -489,7 +495,7 @@ export default function App() {
             <div className="text-center">
               <h1 className="text-2xl font-black text-white uppercase tracking-widest">{t.modeSelectTitle}</h1>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 w-full max-w-4xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full max-w-6xl">
               {/* Upload your own image (first / leftmost) */}
               <button
                 onClick={() => { setFlow('upload'); setWpMode('upload'); }}
@@ -529,6 +535,28 @@ export default function App() {
                 </div>
                 <div className="w-full flex justify-end">
                   <svg className="w-5 h-5 text-white/20 group-hover:text-nim-yellow transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </button>
+
+              {/* Custom Peltor design — links to the dedicated Peltor product page */}
+              <button
+                onClick={() => { (window.top ?? window).location.href = PELTOR_PRODUCT_URL; }}
+                className="group flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-white/10 bg-nim-darker hover:border-cyan-400 hover:bg-cyan-500/5 transition-all text-left"
+              >
+                <div className="w-16 h-16 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors">
+                  <svg className="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 15v-3a8 8 0 0116 0v3" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 15a2 2 0 012-2h1v6H6a2 2 0 01-2-2v-2zM20 15a2 2 0 00-2-2h-1v6h1a2 2 0 002-2v-2z" />
+                  </svg>
+                </div>
+                <div className="w-full">
+                  <p className="text-base font-black text-white uppercase tracking-wider group-hover:text-cyan-400 transition-colors">{t.modePeltor}</p>
+                  <p className="text-xs text-white/40 mt-1 leading-relaxed">{t.modePeltorDesc}</p>
+                </div>
+                <div className="w-full flex justify-end">
+                  <svg className="w-5 h-5 text-white/20 group-hover:text-cyan-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
