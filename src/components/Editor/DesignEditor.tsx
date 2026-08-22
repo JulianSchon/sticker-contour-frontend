@@ -27,6 +27,13 @@ import { replicateLeftToRight } from '../../lib/shieldReplicate.ts';
 const MIN_DISPLAY = 280;
 const FRAME_PAD = 48; // p-6 on the frame container (24px each side)
 
+// Inside the WordPress iframe the parent resizes the iframe to our document
+// height, so any vh-based sizing feeds back on itself (70vh of the iframe →
+// taller document → taller iframe → …, converging at ~3.3× the real content).
+// Use a fixed frame height there; vh is only safe in the standalone app.
+const IS_WORDPRESS = import.meta.env.VITE_MODE === 'wordpress';
+const FRAME_HEIGHT_LG = IS_WORDPRESS ? 'lg:h-[620px]' : 'lg:h-[70vh]';
+
 interface Props {
   /** Hand the flattened design off to the contour page for cut refinement. */
   onComplete: (file: File, dataUrl: string, widthCm: number, heightCm: number) => void;
@@ -243,7 +250,7 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
 
         <div
           ref={frameRef}
-          className="order-2 lg:order-3 relative w-full lg:w-auto lg:flex-1 flex items-center justify-center bg-[#0a0a0a] p-3 lg:p-6 h-[420px] min-h-[300px] lg:h-[70vh] lg:min-h-[420px] overflow-hidden"
+          className={`order-2 lg:order-3 relative w-full lg:w-auto lg:flex-1 flex items-center justify-center bg-[#0a0a0a] p-3 lg:p-6 h-[420px] min-h-[300px] ${FRAME_HEIGHT_LG} lg:min-h-[420px] overflow-hidden`}
         >
           <EditorCanvas
             canvasElRef={editor.canvasElRef}
