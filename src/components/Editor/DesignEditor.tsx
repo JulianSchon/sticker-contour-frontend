@@ -18,6 +18,7 @@ import type { StickerTemplate, TemplateSizeMm } from '../../types/template.ts';
 import { TemplateGuide } from './TemplateGuide.tsx';
 import { TemplateFill } from './TemplateFill.tsx';
 import { TemplateSizePicker } from './TemplateSizePicker.tsx';
+import { TemplateMockup } from './TemplateMockup.tsx';
 import { BgColorControl } from './BgColorControl.tsx';
 import { ShieldMirror } from './ShieldMirror.tsx';
 import { shieldBBoxes } from '../../lib/shieldBBox.ts';
@@ -289,6 +290,14 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
           )}
         </div>
       </div>
+
+      {/* Live product mockup — parametric single-shield templates only.
+          Gated on bgColor like TemplateFill so editor and mockup never diverge. */}
+      {template && bgColor && !isEmpty && (
+        <div className="border-t border-white/10 p-4 flex justify-center">
+          <TemplateMockup fabricCanvas={editor.canvas} template={template} bgColor={bgColor} />
+        </div>
+      )}
 
       <div className="flex items-center justify-end gap-3 p-4 border-t border-white/10 flex-wrap">
         {template && bgColor && onBgColorChange && (
