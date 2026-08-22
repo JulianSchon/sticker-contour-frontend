@@ -8,18 +8,18 @@ export function orderLeftToRight(boxes: BBox[]): BBox[] {
 }
 
 /**
- * Bounding box (in the template's mm space) of each shield's clip path, ordered
- * left-to-right. Uses the browser's SVG getBBox() by rendering each path into a
- * hidden <svg>. Returns [] if getBBox is unavailable (e.g. jsdom).
+ * Bounding box (in the template's mm space) of each shield's clip path (or cut
+ * path), ordered left-to-right. Uses the browser's SVG getBBox() by rendering
+ * each path into a hidden <svg>. Returns [] if getBBox is unavailable (jsdom).
  */
-export function shieldBBoxes(template: StickerTemplate): BBox[] {
+export function shieldBBoxes(template: StickerTemplate, path: 'clipPath' | 'cutPath' = 'clipPath'): BBox[] {
   if (typeof document === 'undefined') return [];
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('viewBox', `0 0 ${template.widthMm} ${template.heightMm}`);
   svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;left:-9999px;top:-9999px;';
   const els = template.shields.map((s) => {
     const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    p.setAttribute('d', s.clipPath);
+    p.setAttribute('d', s[path]);
     svg.appendChild(p);
     return p;
   });
