@@ -17,7 +17,8 @@ import { UploadStart } from './components/UploadStart.tsx';
 import { ShapeSelector } from './components/ShapeSelector.tsx';
 import { useTour } from './hooks/useTour.ts';
 import { fetchTemplate, generateTemplatePdfBlob } from './lib/api.ts';
-import type { StickerTemplate } from './types/template.ts';
+import { sameSize } from './lib/templateSize.ts';
+import type { StickerTemplate, TemplateSizeMm } from './types/template.ts';
 
 const DEFAULT_PARAMS: ContourParams = {
   threshold: 128,
@@ -33,14 +34,18 @@ const DEFAULT_PARAMS: ContourParams = {
 };
 
 type Tab = 'design' | 'contour' | 'print-planning';
-type WpMode = null | 'single' | 'sheet' | 'design' | 'upload' | 'peltor';
+type WpMode = null | 'single' | 'sheet' | 'design' | 'upload' | 'template';
 
 const IS_WORDPRESS = import.meta.env.VITE_MODE === 'wordpress';
 
-// The "Custom Peltor design" shortcut links to the dedicated Peltor product page
-// (its own product/price; its iframe boots straight into the Peltor editor via
-// ?tool=peltor). Navigating there — rather than switching mode inside this iframe —
-// keeps the design attached to the correct WooCommerce product & cart.
+// Template ids the editor accepts via ?tool=<id>. Each has its own WooCommerce
+// product page whose iframe boots straight into the template editor — navigating
+// there (rather than switching mode inside this iframe) keeps the design attached
+// to the correct product & cart.
+const TEMPLATE_TOOLS = ['peltor', 'olburk', 'vinflaska', 'barfront'] as const;
+
+// The "Custom Peltor design" shortcut on the mode-select page links to the
+// dedicated Peltor product page (its own product/price; boots via ?tool=peltor).
 const PELTOR_PRODUCT_URL = 'https://nimstick.se/product/egen-design-peltor/';
 
 export default function App() {
@@ -48,10 +53,16 @@ export default function App() {
   // WordPress opens on the mode-select start page (single vs sheet); standalone
   // goes straight to the editor (it uses `tab`, not `wpMode`).
   const initialTool = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('tool') : null;
+  const templateId = initialTool && (TEMPLATE_TOOLS as readonly string[]).includes(initialTool) ? initialTool : null;
   const [wpMode, setWpMode] = useState<WpMode>(
-    IS_WORDPRESS ? (initialTool === 'peltor' ? 'peltor' : null) : 'design',
+    IS_WORDPRESS ? (templateId ? 'template' : null) : 'design',
   );
   const [template, setTemplate] = useState<StickerTemplate | null>(null);
+  // Selected label size for parametric templates; null = the template's default.
+  const [templateSizeMm, setTemplateSizeMm] = useState<TemplateSizeMm | null>(null);
+  // True while a template (re)fetch is in flight — gates Save so the generated
+  // PDF and the postMessage dimensions can never come from different sizes.
+  const [templateBusy, setTemplateBusy] = useState(false);
   const [bgColor, setBgColor] = useState('#000000');
   const [pairMode, setPairMode] = useState<'identical' | 'different'>('identical');
   // Single vs sheet INTENT, chosen on the WP start page. Separate from wpMode
@@ -82,10 +93,22 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    if (wpMode === 'peltor' && !template) {
-      fetchTemplate('peltor').then(setTemplate).catch(() => setTemplate(null));
-    }
-  }, [wpMode, template]);
+    if (wpMode !== 'template' || !templateId) return;
+    let stale = false;
+    setTemplateBusy(true);
+    fetchTemplate(templateId, templateSizeMm ?? undefined)
+      .then(tpl => { if (!stale) setTemplate(tpl); })
+      // Keep the last good template on a failed refetch — clearing it would
+      // silently degrade the product into the free-form editor.
+      .catch(() => {})
+      .finally(() => { if (!stale) setTemplateBusy(false); });
+    return () => { stale = true; };
+  }, [wpMode, templateId, templateSizeMm]);
+
+  // Ignore no-op size changes so a clamp landing on the current value doesn't
+  // trigger a redundant refetch.
+  const handleTemplateSizeChange = (size: TemplateSizeMm) =>
+    setTemplateSizeMm(prev => (sameSize(prev, size) ? prev : size));
 
   const { data: contour, isLoading, error } = useContour(file, params);
 
@@ -108,17 +131,18 @@ export default function App() {
   };
 
   const handleSaveTemplate = async (file: File, _dataUrl: string): Promise<void> => {
-    const pdf = await generateTemplatePdfBlob(file, 'peltor', bgColor);
+    if (!templateId) return;
+    const pdf = await generateTemplatePdfBlob(file, templateId, bgColor, templateSizeMm ?? undefined);
     if (IS_WORDPRESS) {
       const wCm = template ? template.widthMm / 10 : 0;
       const hCm = template ? template.heightMm / 10 : 0;
       window.parent.postMessage(
-        { type: 'nimstick_save_design', pdf, image: file, filename: `peltor-${bgColor.replace('#', '')}.pdf`, width: wCm, height: hCm, bgColor },
+        { type: 'nimstick_save_design', pdf, image: file, filename: `${templateId}-${bgColor.replace('#', '')}.pdf`, width: wCm, height: hCm, bgColor },
         '*',
       );
     } else {
       const url = URL.createObjectURL(pdf);
-      const a = document.createElement('a'); a.href = url; a.download = 'peltor.pdf';
+      const a = document.createElement('a'); a.href = url; a.download = `${templateId}.pdf`;
       document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     }
   };
@@ -168,7 +192,7 @@ export default function App() {
 
   // ── Header tagline ──────────────────────────────────────────────────────────
   const headerTagline = IS_WORDPRESS
-    ? (wpMode === 'single' ? t.taglineContour : wpMode === 'sheet' ? t.taglinePrint : wpMode === 'design' ? t.modeDesign : wpMode === 'upload' ? t.modeUpload : wpMode === 'peltor' ? (template?.name ?? 'Peltor') : 'CUTZ')
+    ? (wpMode === 'single' ? t.taglineContour : wpMode === 'sheet' ? t.taglinePrint : wpMode === 'design' ? t.modeDesign : wpMode === 'upload' ? t.modeUpload : wpMode === 'template' ? (template?.name ?? (templateId ? templateId.charAt(0).toUpperCase() + templateId.slice(1) : '')) : 'CUTZ')
     : (tab === 'print-planning' ? t.taglinePrint : tab === 'contour' ? t.taglineContour : t.modeDesign);
 
   // Shared preview column for the cut dialog.
@@ -324,7 +348,7 @@ export default function App() {
     </div>
   );
 
-  const designActive = IS_WORDPRESS ? (wpMode === 'design' || wpMode === 'peltor') : tab === 'design';
+  const designActive = IS_WORDPRESS ? (wpMode === 'design' || wpMode === 'template') : tab === 'design';
 
   return (
     <LangContext.Provider value={{ lang, t, setLang, theme, setTheme }}>
@@ -480,12 +504,15 @@ export default function App() {
           <DesignEditor
             ref={designRef}
             onComplete={handleDesignComplete}
-            template={wpMode === 'peltor' && template ? template : undefined}
+            template={wpMode === 'template' && template ? template : undefined}
             bgColor={bgColor}
             onBgColorChange={setBgColor}
             onSaveTemplate={handleSaveTemplate}
-            pairMode={wpMode === 'peltor' ? pairMode : undefined}
+            pairMode={wpMode === 'template' && template && template.shields.length === 2 ? pairMode : undefined}
             onPairModeChange={setPairMode}
+            templateSizeMm={templateSizeMm}
+            onTemplateSizeChange={handleTemplateSizeChange}
+            saveDisabled={templateBusy}
           />
         </div>
 

@@ -13,6 +13,13 @@ describe('template api', () => {
     expect(fetchMock.mock.calls[0][0]).toMatch(/\/templates\/peltor$/);
   });
 
+  it('fetchTemplate appends widthMm/heightMm when a size is given', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
+    vi.stubGlobal('fetch', fetchMock);
+    await fetchTemplate('olburk', { widthMm: 204, heightMm: 110 });
+    expect(fetchMock.mock.calls[0][0]).toMatch(/\/templates\/olburk\?widthMm=204&heightMm=110$/);
+  });
+
   it('fetchTemplate throws on 404', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
     await expect(fetchTemplate('nope')).rejects.toThrow();
@@ -28,5 +35,17 @@ describe('template api', () => {
     expect(url).toMatch(/\/template-generate$/);
     expect(opts.method).toBe('POST');
     expect(opts.body).toBeInstanceOf(FormData);
+    expect((opts.body as FormData).get('widthMm')).toBeNull();
+  });
+
+  it('generateTemplatePdfBlob includes widthMm/heightMm when a size is given', async () => {
+    const blob = new Blob(['%PDF-']);
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, blob: async () => blob });
+    vi.stubGlobal('fetch', fetchMock);
+    await generateTemplatePdfBlob(new Blob(['x']), 'vinflaska', '#000000', { widthMm: 100, heightMm: 150 });
+    const fd = fetchMock.mock.calls[0][1].body as FormData;
+    expect(fd.get('templateId')).toBe('vinflaska');
+    expect(fd.get('widthMm')).toBe('100');
+    expect(fd.get('heightMm')).toBe('150');
   });
 });

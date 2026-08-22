@@ -14,9 +14,10 @@ import { flattenCanvas } from '../../lib/flatten.ts';
 import { exportDimensions } from '../../lib/printSize.ts';
 import { useLang } from '../../lib/LangContext.ts';
 import { DEFAULT_ARTBOARD, type ArtboardSize, type EditorTool } from '../../types/editor.ts';
-import type { StickerTemplate } from '../../types/template.ts';
+import type { StickerTemplate, TemplateSizeMm } from '../../types/template.ts';
 import { TemplateGuide } from './TemplateGuide.tsx';
 import { TemplateFill } from './TemplateFill.tsx';
+import { TemplateSizePicker } from './TemplateSizePicker.tsx';
 import { BgColorControl } from './BgColorControl.tsx';
 import { ShieldMirror } from './ShieldMirror.tsx';
 import { shieldBBoxes } from '../../lib/shieldBBox.ts';
@@ -34,6 +35,11 @@ interface Props {
   onSaveTemplate?: (file: File, dataUrl: string) => Promise<void>;
   pairMode?: 'identical' | 'different';
   onPairModeChange?: (m: 'identical' | 'different') => void;
+  /** Selected label size for parametric templates (null = template default). */
+  templateSizeMm?: TemplateSizeMm | null;
+  onTemplateSizeChange?: (size: TemplateSizeMm) => void;
+  /** Blocks Save while the template is being (re)fetched for a new size. */
+  saveDisabled?: boolean;
 }
 
 export interface FlattenedDesign {
@@ -50,7 +56,7 @@ export interface DesignEditorHandle {
   clear: () => void;
 }
 
-export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function DesignEditor({ onComplete, template, bgColor, onBgColorChange, onSaveTemplate, pairMode, onPairModeChange }, ref) {
+export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function DesignEditor({ onComplete, template, bgColor, onBgColorChange, onSaveTemplate, pairMode, onPairModeChange, templateSizeMm, onTemplateSizeChange, saveDisabled }, ref) {
   const { t } = useLang();
   const [size, setSize] = useState<ArtboardSize>(DEFAULT_ARTBOARD);
   const [tool, setTool] = useState<EditorTool>('uploads');
@@ -256,6 +262,17 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
               <p className="text-sm text-white/25 text-center max-w-xs px-6">{t.edEmptyCanvas}</p>
             </div>
           )}
+          {/* Size picker — floats at the top-centre of the artboard for parametric
+              templates (standard sizes + custom mm inputs). Fixed templates and
+              single-size templates render nothing here. */}
+          {template?.sizes && template.sizes.length > 0 && onTemplateSizeChange && (
+            <TemplateSizePicker
+              sizes={template.sizes}
+              custom={template.custom}
+              value={templateSizeMm ?? { widthMm: template.sizes[0].widthMm, heightMm: template.sizes[0].heightMm }}
+              onChange={onTemplateSizeChange}
+            />
+          )}
           {/* Pair-mode toggle — floats at the top-centre of the artboard, the first
               choice before designing (identical = design one shield, mirror the other). */}
           {template && pairMode && onPairModeChange && (
@@ -286,7 +303,7 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
           {t.edContinueHint}
         </p>
         {template ? (
-          <button onClick={handleSaveTemplate} disabled={!canContinue || isSaving} className="nim-btn-yellow w-full sm:w-auto">
+          <button onClick={handleSaveTemplate} disabled={!canContinue || isSaving || saveDisabled} className="nim-btn-yellow w-full sm:w-auto">
             {isSaving ? t.edPreparing : t.peltorSave}
           </button>
         ) : (
