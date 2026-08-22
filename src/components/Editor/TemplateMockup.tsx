@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import type { Canvas } from 'fabric';
 import { cornerPin, fitRectInQuad } from '../../lib/cornerPin.ts';
 import { shieldBBoxes } from '../../lib/shieldBBox.ts';
-import { TEMPLATE_MOCKUP_SCENES, visibleLabelCropMm } from '../../lib/templateMockupScenes.ts';
+import { TEMPLATE_MOCKUP_SCENES, bandInQuad, visibleLabelCropMm } from '../../lib/templateMockupScenes.ts';
 import { useLang } from '../../lib/LangContext.ts';
 import type { StickerTemplate } from '../../types/template.ts';
 
@@ -83,11 +83,14 @@ export function TemplateMockup({ fabricCanvas, template, bgColor }: Props) {
     };
   }, [fabricCanvas, template.widthMm, crop, bgColor]);
 
-  // Pin the composed label onto the scene's measured quad.
+  // Pin the composed label onto the scene's quad per the scene's layout mode.
   const transform = useMemo(() => {
     if (!scene || !crop) return 'none';
-    const fitted = fitRectInQuad(scene.corners, crop.w / crop.h);
-    return cornerPin(OUT_W, outH, fitted);
+    const target =
+      scene.layout.mode === 'fill' ? scene.corners
+      : scene.layout.mode === 'band' ? bandInQuad(scene.corners, crop.h / scene.layout.zoneHeightMm)
+      : fitRectInQuad(scene.corners, crop.w / crop.h);
+    return cornerPin(OUT_W, outH, target);
   }, [scene, crop, outH]);
 
   if (!scene || !crop) return null;
