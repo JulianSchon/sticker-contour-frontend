@@ -22,6 +22,18 @@ export const SIZE_PRESETS: SizePreset[] = [
   { labelEn: 'XL 25×25',    labelSv: 'XL 25×25',    wCm: 25, hCm: 25 },
 ];
 
+/**
+ * Parse a typed size into whole centimetres (≥ 1), or null when empty/invalid.
+ * WooCommerce's CPO width/height fields are integer-typed, so a decimal cm
+ * would make add-to-cart fail silently. There is no upper limit — oversize
+ * stickers are handled by the backend at a lower effective DPI.
+ */
+export function parseWholeCm(raw: string): number | null {
+  const val = parseFloat(raw);
+  if (isNaN(val) || val <= 0) return null;
+  return Math.max(1, Math.round(val));
+}
+
 export function cmToPx(cm: number, dpi: number): number {
   return Math.round((cm / CM_PER_INCH) * dpi);
 }

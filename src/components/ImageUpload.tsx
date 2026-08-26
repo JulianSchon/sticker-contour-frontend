@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { enhanceImage } from '../lib/api.ts';
 import { useLang } from '../lib/LangContext.ts';
+import { parseWholeCm } from '../lib/printSize.ts';
 
 interface Props {
   onImageSelected: (file: File, dataUrl: string) => void;
@@ -123,8 +124,7 @@ export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
   const handleWidth = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
     setWidthInput(raw);
-    const val = parseFloat(raw);
-    const wCm = isNaN(val) || val <= 0 ? null : val;
+    const wCm = parseWholeCm(raw);
     setWidthCm(wCm);
     let hCm = heightCm;
     if (wCm && imageDimensions) {
@@ -142,8 +142,7 @@ export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
   const handleHeight = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
     setHeightInput(raw);
-    const val = parseFloat(raw);
-    const hCm = isNaN(val) || val <= 0 ? null : val;
+    const hCm = parseWholeCm(raw);
     setHeightCm(hCm);
     let wCm = widthCm;
     if (hCm && imageDimensions) {
@@ -232,10 +231,15 @@ export function ImageUpload({ onImageSelected, onSizeChange }: Props) {
               <input
                 type="number"
                 min="1"
-                max="200"
                 step="1"
+                inputMode="numeric"
                 value={axis === 'width' ? widthInput : heightInput}
                 onChange={axis === 'width' ? handleWidth : handleHeight}
+                onBlur={() => {
+                  // Show the whole-cm value that will actually be ordered.
+                  if (axis === 'width') setWidthInput(widthCm ? String(widthCm) : '');
+                  else setHeightInput(heightCm ? String(heightCm) : '');
+                }}
                 placeholder="e.g. 10"
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-nim-yellow/50 pr-8"
               />
