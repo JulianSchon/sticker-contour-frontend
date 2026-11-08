@@ -11,6 +11,8 @@ export interface FabricLayer {
   id: string;
   kind: 'image' | 'text' | 'shape';
   label: string;
+  /** Key of the customer's original uploaded file (see getOriginals). */
+  originalKey?: string;
 }
 
 /** Snapshot of the selected object's editable properties, so panels can show
@@ -69,6 +71,8 @@ interface UseFabricEditor {
   selectLayer: (id: string) => void;
   undo: () => void;
   redo: () => void;
+  /** The original uploaded files still used by an object on the canvas. */
+  getOriginals: () => File[];
 }
 
 let idCounter = 0;
@@ -94,6 +98,9 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
   const historyRef = useRef<{ stack: string[]; index: number }>({ stack: [], index: -1 });
   const isRestoringRef = useRef(false);
   const objectUrlsRef = useRef<string[]>([]);
+  // Uploaded files keyed by FabricLayer.originalKey. Survives undo/redo because
+  // the key rides the serialised _layer.
+  const originalsRef = useRef(new Map<string, File>());
 
   useEffect(() => {
     if (!canvasElRef.current) return;
@@ -282,7 +289,9 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
     const maxW = canvas.getWidth() * 0.8;
     if (img.width && img.width > maxW) img.scaleToWidth(maxW);
     img.set({ left: canvas.getWidth() / 2, top: canvas.getHeight() / 2, originX: 'center', originY: 'center' });
-    setLayerOf(img, { id: nextId(), kind: 'image', label: file.name });
+    const originalKey = nextId();
+    originalsRef.current.set(originalKey, file);
+    setLayerOf(img, { id: nextId(), kind: 'image', label: file.name, originalKey });
     canvas.add(img);
     canvas.setActiveObject(img);
     canvas.renderAll();
@@ -399,7 +408,7 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
     const clone = await active.clone(SNAPSHOT_PROPS);
     clone.set({ left: (active.left ?? 0) + 16, top: (active.top ?? 0) + 16 });
     const src = layerOf(active);
-    setLayerOf(clone, { id: nextId(), kind: src?.kind ?? 'shape', label: src?.label ?? 'Copy' });
+    setLayerOf(clone, { id: nextId(), kind: src?.kind ?? 'shape', label: src?.label ?? 'Copy', originalKey: src?.originalKey });
     canvas.add(clone);
     canvas.setActiveObject(clone);
     canvas.renderAll();
@@ -452,10 +461,21 @@ export function useFabricEditor(displayWidth: number, displayHeight: number): Us
     restore(canvas, h.stack[h.index]);
   }, [canvas, restore]);
 
+  const getOriginals = useCallback((): File[] => {
+    if (!canvas) return [];
+    const files = new Set<File>();
+    for (const o of canvas.getObjects()) {
+      const key = layerOf(o)?.originalKey;
+      const file = key ? originalsRef.current.get(key) : undefined;
+      if (file) files.add(file);
+    }
+    return [...files];
+  }, [canvas]);
+
   return {
     canvasElRef, canvas, layers, selectedId, selected, canUndo, canRedo,
     addText, addImageFromFile, addImageFromUrl, applyTemplate, addShape, updateSelected, duplicateSelected,
     deleteSelected, clear, bringForward, sendBackward, selectLayer, undo, redo, guides,
-    removeBackgroundSelected, removingBg, bgError,
+    removeBackgroundSelected, removingBg, bgError, getOriginals,
   };
 }
