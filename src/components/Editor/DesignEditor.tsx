@@ -23,6 +23,7 @@ import { BgColorControl } from './BgColorControl.tsx';
 import { ShieldMirror } from './ShieldMirror.tsx';
 import { shieldBBoxes } from '../../lib/shieldBBox.ts';
 import { replicateLeftToRight } from '../../lib/shieldReplicate.ts';
+import { useShieldClips } from '../../hooks/useShieldClips.ts';
 
 const MIN_DISPLAY = 280;
 const FRAME_PAD = 48; // p-6 on the frame container (24px each side)
@@ -40,7 +41,8 @@ interface Props {
   template?: StickerTemplate;
   bgColor?: string;
   onBgColorChange?: (hex: string) => void;
-  onSaveTemplate?: (file: File, dataUrl: string) => Promise<void>;
+  /** `originals` = the customer's uploaded source images still on the design. */
+  onSaveTemplate?: (file: File, dataUrl: string, originals: File[]) => Promise<void>;
   pairMode?: 'identical' | 'different';
   onPairModeChange?: (m: 'identical' | 'different') => void;
   /** Selected label size for parametric templates (null = template default). */
@@ -62,6 +64,8 @@ export interface DesignEditorHandle {
   flatten: () => Promise<FlattenedDesign | null>;
   /** Remove all objects so the user can start a fresh design. */
   clear: () => void;
+  /** The customer's uploaded source images still used on the canvas. */
+  getOriginals: () => File[];
 }
 
 export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function DesignEditor({ onComplete, template, bgColor, onBgColorChange, onSaveTemplate, pairMode, onPairModeChange, templateSizeMm, onTemplateSizeChange, saveDisabled }, ref) {
@@ -104,6 +108,9 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
   const editor = useFabricEditor(displayWidth, displayHeight);
   const { library, isLoading: libLoading } = useContentLibrary();
   const { canvas, undo, redo, deleteSelected, duplicateSelected, selectedId } = editor;
+
+  // Different designs per shield: keep each object inside its own shield.
+  useShieldClips(canvas, template, shieldBoxes, pairMode === 'different', displayWidth, displayHeight);
 
   // Keyboard shortcuts: undo/redo, delete, duplicate, arrow-nudge.
   useEffect(() => {
@@ -148,7 +155,7 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
 
   // Expose flatten()/clear() so the cut tab can refresh from the design and the
   // sheet flow can reset the artboard for the next design.
-  useImperativeHandle(ref, () => ({ flatten, clear: editor.clear }), [flatten, editor.clear]);
+  useImperativeHandle(ref, () => ({ flatten, clear: editor.clear, getOriginals: editor.getOriginals }), [flatten, editor.clear, editor.getOriginals]);
 
   const handleContinue = async () => {
     setIsFlattening(true);
@@ -173,7 +180,7 @@ export const DesignEditor = forwardRef<DesignEditorHandle, Props>(function Desig
         const rep = await replicateLeftToRight(result.dataUrl, template.widthMm, shieldBoxes[0], shieldBoxes[1]);
         file = rep.file; dataUrl = rep.dataUrl;
       }
-      await onSaveTemplate(file, dataUrl);
+      await onSaveTemplate(file, dataUrl, editor.getOriginals());
     } finally {
       setIsSaving(false);
     }

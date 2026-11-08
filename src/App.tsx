@@ -130,14 +130,14 @@ export default function App() {
     else setTab('contour');
   };
 
-  const handleSaveTemplate = async (file: File, _dataUrl: string): Promise<void> => {
+  const handleSaveTemplate = async (file: File, _dataUrl: string, originals: File[]): Promise<void> => {
     if (!templateId) return;
     const pdf = await generateTemplatePdfBlob(file, templateId, bgColor, templateSizeMm ?? undefined);
     if (IS_WORDPRESS) {
       const wCm = template ? template.widthMm / 10 : 0;
       const hCm = template ? template.heightMm / 10 : 0;
       window.parent.postMessage(
-        { type: 'nimstick_save_design', pdf, image: file, filename: `${templateId}-${bgColor.replace('#', '')}.pdf`, width: wCm, height: hCm, bgColor },
+        { type: 'nimstick_save_design', pdf, image: file, originals, filename: `${templateId}-${bgColor.replace('#', '')}.pdf`, width: wCm, height: hCm, bgColor },
         '*',
       );
     } else {
@@ -148,6 +148,11 @@ export default function App() {
   };
 
   const designRef = useRef<DesignEditorHandle>(null);
+
+  // The customer's own source images for the print archive: the uploaded file
+  // itself in the upload flow, else whatever they uploaded into the editor.
+  const getOriginals = (): File[] =>
+    flow === 'upload' ? (file ? [file] : []) : designRef.current?.getOriginals() ?? [];
 
   const goToDesign = () => { if (IS_WORDPRESS) setWpMode('design'); else setTab('design'); };
 
@@ -326,7 +331,7 @@ export default function App() {
           <div className="px-5 pt-5 pb-2"><StepLabel n={IS_WORDPRESS ? '03' : '02'} label={IS_WORDPRESS ? t.step03wp : t.step03} /></div>
           <div className="px-5 pb-5 flex flex-col gap-3">
             {IS_WORDPRESS
-              ? <DownloadButton file={file} params={params} widthCm={stickerWidthCm} heightCm={stickerHeightCm} material={material} finish={finish} />
+              ? <DownloadButton file={file} params={params} widthCm={stickerWidthCm} heightCm={stickerHeightCm} material={material} finish={finish} getOriginals={getOriginals} />
               : <DownloadButton file={file} params={params} widthCm={stickerWidthCm} heightCm={stickerHeightCm} />}
             {IS_WORDPRESS && flow === 'sheet' && (
               <>
